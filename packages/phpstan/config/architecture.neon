@@ -1,0 +1,4 @@
+rules:
+    - \PhoneBurner\Pinch\Phpstan\Rules\Architecture\NoCoreToComponentDependencyRule
+    - \PhoneBurner\Pinch\Phpstan\Rules\Architecture\NoComponentToFrameworkDependencyRule
+    - \PhoneBurner\Pinch\Phpstan\Rules\Architecture\DependencyHierarchyRule

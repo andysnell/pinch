@@ -1,0 +1,210 @@
+name: "Release Monorepo"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g., 0.0.0, 0.1.0)"
+        required: true
+        default: "0.0.0"
+        type: string
+      skip_split:
+        description: "Skip package splitting (useful for testing)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  validate_version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
+      tag_name: ${{ steps.validate.outputs.tag_name }}
+
+    steps:
+      - name: Validate version format
+        id: validate
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+
+          # Remove 'v' prefix if present
+          VERSION=$(echo "$VERSION" | sed 's/^v//')
+
+          # Validate semantic version format
+          if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "❌ Invalid version format: $VERSION"
+            echo "Expected format: X.Y.Z or X.Y.Z-suffix (e.g., 1.0.0, 1.0.0-alpha.1)"
+            exit 1
+          fi
+
+          TAG_NAME="v$VERSION"
+
+          echo "✅ Version: $VERSION"
+          echo "✅ Tag: $TAG_NAME"
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+  update_versions:
+    runs-on: ubuntu-latest
+    needs: validate_version
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, xml, json
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+
+      - name: Update package versions
+        run: |
+          VERSION="${{ needs.validate_version.outputs.version }}"
+
+          # Update root composer.json version
+          composer config version "$VERSION"
+
+          # Update each package version using monorepo-builder
+          ./vendor/bin/monorepo-builder bump-interdependency "$VERSION"
+
+          echo "✅ Updated all package versions to $VERSION"
+
+      - name: Commit version changes
+        run: |
+          TAG_NAME="${{ needs.validate_version.outputs.tag_name }}"
+          VERSION="${{ needs.validate_version.outputs.version }}"
+
+          # Configure git
+          git config user.name "GitHub Actions"
+          git config user.email "action@github.com"
+
+          # Stage changes
+          git add .
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "ℹ️ No version changes to commit"
+          else
+            # Commit changes
+            git commit -m "Release $VERSION
+
+          🚀 Bump all package versions to $VERSION
+
+          Generated with monorepo-builder"
+
+            # Push changes
+            git push origin main
+            echo "✅ Committed and pushed version changes"
+          fi
+
+      - name: Create and push tag
+        run: |
+          TAG_NAME="${{ needs.validate_version.outputs.tag_name }}"
+          VERSION="${{ needs.validate_version.outputs.version }}"
+
+          # Create annotated tag
+          git tag -a "$TAG_NAME" -m "Release $VERSION
+
+          🚀 Pinch Framework $VERSION
+
+          This release includes all packages:
+          - phoneburner/pinch-core
+          - phoneburner/pinch-component
+          - phoneburner/pinch-framework
+          - phoneburner/pinch-phpstan
+          - phoneburner/pinch-template
+
+          Packages will be automatically split to individual repositories."
+
+          # Push tag
+          git push origin "$TAG_NAME"
+          echo "✅ Created and pushed tag $TAG_NAME"
+
+  trigger_split:
+    runs-on: ubuntu-latest
+    needs: [validate_version, update_versions]
+    if: ${{ !github.event.inputs.skip_split }}
+
+    steps:
+      - name: Trigger package split workflow
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ACCESS_TOKEN }}
+          script: |
+            const version = '${{ needs.validate_version.outputs.version }}';
+
+            console.log(`🚀 Triggering package split for version ${version}...`);
+
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'packages-split.yml',
+              ref: 'main',
+              inputs: {
+                version: version
+              }
+            });
+
+            console.log('✅ Package split workflow triggered successfully');
+
+  create_github_release:
+    runs-on: ubuntu-latest
+    needs: [validate_version, update_versions]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate_version.outputs.tag_name }}
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.validate_version.outputs.tag_name }}
+          release_name: "Pinch Framework ${{ needs.validate_version.outputs.version }}"
+          body: |
+            🚀 **Pinch Framework ${{ needs.validate_version.outputs.version }}**
+
+            This release includes all packages in the Pinch monorepo. Individual packages are automatically split to separate repositories for easier consumption.
+
+            ## 📦 Split Packages
+
+            The following packages are available individually:
+
+            - [`phoneburner/pinch-core`](https://github.com/phoneburner/pinch-core) - Core utilities and primitives
+            - [`phoneburner/pinch-component`](https://github.com/phoneburner/pinch-component) - Framework-agnostic interfaces
+            - [`phoneburner/pinch-framework`](https://github.com/phoneburner/pinch) - Batteries-included implementations
+            - [`phoneburner/pinch-phpstan`](https://github.com/phoneburner/pinch-phpstan) - Static analysis rules
+            - [`phoneburner/pinch-template`](https://github.com/phoneburner/pinch-template) - Application starter template
+
+            ## 🛠 Installation
+
+            ```bash
+            # Install individual packages
+            composer require phoneburner/pinch-core:^${{ needs.validate_version.outputs.version }}
+            composer require phoneburner/pinch-framework:^${{ needs.validate_version.outputs.version }}
+
+            # Or use the template to start a new project
+            composer create-project phoneburner/pinch-template my-app
+            ```
+
+            ## 📚 Documentation
+
+            - [Framework Documentation](https://github.com/phoneburner/pinch)
+            - [Package Architecture](https://github.com/phoneburner/pinch/tree/main/packages)
+
+            ---
+
+            🤖 *This release was created automatically by the Pinch monorepo release system.*
+          draft: false
+          prerelease: ${{ contains(needs.validate_version.outputs.version, '-') || startsWith(needs.validate_version.outputs.version, '0.') }}

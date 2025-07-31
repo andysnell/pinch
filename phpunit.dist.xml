@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         beStrictAboutCoverageMetadata="false"
+         beStrictAboutOutputDuringTests="true"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory="build/.phpunit.cache"
+         displayDetailsOnPhpunitDeprecations="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerNotices="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         executionOrder="depends,defects"
+         failOnDeprecation="true"
+         failOnNotice="true"
+         failOnPhpunitDeprecation="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         requireCoverageMetadata="false"
+         shortenArraysForExportThreshold="10"
+>
+    <php>
+        <ini name="memory_limit" value="512M"/>
+    </php>
+    <testsuites>
+        <testsuite name="Pinch Unit Tests">
+            <directory groups="component">packages/component/tests</directory>
+            <directory groups="framework">packages/framework/tests</directory>
+            <directory groups="phpstan">packages/phpstan/tests</directory>
+            <directory groups="core">packages/core/tests</directory>
+            <directory groups="template">packages/template/tests</directory>
+        </testsuite>
+    </testsuites>
+    <source ignoreIndirectDeprecations="true" restrictNotices="true" restrictWarnings="true">
+        <include>
+            <directory>packages/component/src</directory>
+            <directory>packages/framework/src</directory>
+            <directory>packages/phpstan/src</directory>
+            <directory>packages/core/src</directory>
+            <directory>packages/template/src</directory>
+        </include>
+    </source>
+</phpunit>
