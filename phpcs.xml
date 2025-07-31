@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+    <arg name="report" value="full"/>
+    <arg name="cache" value="build/phpcs"/>
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="spw"/>
+    <config name="ignore_warnings_on_exit" value="1"/>
+    <ini name="memory_limit" value="-1"/>
+    <file>packages/core</file>
+    <file>packages/component</file>
+    <file>packages/framework</file>
+    <file>packages/phpstan</file>
+    <file>packages/template</file>
+    <file>rector.php</file>
+    <file>monorepo-builder.php</file>
+    <rule ref="PhoneBurner" />
+    <rule ref="SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalFunctions">
+        <!-- PHPCS cannot distinguish between a global function and a namespaced function used in its own namespace -->
+        <exclude-pattern>*/functions\.php$</exclude-pattern>
+    </rule>
+</ruleset>

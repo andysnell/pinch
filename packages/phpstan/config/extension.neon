@@ -1,0 +1,15 @@
+# Register Custom Extension Services
+# Note: These are defined separately from the main PHPStan config to allow reuse
+# with Rector, which conflicts with the base configuration's inclusion of the
+# "bleeding edge" PHPStan extension.
+
+services:
+    - class: \PhoneBurner\Pinch\Phpstan\Type\ContainerInterfaceReturnTypeExtension
+      tags:
+          - phpstan.broker.dynamicMethodReturnTypeExtension
+    - class: \PhoneBurner\Pinch\Phpstan\Collectors\ServiceProviderClassCollector
+      tags:
+        - phpstan.collector
+    - class: \PhoneBurner\Pinch\Phpstan\Collectors\ServiceProviderRegistrationsCollector
+      tags:
+        - phpstan.collector

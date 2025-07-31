@@ -1,0 +1,114 @@
+name: "Split Packages"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to tag (e.g., 0.0.0, 0.1.0)"
+        required: true
+        default: "0.0.0"
+        type: string
+  push:
+    tags: ["v*"]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  split_packages:
+    runs-on: ubuntu-latest
+    if: github.repository == 'phoneburner/pinch'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - local_path: "core"
+            split_repository: "pinch-core"
+          - local_path: "component"
+            split_repository: "pinch-component"
+          - local_path: "framework"
+            split_repository: "pinch-framework"
+          - local_path: "phpstan"
+            split_repository: "pinch-phpstan"
+          - local_path: "template"
+            split_repository: "pinch-template"
+
+    name: Split ${{ matrix.package.split_repository }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history for proper splitting
+          fetch-depth: 0
+
+      - name: Split package
+        uses: "symplify/monorepo-split-github-action@2.3"
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        with:
+          # Package directory in monorepo
+          package_directory: "packages/${{ matrix.package.local_path }}"
+
+          # Target repository settings
+          repository_organization: "phoneburner"
+          repository_name: "${{ matrix.package.split_repository }}"
+
+          # User for commits
+          user_name: "monorepo-builder"
+          user_email: "action@github.com"
+
+          # Branch to work with
+          branch: "main"
+
+  create_releases:
+    runs-on: ubuntu-latest
+    needs: split_packages
+    if: github.event_name == 'workflow_dispatch'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        repository:
+          [
+            "pinch-core",
+            "pinch-component",
+            "pinch-framework",
+            "pinch-phpstan",
+            "pinch-template",
+          ]
+
+    steps:
+      - name: Create release in split repository
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ACCESS_TOKEN }}
+          script: |
+            const version = '${{ github.event.inputs.version }}';
+            const tagName = `v${version}`;
+            const repoName = '${{ matrix.repository }}';
+
+            try {
+              // Create release in the split repository
+              const release = await github.rest.repos.createRelease({
+                owner: 'phoneburner',
+                repo: repoName,
+                tag_name: tagName,
+                name: `Release ${tagName}`,
+                body: `🚀 Release ${tagName} of ${repoName}\n\nThis package was automatically split from the main Pinch monorepo.`,
+                draft: false,
+                prerelease: version.includes('-') || version.startsWith('0.')
+              });
+
+              console.log(`✅ Created release ${tagName} for ${repoName}`);
+              console.log(`🔗 Release URL: ${release.data.html_url}`);
+
+            } catch (error) {
+              if (error.status === 422 && error.message.includes('already_exists')) {
+                console.log(`⚠️  Release ${tagName} already exists for ${repoName}`);
+              } else {
+                console.error(`❌ Failed to create release for ${repoName}:`, error);
+                throw error;
+              }
+            }
