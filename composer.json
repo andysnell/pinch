@@ -3,6 +3,7 @@
   "description": "The Pinch API Framework Monorepo",
   "license": "MIT",
   "type": "library",
+  "version": "0.0.1",
   "authors": [
     {
       "email": "tim@phoneburner.com",
@@ -198,6 +199,5 @@
       "@paratest",
       "@behat"
     ]
-  },
-  "version": "0.0.1"
+  }
 }

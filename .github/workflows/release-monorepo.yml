@@ -75,9 +75,6 @@ jobs:
           context: ./packages/template
           file: ./packages/template/Dockerfile
           target: development-php
-#          build-args: |
-#            USER_UID=${{ steps.user_info.outputs.uid }}
-#            USER_GID=${{ steps.user_info.outputs.gid }}
           tags: |
             ghcr.io/${{ github.repository }}-php:${{ needs.validate_version.outputs.tag_name }}
             ghcr.io/${{ github.repository }}-php:latest
@@ -133,6 +130,7 @@ jobs:
           # Update each package version using monorepo-builder
           docker compose run --rm php ./vendor/bin/monorepo-builder bump-interdependency "$VERSION"
           docker compose run --rm php composer update --lock --no-progress
+          make prettier-write;
 
           echo "✅ Updated all package versions to $VERSION"
 
@@ -142,8 +140,8 @@ jobs:
           VERSION="${{ needs.validate_version.outputs.version }}"
 
           # Configure git
-          git config user.name "GitHub Actions"
-          git config user.email "action@github.com"
+          git config user.name "Andy Snell"
+          git config user.email "andy@phoneburner.com"
 
           # Stage changes
           git add .
