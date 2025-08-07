@@ -8,10 +8,72 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Required to push to GHCR
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Image - pinch-php
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/template/Dockerfile
+          target: development-php
+          pull: true
+          push: true
+          load: true
+          tags: ghcr.io/${{ github.repository }}-php:ci
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-php:ci
+          cache-to: type=inline
+
+      - name: Build Image - pinch-php
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/template/Dockerfile
+          target: development-php
+          pull: true
+          push: true
+          load: true
+          tags: ghcr.io/${{ github.repository }}-php:ci
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-php:ci
+          cache-to: type=inline
+
+      - name: Build Image - pinch-web
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/template/Dockerfile
+          target: development-web
+          pull: true
+          push: true
+          load: true
+          tags: ghcr.io/${{ github.repository }}-web:ci
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-web:ci
+          cache-to: type=inline
+
+      - name: Build Image - pinch-prettier
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/template/Dockerfile
+          target: prettier
+          pull: true
+          push: true
+          load: true
+          tags: ghcr.io/${{ github.repository }}-prettier:ci
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-prettier:ci
+          cache-to: type=inline
 
       - name: Run Code Quality Checks
         run: |
