@@ -1,67 +1,67 @@
 {
-  "name": "phoneburner/pinch-phpstan",
-  "description": "Custom PHPStan Rules for the Pinch Framework",
-  "license": "MIT",
-  "authors": [
-    {
-      "email": "tim@phoneburner.com",
-      "name": "Tim Lytle"
+    "name": "phoneburner/pinch-phpstan",
+    "description": "Custom PHPStan Rules for the Pinch Framework",
+    "license": "MIT",
+    "authors": [
+        {
+            "email": "tim@phoneburner.com",
+            "name": "Tim Lytle"
+        },
+        {
+            "email": "andy@phoneburner.com",
+            "name": "Andy Snell"
+        }
+    ],
+    "type": "library",
+    "require": {
+        "php": "^8.4",
+        "phpstan/extension-installer": "^1.4.3",
+        "phpstan/phpstan": "^2.1.19",
+        "phpstan/phpstan-deprecation-rules": "^2.0.3",
+        "phpstan/phpstan-doctrine": "^2.0.4",
+        "phpstan/phpstan-phpunit": "^2.0.7",
+        "spaze/phpstan-disallowed-calls": "^4.6.0"
     },
-    {
-      "email": "andy@phoneburner.com",
-      "name": "Andy Snell"
+    "require-dev": {
+        "phoneburner/api-handler": "0.0.1",
+        "phoneburner/composer-replacements": "0.0.1",
+        "phoneburner/http-tortilla": "0.0.1",
+        "phoneburner/link-tortilla": "0.0.1",
+        "phoneburner/pinch-component": "0.0.1",
+        "phoneburner/pinch-framework": "0.0.1",
+        "phoneburner/pinch-core": "0.0.1",
+        "php-parallel-lint/php-parallel-lint": "^1.4",
+        "phpunit/phpunit": "^12.2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhoneBurner\\Pinch\\Phpstan\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PhoneBurner\\Pinch\\Phpstan\\Tests\\": "tests/"
+        },
+        "classmap": [
+            "tests/Rules/Architecture/Fixtures/"
+        ]
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
+        },
+        "phpstan": {
+            "includes": [
+                "config/extension.neon",
+                "config/rules.neon"
+            ]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
+        },
+        "sort-packages": true
     }
-  ],
-  "type": "library",
-  "require": {
-    "php": "^8.4",
-    "phpstan/extension-installer": "^1.4.3",
-    "phpstan/phpstan": "^2.1.19",
-    "phpstan/phpstan-deprecation-rules": "^2.0.3",
-    "phpstan/phpstan-doctrine": "^2.0.4",
-    "phpstan/phpstan-phpunit": "^2.0.7",
-    "spaze/phpstan-disallowed-calls": "^4.6.0"
-  },
-  "require-dev": {
-    "phoneburner/api-handler": "0.0.0",
-    "phoneburner/composer-replacements": "0.0.0",
-    "phoneburner/http-tortilla": "0.0.0",
-    "phoneburner/link-tortilla": "0.0.0",
-    "phoneburner/pinch-component": "0.0.0",
-    "phoneburner/pinch-framework": "0.0.0",
-    "phoneburner/pinch-core": "0.0.0",
-    "php-parallel-lint/php-parallel-lint": "^1.4",
-    "phpunit/phpunit": "^12.2.7"
-  },
-  "autoload": {
-    "psr-4": {
-      "PhoneBurner\\Pinch\\Phpstan\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "PhoneBurner\\Pinch\\Phpstan\\Tests\\": "tests/"
-    },
-    "classmap": [
-      "tests/Rules/Architecture/Fixtures/"
-    ]
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-main": "1.0.x-dev"
-    },
-    "phpstan": {
-      "includes": [
-        "config/extension.neon",
-        "config/rules.neon"
-      ]
-    }
-  },
-  "config": {
-    "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true,
-      "phpstan/extension-installer": true
-    },
-    "sort-packages": true
-  }
 }
