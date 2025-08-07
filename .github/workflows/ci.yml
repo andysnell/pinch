@@ -38,15 +38,15 @@ jobs:
           context: ./packages/template
           file: ./packages/template/Dockerfile
           target: development-php
-          pull: true
-          push: true
-          load: true
           build-args: |
             USER_UID=${{ steps.user_info.outputs.uid }}
             USER_GID=${{ steps.user_info.outputs.gid }}
-          tags: ghcr.io/${{ github.repository }}-php:ci
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-php:ci
-          cache-to: type=inline
+          tags: |
+            ghcr.io/${{ github.repository }}-php:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}-php:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha
+          load: true
 
       - name: Build Image - pinch-web
         uses: docker/build-push-action@v5
@@ -54,12 +54,12 @@ jobs:
           context: ./packages/template
           file: ./packages/template/Dockerfile
           target: development-web
-          pull: true
-          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-web:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}-web:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha
           load: true
-          tags: ghcr.io/${{ github.repository }}-web:ci
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-web:ci
-          cache-to: type=inline
 
       - name: Build Image - pinch-prettier
         uses: docker/build-push-action@v5
@@ -67,15 +67,18 @@ jobs:
           context: .
           file: ./packages/template/Dockerfile
           target: prettier
-          pull: true
-          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-prettier:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}-prettier:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha
           load: true
-          tags: ghcr.io/${{ github.repository }}-prettier:ci
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-prettier:ci
-          cache-to: type=inline
 
-      - name: Run Code Quality Checks
+      - name: Build Application
         run: |
           cp .env.dist .env;
           sed -i "s/^GITHUB_TOKEN=.*/GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}/" ".env";
-          make -j && make ci;
+          make -j
+
+      - name: Run Code Quality Checks
+        run: make ci;

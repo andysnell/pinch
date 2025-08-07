@@ -50,10 +50,14 @@ jobs:
     needs: validate_version
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Get UID and GID
+        id: user_info
+        run: |
+          echo "uid=$(id -u)" >> $GITHUB_OUTPUT
+          echo "gid=$(id -g)" >> $GITHUB_OUTPUT
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -74,8 +78,11 @@ jobs:
           build-args: |
             USER_UID=${{ steps.user_info.outputs.uid }}
             USER_GID=${{ steps.user_info.outputs.gid }}
-          tags: ghcr.io/${{ github.repository }}-php:ci
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-php:ci
+          tags: |
+            ghcr.io/${{ github.repository }}-php:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}-php:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha
           load: true
 
       - name: Build Image - pinch-web
@@ -84,8 +91,11 @@ jobs:
           context: ./packages/template
           file: ./packages/template/Dockerfile
           target: development-web
-          tags: ghcr.io/${{ github.repository }}-web:ci
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-web:ci
+          tags: |
+            ghcr.io/${{ github.repository }}-web:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}-web:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha
           load: true
 
       - name: Build Image - pinch-prettier
@@ -94,11 +104,14 @@ jobs:
           context: .
           file: ./packages/template/Dockerfile
           target: prettier
-          tags: ghcr.io/${{ github.repository }}-prettier:ci
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-prettier:ci
+          tags: |
+            ghcr.io/${{ github.repository }}-prettier:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}-prettier:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha
           load: true
 
-      - name: Setup PHP
+      - name: Build Application
         run: |
           cp .env.dist .env;
           sed -i "s/^GITHUB_TOKEN=.*/GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}/" ".env";
