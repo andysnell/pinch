@@ -169,9 +169,14 @@ shell psysh: build/.install
 	docker compose up --detach
 	$(docker-php) salt shell
 
-.PHONY: lint phpcbf phpcs phpstan phpunit phpunit-coverage rector rector-dry-run test
-lint phpcbf phpcs phpstan phpunit phpunit-coverage rector rector-dry-run test: build/.install
-	$(docker-php) composer run-script "$@"
+.PHONY: lint phpcbf phpcs phpstan rector rector-dry-run
+lint phpcbf phpcs phpstan rector rector-dry-run: build/.install
+	docker compose run --rm -e XDEBUG_MODE=off php composer run-script "$@"
+
+.PHONY: phpunit phpunit-coverage test behat paratest paratest-coverage
+phpunit phpunit-coverage test behat paratest paratest-coverage: build/.install
+	docker compose up --detach
+	docker compose run --rm -e XDEBUG_MODE=off php composer run-script "$@"
 
 .NOTPARALLEL: ci pre-ci preci
 .PHONY: ci pre-ci preci

@@ -183,50 +183,17 @@
   },
   "scripts": {
     "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices",
-    "behat": [
-      "@putenv XDEBUG_MODE=off",
-      "@php vendor/bin/behat -c packages/template/behat.php"
-    ],
-    "lint": [
-      "@putenv XDEBUG_MODE=off",
-      "@php vendor/bin/parallel-lint -j $(nproc --ignore=2) --show-deprecated --exclude vendor --exclude build ."
-    ],
-    "paratest": [
-      "@putenv XDEBUG_MODE=off",
-      "@php vendor/bin/paratest"
-    ],
-    "paratest-coverage": [
-      "@putenv XDEBUG_MODE=coverage",
-      "@php vendor/bin/paratest --coverage-html=build/phpunit"
-    ],
-    "phpcbf": [
-      "@putenv XDEBUG_MODE=off",
-      "@php vendor/bin/phpcbf --parallel=$(nproc --ignore=2) --report=full"
-    ],
-    "phpcs": [
-      "@putenv XDEBUG_MODE=off",
-      "@php vendor/bin/phpcs --parallel=$(nproc --ignore=2) --report=full"
-    ],
-    "phpstan": [
-      "@putenv XDEBUG_MODE=off",
-      "@php vendor/bin/phpstan analyze --memory-limit=-1 --verbose"
-    ],
-    "phpunit": [
-      "@putenv XDEBUG_MODE=off",
-      "@php vendor/bin/phpunit"
-    ],
-    "phpunit-coverage": [
-      "@putenv XDEBUG_MODE=coverage",
-      "@php vendor/bin/phpunit --coverage-html=build/phpunit"
-    ],
-    "rector": [
-      "@putenv XDEBUG_MODE=off",
-      "@php vendor/bin/rector process"
-    ],
-    "rector-dry-run": [
-      "@putenv XDEBUG_MODE=off",
-      "@php vendor/bin/rector process --dry-run"
-    ],
+    "behat": "@php vendor/bin/behat -c packages/template/behat.php",
+    "lint": "@php vendor/bin/parallel-lint -j $(nproc --ignore=2) --show-deprecated --exclude vendor --exclude build .",
+    "paratest": "@php vendor/bin/paratest",
+    "paratest-coverage": "@php vendor/bin/paratest --coverage-html=build/phpunit",
+    "phpcbf": "@php vendor/bin/phpcbf --parallel=$(nproc --ignore=2) --report=full",
+    "phpcs": "@php vendor/bin/phpcs --parallel=$(nproc --ignore=2) --report=full",
+    "phpstan": "@php vendor/bin/phpstan analyze --memory-limit=-1 --verbose",
+    "phpunit": "@php vendor/bin/phpunit",
+    "phpunit-coverage": "@php vendor/bin/phpunit --coverage-html=build/phpunit",
+    "rector": "@php vendor/bin/rector process",
+    "rector-dry-run": "@php vendor/bin/rector process --dry-run",
     "test": [
       "@paratest",
       "@behat"
