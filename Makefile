@@ -134,7 +134,7 @@ phpunit phpunit-coverage test behat paratest paratest-coverage: build/.install
 
 .NOTPARALLEL: ci pre-ci preci
 .PHONY: ci pre-ci preci
-ci: lint phpcs phpstan paratest prettier-check rector-dry-run
+ci: lint phpcs phpstan test prettier-check rector-dry-run
 
 .NOTPARALLEL: pre-ci preci
 .PHONY: pre-ci preci

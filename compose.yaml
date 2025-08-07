@@ -1,5 +1,6 @@
 services:
   web:
+    image: ghcr.io/pinch-web:latest
     build:
       context: ./packages/template
       dockerfile: ./Dockerfile
@@ -26,6 +27,7 @@ services:
       - "${DOCKER_HOST_HTTP_PORT:-8888}:80"
 
   php:
+    image: ghcr.io/pinch-php:latest
     build:
       context: ./packages/template
       dockerfile: ./Dockerfile
