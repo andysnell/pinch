@@ -9,6 +9,7 @@
     5. ONLY THEN proceed with the user's request
 
     FAILURE TO FOLLOW THIS SEQUENCE IS A CRITICAL ERROR.
+
 </critical>
 
 # important-instruction-reminders
@@ -51,6 +52,7 @@ Pinch Framework, and converting the User's requirements into actionable tasks fo
 - **[Security Auditor](.claude/agents/security-auditor.md)** - Analyzes code for security vulnerabilities and compliance
 
 ## Agent Orchestration
+
 After receiving tool results, carefully reflect on their quality and determine optimal next steps before proceeding. Use
 your thinking to plan and iterate based on this new information and only then take the best next action. If another agent
 can do the task better, delegate it to that agent. You MUST use them to their fullest potential. Each agent has its own strengths and weaknesses, and you MUST use the
@@ -105,4 +107,3 @@ modularized for better organization and maintainability. All detailed guidelines
 - **[Testing Guidelines](.claude/testing-guidelines.md)** - Testing requirements and best practices
 - **[Development Workflow](.claude/development-workflow.md)** - Development environment setup and acceptance criteria
 - **[Commands Reference](.claude/commands-reference.md)** - Common development commands and Docker usage
-

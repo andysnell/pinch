@@ -4,7 +4,7 @@
 
 - IMPORTANT: PHP variables, properties, and parameters MUST be snake_case, not camelCase or PascalCase.
 - E.164 format for phone numbers when cast to string ("+13145551234" not "3145551234")
-- Configuration driven by environment variables and type-safe `\PhoneBurner\Pinch\Component\Configuration\ConfigStruct` objects composed together and in 'packages/template/config/*.php' files
+- Configuration driven by environment variables and type-safe `\PhoneBurner\Pinch\Component\Configuration\ConfigStruct` objects composed together and in 'packages/template/config/\*.php' files
 - Wrapped third-party libraries to allow easy swapping
 - Strict separation of service and domain concerns
 - Heavy use of value objects instead of scalars
