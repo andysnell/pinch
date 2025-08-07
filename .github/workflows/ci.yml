@@ -41,19 +41,6 @@ jobs:
           pull: true
           push: true
           load: true
-          tags: ghcr.io/${{ github.repository }}-php:ci
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-php:ci
-          cache-to: type=inline
-
-      - name: Build Image - pinch-php
-        uses: docker/build-push-action@v5
-        with:
-          context: ./packages/template
-          file: ./packages/template/Dockerfile
-          target: development-php
-          pull: true
-          push: true
-          load: true
           build-args: |
             USER_UID=${{ steps.user_info.outputs.uid }}
             USER_GID=${{ steps.user_info.outputs.gid }}
