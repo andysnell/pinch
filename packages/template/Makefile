@@ -92,13 +92,13 @@ BUILD_DIRS = build/.phpunit.cache \
 ##------------------------------------------------------------------------------
 
 build/docker/docker-compose.json: packages/template/Dockerfile compose.yaml | build/docker
-	docker compose pull --quiet --policy="always" --ignore-pull-failures
-	# Skip USER_UID and USER_GID on Mac OS to avoid compatibility issues
+# Skip USER_UID and USER_GID on Mac OS to avoid compatibility issues
 ifeq ($(OS),Darwin)
 	COMPOSE_BAKE=true docker compose build --pull
 else
 	COMPOSE_BAKE=true docker compose build --pull --build-arg USER_UID=$$(id -u) --build-arg USER_GID=$$(id -g)
 endif
+	docker compose pull --quiet --policy="always" --ignore-pull-failures
 	touch "$@" # required to consistently update the file mtime
 
 build/docker/pinch-%.json: Dockerfile | build/docker

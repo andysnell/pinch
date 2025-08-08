@@ -51,7 +51,7 @@ jobs:
       - name: Build Image - pinch-prettier
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./packages/template
           file: ./packages/template/Dockerfile
           target: prettier
           tags: ghcr.io/${{ github.repository }}-prettier:latest # not pushed, just used locally
