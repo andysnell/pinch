@@ -103,7 +103,6 @@ ENV SALT_BUILD_STAGE="development"
 ENV XDEBUG_MODE="off"
 ARG USER_UID=1000
 ARG USER_GID=1000
-RUN docker-php-ext-enable xdebug
 RUN <<-EOF
   set -eux
   mkdir -p /home/dev/.composer
