@@ -38,6 +38,7 @@
   },
   "autoload": {
     "files": [
+      "src/functions.php",
       "src/Array/functions.php",
       "src/Attribute/functions.php",
       "src/Enum/functions.php",
