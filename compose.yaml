@@ -5,9 +5,6 @@ services:
       context: ./packages/template
       dockerfile: ./Dockerfile
       target: development-web
-      args:
-        USER_UID: ${UID:-1000}
-        USER_GID: ${GID:-1000}
     platform: linux/amd64
     restart: unless-stopped
     cap_add:
@@ -32,9 +29,6 @@ services:
       context: ./packages/template
       dockerfile: ./Dockerfile
       target: development-php
-      args:
-        USER_UID: ${UID:-1000}
-        USER_GID: ${GID:-1000}
     platform: linux/amd64
     restart: unless-stopped
     user: "dev"
