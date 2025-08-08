@@ -8,6 +8,7 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    if: github.repository == 'phoneburner/pinch'
     permissions:
       contents: read
       packages: write

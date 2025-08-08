@@ -73,16 +73,6 @@ jobs:
             sed -i "s/\"phoneburner\/pinch-template\": \"[^\"]*\"/\"phoneburner\/pinch-template\": \"^$VERSION\"/g" "$package"
           done
 
-          # Also update root composer.json if it has any pinch dependencies
-          if [ -f "composer.json" ]; then
-            echo "  Updating: composer.json (root)"
-            sed -i "s/\"phoneburner\/pinch-core\": \"[^\"]*\"/\"phoneburner\/pinch-core\": \"^$VERSION\"/g" composer.json
-            sed -i "s/\"phoneburner\/pinch-component\": \"[^\"]*\"/\"phoneburner\/pinch-component\": \"^$VERSION\"/g" composer.json
-            sed -i "s/\"phoneburner\/pinch-framework\": \"[^\"]*\"/\"phoneburner\/pinch-framework\": \"^$VERSION\"/g" composer.json
-            sed -i "s/\"phoneburner\/pinch-phpstan\": \"[^\"]*\"/\"phoneburner\/pinch-phpstan\": \"^$VERSION\"/g" composer.json
-            sed -i "s/\"phoneburner\/pinch-template\": \"[^\"]*\"/\"phoneburner\/pinch-template\": \"^$VERSION\"/g" composer.json
-          fi
-
           echo "✅ Updated all package interdependencies to ^$VERSION"
 
       - name: Commit version changes
@@ -104,9 +94,7 @@ jobs:
             # Commit changes
             git commit -m "Release $TAG_NAME
 
-          🚀 Bump all package versions to $TAG_NAME
-
-          Generated with monorepo-builder"
+          🚀 Bump all package versions to $TAG_NAME"
 
             # Push changes
             git push origin main

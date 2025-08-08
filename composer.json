@@ -112,11 +112,11 @@
     "symplify/monorepo-builder": "^11.2"
   },
   "replace": {
-    "phoneburner/pinch-component": "^0.0.5",
-    "phoneburner/pinch-core": "^0.0.5",
-    "phoneburner/pinch-framework": "^0.0.5",
-    "phoneburner/pinch-phpstan": "^0.0.5",
-    "phoneburner/pinch-template": "^0.0.5"
+    "phoneburner/pinch-component": "self.version",
+    "phoneburner/pinch-core": "self.version",
+    "phoneburner/pinch-framework": "self.version",
+    "phoneburner/pinch-phpstan": "self.version",
+    "phoneburner/pinch-template": "self.version"
   },
   "provide": {
     "psr/cache-implementation": "3.0",
