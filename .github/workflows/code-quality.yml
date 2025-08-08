@@ -13,10 +13,11 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Log in to GitHub Container Registry
+        if: github.repository == 'phoneburner/pinch'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -33,8 +34,8 @@ jobs:
           file: ./packages/template/Dockerfile
           target: development-php
           tags: ghcr.io/${{ github.repository }}-php:latest # not pushed, just used locally
-          cache-from: type=gha,scope=${{ github.repository }}-php
-          cache-to: type=gha,scope=${{ github.repository }}-php,mode=max
+          cache-from: ${{ github.repository == 'phoneburner/pinch' && 'type=gha,scope=phoneburner/pinch-php' || '' }}
+          cache-to: ${{ github.repository == 'phoneburner/pinch' && 'type=gha,scope=phoneburner/pinch-php,mode=max' || '' }}
           load: true
 
       - name: Build Image - pinch-web
@@ -44,8 +45,8 @@ jobs:
           file: ./packages/template/Dockerfile
           target: development-web
           tags: ghcr.io/${{ github.repository }}-web:latest # not pushed, just used locally
-          cache-from: type=gha,scope=${{ github.repository }}-web
-          cache-to: type=gha,scope=${{ github.repository }}-web,mode=max
+          cache-from: ${{ github.repository == 'phoneburner/pinch' && 'type=gha,scope=phoneburner/pinch-web' || '' }}
+          cache-to: ${{ github.repository == 'phoneburner/pinch' && 'type=gha,scope=phoneburner/pinch-web,mode=max' || '' }}
           load: true
 
       - name: Build Image - pinch-prettier
@@ -55,8 +56,8 @@ jobs:
           file: ./packages/template/Dockerfile
           target: prettier
           tags: ghcr.io/${{ github.repository }}-prettier:latest # not pushed, just used locally
-          cache-from: type=gha,scope=${{ github.repository }}-prettier
-          cache-to: type=gha,scope=${{ github.repository }}-prettier,mode=max
+          cache-from: ${{ github.repository == 'phoneburner/pinch' && 'type=gha,scope=phoneburner/pinch-prettier' || '' }}
+          cache-to: ${{ github.repository == 'phoneburner/pinch' && 'type=gha,scope=phoneburner/pinch-prettier,mode=max' || '' }}
           load: true
 
       - name: Build Application

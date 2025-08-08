@@ -8,43 +8,72 @@ on:
         required: true
         default: "main"
         type: string
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref to build from (tag or branch name, e.g., v0.0.1, main, feature/xyz)"
+        required: true
+        type: string
+      docker_tag:
+        description: "Override Docker tag (optional - if not provided, will be derived from ref)"
+        required: false
+        type: string
+      always_latest:
+        description: "Always tag as latest regardless of ref"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    if: github.repository == 'phoneburner/pinch'
 
     steps:
-      - name: Checkout code at specified ref
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.ref }}
+          ref: ${{ inputs.ref }}
 
       - name: Determine image tags
         id: tags
         run: |
-          REF="${{ github.event.inputs.ref }}"
+          REF="${{ inputs.ref }}"
 
-          # Sanitize ref for use as Docker tag (replace / with -)
-          DOCKER_TAG=$(echo "$REF" | sed 's/\//-/g')
+          # Use provided docker_tag or derive from ref
+          if [ -n "${{ inputs.docker_tag }}" ]; then
+            DOCKER_TAG="${{ inputs.docker_tag }}"
+            echo "🏷️ Using provided Docker tag: $DOCKER_TAG"
+          else
+            # Sanitize ref for use as Docker tag (replace / with -)
+            DOCKER_TAG=$(echo "$REF" | sed 's/\//-/g')
+            echo "🏷️ Derived Docker tag from ref: $DOCKER_TAG"
+          fi
 
           echo "🏷️ Building from ref: $REF"
           echo "🐳 Docker tag: $DOCKER_TAG"
 
-          # Get the SHA of the checked out ref
-          CURRENT_SHA=$(git rev-parse HEAD)
-          echo "📍 Current SHA: $CURRENT_SHA"
-
-          # Get the SHA of main branch HEAD
-          MAIN_SHA=$(git rev-parse origin/main)
-          echo "📍 Main branch SHA: $MAIN_SHA"
-
           # Check if we should also tag as latest
-          INCLUDE_LATEST="false"
-          if [ "$CURRENT_SHA" = "$MAIN_SHA" ]; then
-            echo "✅ Current ref points to main branch HEAD - will also tag as 'latest'"
-            INCLUDE_LATEST="true"
+          INCLUDE_LATEST="${{ inputs.always_latest }}"
+
+          if [ "$INCLUDE_LATEST" != "true" ]; then
+            # Get the SHA of the checked out ref
+            CURRENT_SHA=$(git rev-parse HEAD)
+            echo "📍 Current SHA: $CURRENT_SHA"
+
+            # Get the SHA of main branch HEAD
+            MAIN_SHA=$(git rev-parse origin/main)
+            echo "📍 Main branch SHA: $MAIN_SHA"
+
+            if [ "$CURRENT_SHA" = "$MAIN_SHA" ]; then
+              echo "✅ Current ref points to main branch HEAD - will also tag as 'latest'"
+              INCLUDE_LATEST="true"
+            else
+              echo "ℹ️ Current ref does not point to main branch HEAD - skipping 'latest' tag"
+              INCLUDE_LATEST="false"
+            fi
           else
-            echo "ℹ️ Current ref does not point to main branch HEAD - skipping 'latest' tag"
+            echo "✅ Always latest flag is set - will tag as 'latest'"
           fi
 
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
@@ -108,7 +137,7 @@ jobs:
         run: |
           echo "## 🐳 Docker Images Built and Pushed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Reference:** \`${{ github.event.inputs.ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Reference:** \`${{ inputs.ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Docker Tag:** \`${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Images:" >> $GITHUB_STEP_SUMMARY
