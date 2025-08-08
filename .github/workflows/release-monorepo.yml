@@ -75,6 +75,17 @@ jobs:
 
           echo "✅ Updated all package interdependencies to ^$VERSION"
 
+          # Update the version in the welcome splash page
+          WELCOME_FILE="packages/template/resources/views/welcome.html"
+          if [ -f "$WELCOME_FILE" ]; then
+            echo "🎨 Updating version in welcome splash page..."
+            # Using perl for more reliable in-place editing with better regex support
+            perl -i -pe "s/<div class=\"framework-version\">Framework v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?<\/div>/<div class=\"framework-version\">Framework v$VERSION<\/div>/g" "$WELCOME_FILE"
+            echo "✅ Updated welcome page to display Framework v$VERSION"
+          else
+            echo "⚠️  Welcome file not found at $WELCOME_FILE"
+          fi
+
       - name: Commit version changes
         run: |
           TAG_NAME="${{ needs.validate_version.outputs.tag_name }}"

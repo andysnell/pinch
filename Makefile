@@ -110,6 +110,7 @@ $(BUILD_DIRS): | .env phpstan.neon phpunit.xml
 
 .env:
 	@$(call copy-safe,.env.dist,.env)
+	@$(call generate-key,PINCH_APP_KEY)
 
 phpstan.neon:
 	@$(call copy-safe,phpstan.dist.neon,phpstan.neon)
@@ -124,6 +125,7 @@ composer.lock vendor: build/composer build/docker/docker-compose.json composer.j
 	@touch vendor composer.lock
 
 build/.install : $(BUILD_DIRS) vendor build/docker/pinch-prettier.json | $(BUILD_DIRS)
+	@$(call generate-key,PINCH_APP_KEY)
 	@echo "Application Build Complete."
 	@touch build/.install
 
