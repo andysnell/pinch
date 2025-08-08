@@ -16,6 +16,7 @@ _ERROR := "\033[31m%s\033[0m %s\n" # Red text template for "printf"
 
 docker-php = docker compose run --rm --user=$$(id -u):$$(id -g) php
 docker-run = docker run --rm --env-file "$${PWD}/.env" --user=$$(id -u):$$(id -g)
+redocly-cli := $(docker-run) --volume $${PWD}:/spec redocly/cli
 
 # Define behavior to safely source file (1) to dist file (2), without overwriting
 # if the dist file already exists. This is more portable than using `cp --no-clobber`.
@@ -48,6 +49,34 @@ define check-token
 	fi
 endef
 
+# Define behavior to generate a new 256-bit key for the application, if it is
+# not already set in the .env file.
+define generate-key
+	if grep -q "^$(1)=" ".env"; then \
+		KEY_VALUE=$$(grep "^$(1)=" ".env" | cut -d'=' -f2); \
+		if [ -z "$$KEY_VALUE" ]; then \
+			NEW_KEY=$$(head -c 32 /dev/urandom | base64); \
+			sed -i "s;^$(1)=.*;$(1)=$$NEW_KEY;" ".env"; \
+			echo "New $(1) generated successfully!"; \
+		else \
+			echo "$(1) is already set."; \
+		fi; \
+	else \
+		NEW_KEY=$$(head -c 32 /dev/urandom | base64); \
+		echo -e "$(1)=$$NEW_KEY" >> ".env"; \
+		echo "New $(1) generated successfully!"; \
+	fi
+endef
+
+define confirm
+	printf -v PROMPT $(_WARN) $(1)  [y/N];
+	read -p "$$PROMPT" CONFIRMATION;
+	if [[ ! "$$CONFIRMATION" =~ ^[Yy] ]]; then \
+		echo "Exiting..."; \
+		exit 1; \
+	fi
+endef
+
 BUILD_DIRS = build/.phpunit.cache \
 	build/composer \
 	build/docker \
@@ -65,7 +94,7 @@ BUILD_DIRS = build/.phpunit.cache \
 
 build/docker/docker-compose.json: packages/template/Dockerfile compose.yaml | build/docker
 	docker compose pull --quiet --ignore-buildable
-	COMPOSE_BAKE=true docker compose build --pull
+	COMPOSE_BAKE=true docker compose build --pull --build-arg USER_UID=$$(id -u) --build-arg USER_GID=$$(id -g)
 	touch "$@" # required to consistently update the file mtime
 
 build/docker/pinch-%.json: packages/template/Dockerfile | build/docker
@@ -76,6 +105,9 @@ build/docker/pinch-%.json: packages/template/Dockerfile | build/docker
 # Build/Setup/Teardown Targets
 ##------------------------------------------------------------------------------
 
+$(BUILD_DIRS): | .env phpstan.neon phpunit.xml
+	mkdir -p "$@"
+
 .env:
 	@$(call copy-safe,.env.dist,.env)
 
@@ -85,22 +117,24 @@ phpstan.neon:
 phpunit.xml:
 	@$(call copy-safe,phpunit.dist.xml,phpunit.xml)
 
-$(BUILD_DIRS): | .env
-	mkdir -p "$@"
-
-vendor: build/composer build/docker/docker-compose.json composer.json composer.lock | .env
+composer.lock vendor: build/composer build/docker/docker-compose.json composer.json | .env
 	mkdir -p "$@"
 	@$(call check-token,GITHUB_TOKEN)
 	$(docker-php) composer install
-	@touch vendor
+	@touch vendor composer.lock
 
-build/.install : vendor build/docker/pinch-prettier.json | $(BUILD_DIRS)
+build/.install : $(BUILD_DIRS) vendor build/docker/pinch-prettier.json | $(BUILD_DIRS)
 	@echo "Application Build Complete."
 	@touch build/.install
 
+build/.migrations: database/migrations/*
+	docker compose up --detach --wait --wait-timeout=30
+	$(docker-php) pinch migrations:migrate --no-interaction && touch $@
+
 .PHONY: clean
 clean:
-	$(docker-php) rm -rf ./build ./vendor
+	$(docker-php) rm -rf ./build ./vendor/ ./public/phpunit
+	$(docker-php) find /app/storage/ -type f -not -name .gitignore -delete
 
 ##------------------------------------------------------------------------------
 # Code Quality, Testing & Utility Targets
@@ -143,7 +177,7 @@ pre-ci preci: prettier-write rector phpcbf ci
 # Run the PHP development server to serve the HTML test coverage report on port 8000.
 .PHONY: serve-coverage
 serve-coverage:
-	@docker compose run --rm --publish 8000:80 --user=$$(id -u):$$(id -g) php php -S 0.0.0.0:80 -t /app/build/phpunit
+	@docker compose run --rm --publish 8000:80 ghcr.io/phoneburner/pinch-php php -S 0.0.0.0:80 -t /app/build/phpunit
 
 ##------------------------------------------------------------------------------
 # Prettier Code Formatter for JSON, YAML, HTML, Markdown, and CSS Files
