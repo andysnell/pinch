@@ -14,7 +14,7 @@ _ERROR := "\033[31m%s\033[0m %s\n" # Red text template for "printf"
 # Command Aliases & Function/Variable Definitions
 ##------------------------------------------------------------------------------
 
-docker-php = docker compose run --rm php
+docker-php = docker compose run --rm --user=$$(id -u):$$(id -g) php
 docker-run = docker run --rm --env-file "$${PWD}/.env" --user=$$(id -u):$$(id -g)
 
 # Define behavior to safely source file (1) to dist file (2), without overwriting
@@ -64,7 +64,7 @@ BUILD_DIRS = build/.phpunit.cache \
 ##------------------------------------------------------------------------------
 
 build/docker/docker-compose.json: packages/template/Dockerfile compose.yaml | build/docker
-	COMPOSE_BAKE=true docker compose build --pull --ignore-pull-failures
+	COMPOSE_BAKE=true docker compose build --pull
 	docker compose pull --quiet --ignore-pull-failures
 	touch "$@" # required to consistently update the file mtime
 
