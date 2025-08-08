@@ -15,6 +15,7 @@
   },
   "require-dev": {
     "behat/behat": "^3.23.0",
+    "brianium/paratest": "^7.11",
     "eventsauce/test-utilities": "dev-main",
     "league/openapi-psr7-validator": "^0.22.0",
     "phoneburner/coding-standard": "^1.0.0",
