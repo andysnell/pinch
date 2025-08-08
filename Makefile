@@ -16,7 +16,6 @@ _ERROR := "\033[31m%s\033[0m %s\n" # Red text template for "printf"
 
 docker-php = docker compose run --rm --user=$$(id -u):$$(id -g) php
 docker-run = docker run --rm --env-file "$${PWD}/.env" --user=$$(id -u):$$(id -g)
-redocly-cli := $(docker-run) --volume $${PWD}:/spec redocly/cli
 
 # Define behavior to safely source file (1) to dist file (2), without overwriting
 # if the dist file already exists. This is more portable than using `cp --no-clobber`.
@@ -187,8 +186,8 @@ serve-coverage:
 ##------------------------------------------------------------------------------
 
 .PHONY: prettier-%
-prettier-%: | build/docker/pinch-prettier.json
-	$(docker-run) --volume $${PWD}:/app --user=$$(id -u):$$(id -g) pinch-prettier --$* .
+prettier-%: | build/.install
+	$(docker-run) --volume $${PWD}:/app --user=$$(id -u):$$(id -g) ghcr.io/phoneburner/pinch-prettier --$* .
 
 ##------------------------------------------------------------------------------
 # Enable Makefile Overrides
