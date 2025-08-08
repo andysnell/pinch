@@ -58,7 +58,11 @@
     "phpunit": "@php vendor/bin/phpunit",
     "phpunit-coverage": "@php vendor/bin/phpunit --coverage-html=build/phpunit",
     "rector": "@php vendor/bin/rector process",
-    "rector-dry-run": "@php vendor/bin/rector process --dry-run"
+    "rector-dry-run": "@php vendor/bin/rector process --dry-run",
+    "test": [
+      "@paratest",
+      "@behat"
+    ]
   },
   "config": {
     "allow-plugins": {
