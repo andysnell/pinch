@@ -101,6 +101,14 @@ jobs:
             echo "✅ Committed and pushed version changes"
           fi
 
+  create_tag:
+    runs-on: ubuntu-latest
+    needs: [validate_version, update_versions]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Create and push tag
         run: |
           TAG_NAME="${{ needs.validate_version.outputs.tag_name }}"
@@ -126,7 +134,7 @@ jobs:
 
   build_images:
     uses: ./.github/workflows/build-images.yml
-    needs: [validate_version, update_versions]
+    needs: [validate_version, create_tag]
     with:
       ref: ${{ needs.validate_version.outputs.tag_name }}
       docker_tag: ${{ needs.validate_version.outputs.version }}
@@ -134,7 +142,7 @@ jobs:
 
   trigger_split:
     uses: ./.github/workflows/split-packages.yml
-    needs: [validate_version, update_versions]
+    needs: [validate_version, create_tag]
     if: ${{ !inputs.skip_split }}
     with:
       version: ${{ needs.validate_version.outputs.version }}
@@ -143,7 +151,7 @@ jobs:
 
   create_github_release:
     runs-on: ubuntu-latest
-    needs: [validate_version, update_versions]
+    needs: [validate_version, create_tag]
 
     steps:
       - name: Checkout
