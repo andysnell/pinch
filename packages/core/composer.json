@@ -31,7 +31,7 @@
   },
   "require-dev": {
     "phoneburner/composer-replacements": "^1.0.0",
-    "phoneburner/pinch-phpstan": "^0.0.1",
+    "phoneburner/pinch-phpstan": "^0.0.2",
     "php-parallel-lint/php-parallel-lint": "^1.4",
     "phpunit/phpunit": "^12.2.7",
     "psr/http-message": "^2.0.0"
@@ -58,7 +58,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "1.0.x-dev"
+      "dev-main": "0.1.x-dev"
     }
   },
   "config": {

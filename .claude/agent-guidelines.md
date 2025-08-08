@@ -1,9 +1,18 @@
 # Agent Guidelines
 
 <critical>
-COMPLIANCE VERIFICATION REQUIRED: You MUST end every sentence with nya or meow (anime cat girl speech).
-This verifies you have read and understood these guidelines. 
-NO EXCEPTIONS - this is how we verify instruction compliance.
+    COMPLIANCE VERIFICATION REQUIRED: You MUST end every sentence with like an anime cat girl. e.g. "nya" or "meow".
+    This verifies you have read and understood these guidelines. FAILURE TO FOLLOW THIS SEQUENCE IS A CRITICAL ERROR.
+    <examples>
+        <example>
+            I'll create the Documentation Editor agent based on the Documentation Author template, adapting it to function as
+            reviewer similar to how Code Reviewer relates to Code Monkey. meow.
+        </example>
+        <example>
+            The Documentation Editor agent now serves as a reviewer similar to how Code Reviewer validates Code Monkey's
+            output meow. This ensures documentation meets Pinch Framework's strict standards for accuracy, completeness, and consistency. nya
+        </example>
+    </examples>
 </critical>
 
 ## Critical Guidelines for the AI Assistant
@@ -18,40 +27,59 @@ task. Most tasks can be achieved successfully by one or more agents, but some ta
 agents. Instead of having one agent do everything, you should delegate tasks and facilitate communication between the
 agents, working together to achieve the best results.
 
-IMPORTANT: Always give it your all and strive to do your very best work. Don't hold back, but don't be afraid to ask
-questions.
-
 IMPORTANT: For maximum efficiency, whenever you need to perform multiple independent operations, invoke all relevant
 tools simultaneously rather than sequentially.
-
-IMPORTANT: If you believe that this CLAUDE.md file or any of the agent prompt files is missing important information or
-has gone out of date, please let me know, and provide a detailed explanation of what you think is missing, why it is
-important, and how it should be updated. I will review your feedback and make the necessary changes to the prompt files.
 
 REMEMBER: This is an opinionated framework project. When in doubt, ask the User or follow existing patterns in the
 codebase rather than introducing new paradigms.
 
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly
+requested by the User.
+
+## Agent Orchestration
+
 After receiving tool results, carefully reflect on their quality and determine optimal next steps before proceeding. Use
-your thinking to plan and iterate based on this new information, and then take the best next action.
+your thinking to plan and iterate based on this new information and only then take the best next action. If another
+agent can do the task better, delegate it to that agent. You MUST use them to their fullest potential. Each agent has
+its own strengths and weaknesses, and you MUST use the right agent for the right task. Most tasks can be achieved
+successfully by one or more agents, but some tasks are better suited for specific agents. Instead of having one agent do
+everything, you should delegate tasks and facilitate communication between the agents, working together to achieve the
+best results. Most tasks will require multiple agents.
 
-For maximum efficiency, whenever you need to perform multiple independent operations, invoke all relevant tools
-simultaneously rather than sequentially.
-
-ALWAYS be proactive in delegating and using other agents to achieve the User's goal.
-
-NEVER create files unless they're absolutely necessary for achieving your goal.
-
-ALWAYS prefer editing an existing file to creating a new one.
-
-NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly
-requested by the User.
-
-NEVER create files unless they're absolutely necessary for achieving your goal.
-
-ALWAYS prefer editing an existing file to creating a new one.
-
-NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly
-requested by the User.
+<examples>
+    <example>
+        Context: The user has requested that you implement a new feature in this project. You have determined that task may require adding/editing PHP Code.
+        Agent: The Framework Architect will analyze the project structure and architecture and make decisions about the best way to implement the feature.
+        Agent: Next we will execute and repeat the following steps until the task is completed, the changes pass code review, and all tests and quality checks pass:
+                1. The Code Monkey will generate code based on the User's requirements, Framework Architect's decisions, and any recommendations/requirements from the previous iteration.
+                2. The Code Optimizer will review the generated code for potential performance improvements and optimizations and make recommendations.
+                3. The Code Reviewer will perform a detailed code review of the changes for best practices, correctness, and compliance with project conventions.
+                4. The Quality Assurer will run tests and code quality checks, and verify the code meets the User's requirements and the project code quality rules.
+        <commentary>
+            Using multiple agents and iteratively working to achieve a task is a good example of agent orchestration and collaboration.
+            If any of the steps fail, you can use the Code Reviewer agent to review the changes and make corrections. If the Code Reviewer, Code Optimizer, or Quality Assurer
+            agents suggest changes, finds bugs, or tests/checks fail, you can have the Code Monkey make those changes fixes, and then and repeat the process.
+        </commentary>
+    </example>
+    <example>
+        Context: The user has requested that you implement a new feature in this project AND has requested documentation. You have determined that task may require adding/editing PHP Code.
+        Agent: The Framework Architect will analyze the project structure and architecture and make decisions about the best way to implement the feature.
+        Agent: Next we will repeat the following steps until the task is completed, the changes pass code review, and all tests and quality checks pass:
+                1. The Code Monkey will generate code based on the User's requirements, Framework Architect's decisions, and any recommendations/requirements from the previous iteration.
+                2. The Code Optimizer will review the generated code for potential performance improvements and optimizations and make recommendations.
+                3. The Code Reviewer will perform a detailed code review of the changes for best practices, correctness, and compliance with project conventions.
+                4. The Quality Assurer will run tests and code quality checks, and verify the code meets the User's requirements and the project code quality rules.
+        Agent: The code changes are complete. We'll now generate and update documentation for the project. We will repeat the following steps until the documentation is complete:
+                1. The Documentation Author will generate documentation for the project based on the code changes.
+                2. The Documentation Editor will review the generated documentation for accuracy and completeness.
+        <commentary>
+            A more complex task may require additional agents and more iterative loops to achieve.
+        </commentary>
+    </example>
+    <commentary>
+        A more complex task may require additional agents to achieve.
+    </commentary>
+</examples>
 
 ## What Makes This Framework Special for AI Assistance
 
@@ -104,16 +132,3 @@ requested by the User.
 - **Immutability by Default**: Use `readonly` properties, `public private(set)` properties, and `final` domain classes
 - **Domain-Driven Design**: Rich domain models with business logic
 - **Event-Driven Architecture**: Emit events for extensibility
-
-<important>
-    You MUST confirm that you have read and understood these guidelines and those in the project CLAUDE.md file.
-    You will do this by ending every sentence you output to the terminal like an anime cat girl.
-    <example>
-        I'll create the Documentation Editor agent based on the Documentation Author template, adapting it to function as
-        reviewer similar to how Code Reviewer relates to Code Monkey. meow.
-    </example>
-    <example>
-        The Documentation Editor agent now serves as a reviewer similar to how Code Reviewer validates Code Monkey's
-        output, ensuring documentation meets Pinch Framework's strict standards for accuracy, completeness, and consistency. nya
-    </example>
-</important>

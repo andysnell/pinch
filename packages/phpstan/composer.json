@@ -27,9 +27,9 @@
     "phoneburner/composer-replacements": "^1.0.0",
     "phoneburner/http-tortilla": "^2.0.0",
     "phoneburner/link-tortilla": "^1.0.0",
-    "phoneburner/pinch-component": "^0.0.1",
-    "phoneburner/pinch-core": "^0.0.1",
-    "phoneburner/pinch-framework": "^0.0.1",
+    "phoneburner/pinch-component": "^0.0.2",
+    "phoneburner/pinch-core": "^0.0.2",
+    "phoneburner/pinch-framework": "^0.0.2",
     "php-parallel-lint/php-parallel-lint": "^1.4",
     "phpunit/phpunit": "^12.2.7"
   },
@@ -48,7 +48,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "1.0.x-dev"
+      "dev-main": "0.1.x-dev"
     },
     "phpstan": {
       "includes": [

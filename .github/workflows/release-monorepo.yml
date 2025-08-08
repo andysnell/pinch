@@ -53,12 +53,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get UID and GID
-        id: user_info
-        run: |
-          echo "uid=$(id -u)" >> $GITHUB_OUTPUT
-          echo "gid=$(id -g)" >> $GITHUB_OUTPUT
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -114,25 +108,36 @@ jobs:
           push: true
           load: true
 
-      - name: Build Application
-        run: |
-          cp .env.dist .env;
-          sed -i "s/^GITHUB_TOKEN=.*/GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}/" ".env";
-          make -j
-
       - name: Update package versions
         run: |
           VERSION="${{ needs.validate_version.outputs.version }}"
 
-          # Update root composer.json version
-          docker compose run --rm php composer config version "$VERSION"
+          # Update interdependencies using sed (workaround for monorepo-builder bug)
+          # This updates all phoneburner/pinch-* package references to the new version
 
-          # Update each package version using monorepo-builder
-          docker compose run --rm php ./vendor/bin/monorepo-builder bump-interdependency "$VERSION"
-          docker compose run --rm php composer update --lock --no-progress
-          make prettier-write;
+          echo "📦 Updating package interdependencies to ^$VERSION..."
 
-          echo "✅ Updated all package versions to $VERSION"
+          # Update all pinch package dependencies in all composer.json files
+          for package in packages/*/composer.json; do
+            echo "  Updating: $package"
+            sed -i "s/\"phoneburner\/pinch-core\": \"[^\"]*\"/\"phoneburner\/pinch-core\": \"^$VERSION\"/g" "$package"
+            sed -i "s/\"phoneburner\/pinch-component\": \"[^\"]*\"/\"phoneburner\/pinch-component\": \"^$VERSION\"/g" "$package"
+            sed -i "s/\"phoneburner\/pinch-framework\": \"[^\"]*\"/\"phoneburner\/pinch-framework\": \"^$VERSION\"/g" "$package"
+            sed -i "s/\"phoneburner\/pinch-phpstan\": \"[^\"]*\"/\"phoneburner\/pinch-phpstan\": \"^$VERSION\"/g" "$package"
+            sed -i "s/\"phoneburner\/pinch-template\": \"[^\"]*\"/\"phoneburner\/pinch-template\": \"^$VERSION\"/g" "$package"
+          done
+
+          # Also update root composer.json if it has any pinch dependencies
+          if [ -f "composer.json" ]; then
+            echo "  Updating: composer.json (root)"
+            sed -i "s/\"phoneburner\/pinch-core\": \"[^\"]*\"/\"phoneburner\/pinch-core\": \"^$VERSION\"/g" composer.json
+            sed -i "s/\"phoneburner\/pinch-component\": \"[^\"]*\"/\"phoneburner\/pinch-component\": \"^$VERSION\"/g" composer.json
+            sed -i "s/\"phoneburner\/pinch-framework\": \"[^\"]*\"/\"phoneburner\/pinch-framework\": \"^$VERSION\"/g" composer.json
+            sed -i "s/\"phoneburner\/pinch-phpstan\": \"[^\"]*\"/\"phoneburner\/pinch-phpstan\": \"^$VERSION\"/g" composer.json
+            sed -i "s/\"phoneburner\/pinch-template\": \"[^\"]*\"/\"phoneburner\/pinch-template\": \"^$VERSION\"/g" composer.json
+          fi
+
+          echo "✅ Updated all package interdependencies to ^$VERSION"
 
       - name: Commit version changes
         run: |
@@ -140,8 +145,8 @@ jobs:
           VERSION="${{ needs.validate_version.outputs.version }}"
 
           # Configure git
-          git config user.name "Andy Snell"
-          git config user.email "andy@phoneburner.com"
+          git config user.name "GitHub Actions"
+          git config user.email "action@github.com"
 
           # Stage changes
           git add .
