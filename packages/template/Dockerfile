@@ -138,6 +138,7 @@ RUN --mount=type=bind,from=composer/composer,source=/usr/bin/composer,target=/us
     [ -n "${GITHUB_TOKEN}" ] && composer config --global github-oauth.github.com ${GITHUB_TOKEN}
     export SALT_APP_KEY=$(head -c 32 /dev/urandom | base64) # temporary key for build
     composer install --classmap-authoritative --no-dev
+    composer audit # Fail the build if vulnerabilities are found (can be adjusted with --ignore-severity option)
     salt orm:generate-proxies
     salt routing:cache
 

@@ -45,7 +45,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
 
-  update_versions:
+  build_images:
     runs-on: ubuntu-latest
     needs: validate_version
 
@@ -72,11 +72,10 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}-php:${{ needs.validate_version.outputs.tag_name }}
             ghcr.io/${{ github.repository }}-php:latest
-          cache-from: type=gha
-          cache-to: type=gha
+          cache-from: type=gha,scope=${{ github.repository }}-php
+          cache-to: type=gha,scope=${{ github.repository }}-php,mode=max
           pull: true
           push: true
-          load: true
 
       - name: Build Image - pinch-web
         uses: docker/build-push-action@v6
@@ -87,11 +86,10 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}-web:${{ needs.validate_version.outputs.tag_name }}
             ghcr.io/${{ github.repository }}-web:latest
-          cache-from: type=gha
-          cache-to: type=gha
+          cache-from: type=gha,scope=${{ github.repository }}-web
+          cache-to: type=gha,scope=${{ github.repository }}-web,mode=max
           pull: true
           push: true
-          load: true
 
       - name: Build Image - pinch-prettier
         uses: docker/build-push-action@v6
@@ -102,11 +100,18 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}-prettier:${{ needs.validate_version.outputs.tag_name }}
             ghcr.io/${{ github.repository }}-prettier:latest
-          cache-from: type=gha
-          cache-to: type=gha
+          cache-from: type=gha,scope=${{ github.repository }}-prettier
+          cache-to: type=gha,scope=${{ github.repository }}-prettier,mode=max
           pull: true
           push: true
-          load: true
+
+  update_versions:
+    runs-on: ubuntu-latest
+    needs: validate_version
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Update package versions
         run: |

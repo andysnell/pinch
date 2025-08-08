@@ -3,6 +3,9 @@ SHELL := bash
 .DEFAULT_GOAL := build/.install
 .WAIT:
 
+# Detect operating system
+OS := $(shell uname -s)
+
 _WARN := "\033[33m%s\033[0m %s\n"  # Yellow text template for "printf"
 _INFO := "\033[32m%s\033[0m %s\n" # Green text template for "printf"
 _ERROR := "\033[31m%s\033[0m %s\n" # Red text template for "printf"
@@ -61,11 +64,13 @@ BUILD_DIRS = build/.phpunit.cache \
 ##------------------------------------------------------------------------------
 
 build/docker/docker-compose.json: packages/template/Dockerfile compose.yaml | build/docker
-	docker compose pull --quiet --policy="always"
-	COMPOSE_BAKE=true docker compose build \
-		--pull \
-		--build-arg USER_UID=$$(id -u) \
-		--build-arg USER_GID=$$(id -g)
+	docker compose pull --quiet --policy="always" --ignore-pull-failures
+	# Skip USER_UID and USER_GID on Mac OS to avoid compatibility issues
+ifeq ($(OS),Darwin)
+	COMPOSE_BAKE=true docker compose build --pull --ignore-pull-failures
+else
+	COMPOSE_BAKE=true docker compose build --pull --build-arg USER_UID=$$(id -u) --build-arg USER_GID=$$(id -g)
+endif
 	touch "$@" # required to consistently update the file mtime
 
 build/docker/pinch-%.json: packages/template/Dockerfile | build/docker
@@ -86,10 +91,10 @@ phpunit.xml:
 	@$(call copy-safe,phpunit.dist.xml,phpunit.xml)
 
 $(BUILD_DIRS): | .env
-	mkdir --parents "$@"
+	mkdir -p "$@"
 
 vendor: build/composer build/docker/docker-compose.json composer.json composer.lock | .env
-	mkdir --parents "$@"
+	mkdir -p "$@"
 	@$(call check-token,GITHUB_TOKEN)
 	$(docker-php) composer install
 	@touch vendor
