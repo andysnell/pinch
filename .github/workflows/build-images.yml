@@ -23,21 +23,21 @@ jobs:
         id: tags
         run: |
           REF="${{ github.event.inputs.ref }}"
-          
+
           # Sanitize ref for use as Docker tag (replace / with -)
           DOCKER_TAG=$(echo "$REF" | sed 's/\//-/g')
-          
+
           echo "🏷️ Building from ref: $REF"
           echo "🐳 Docker tag: $DOCKER_TAG"
-          
+
           # Get the SHA of the checked out ref
           CURRENT_SHA=$(git rev-parse HEAD)
           echo "📍 Current SHA: $CURRENT_SHA"
-          
+
           # Get the SHA of main branch HEAD
           MAIN_SHA=$(git rev-parse origin/main)
           echo "📍 Main branch SHA: $MAIN_SHA"
-          
+
           # Check if we should also tag as latest
           INCLUDE_LATEST="false"
           if [ "$CURRENT_SHA" = "$MAIN_SHA" ]; then
@@ -46,7 +46,7 @@ jobs:
           else
             echo "ℹ️ Current ref does not point to main branch HEAD - skipping 'latest' tag"
           fi
-          
+
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
           echo "include_latest=$INCLUDE_LATEST" >> $GITHUB_OUTPUT
 
@@ -81,6 +81,7 @@ jobs:
           file: ./packages/template/Dockerfile
           target: development-web
           tags: |
+            ghcr.io/${{ github.repository }}-web:${{ github.sha }}
             ghcr.io/${{ github.repository }}-web:${{ steps.tags.outputs.docker_tag }}
             ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-web:latest', github.repository) || '' }}
           cache-from: type=gha,scope=${{ github.repository }}-web
@@ -95,6 +96,7 @@ jobs:
           file: ./packages/template/Dockerfile
           target: prettier
           tags: |
+            ghcr.io/${{ github.repository }}-prettier:${{ github.sha }}
             ghcr.io/${{ github.repository }}-prettier:${{ steps.tags.outputs.docker_tag }}
             ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-prettier:latest', github.repository) || '' }}
           cache-from: type=gha,scope=${{ github.repository }}-prettier
@@ -113,7 +115,7 @@ jobs:
           echo "- \`ghcr.io/${{ github.repository }}-php:${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`ghcr.io/${{ github.repository }}-web:${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`ghcr.io/${{ github.repository }}-prettier:${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.tags.outputs.include_latest }}" = "true" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Also tagged as \`latest\`:" >> $GITHUB_STEP_SUMMARY

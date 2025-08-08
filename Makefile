@@ -64,8 +64,8 @@ BUILD_DIRS = build/.phpunit.cache \
 ##------------------------------------------------------------------------------
 
 build/docker/docker-compose.json: packages/template/Dockerfile compose.yaml | build/docker
+	docker compose pull --quiet --ignore-buildable
 	COMPOSE_BAKE=true docker compose build --pull
-	docker compose pull --quiet --ignore-pull-failures
 	touch "$@" # required to consistently update the file mtime
 
 build/docker/pinch-%.json: packages/template/Dockerfile | build/docker
@@ -125,12 +125,12 @@ shell psysh: build/.install
 
 .PHONY: lint phpcbf phpcs phpstan rector rector-dry-run
 lint phpcbf phpcs phpstan rector rector-dry-run: build/.install
-	docker compose run --rm -e XDEBUG_MODE=off php composer run-script "$@"
+	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer run-script "$@"
 
 .PHONY: phpunit phpunit-coverage test behat paratest paratest-coverage
 phpunit phpunit-coverage test behat paratest paratest-coverage: build/.install
 	docker compose up --detach
-	docker compose run --rm -e XDEBUG_MODE=off php composer run-script "$@"
+	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer run-script "$@"
 
 .NOTPARALLEL: ci pre-ci preci
 .PHONY: ci pre-ci preci
@@ -143,7 +143,7 @@ pre-ci preci: prettier-write rector phpcbf ci
 # Run the PHP development server to serve the HTML test coverage report on port 8000.
 .PHONY: serve-coverage
 serve-coverage:
-	@docker compose run --rm --publish 8000:80 php php -S 0.0.0.0:80 -t /app/build/phpunit
+	@docker compose run --rm --publish 8000:80 --user=$$(id -u):$$(id -g) php php -S 0.0.0.0:80 -t /app/build/phpunit
 
 ##------------------------------------------------------------------------------
 # Prettier Code Formatter for JSON, YAML, HTML, Markdown, and CSS Files
@@ -152,7 +152,7 @@ serve-coverage:
 
 .PHONY: prettier-%
 prettier-%: | build/docker/pinch-prettier.json
-	$(docker-run) --volume $${PWD}:/app pinch-prettier --$* .
+	$(docker-run) --volume $${PWD}:/app --user=$$(id -u):$$(id -g) pinch-prettier --$* .
 
 ##------------------------------------------------------------------------------
 # Enable Makefile Overrides
