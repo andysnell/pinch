@@ -114,6 +114,10 @@ jobs:
           TAG_NAME="${{ needs.validate_version.outputs.tag_name }}"
           VERSION="${{ needs.validate_version.outputs.version }}"
 
+          # Configure git
+          git config user.name "GitHub Actions"
+          git config user.email "action@github.com"
+
           # Create annotated tag
           git tag -a "$TAG_NAME" -m "Release $TAG_NAME
 
