@@ -150,6 +150,8 @@ jobs:
     if: ${{ !inputs.skip_split }}
     with:
       version: ${{ needs.validate_version.outputs.version }}
+    secrets:
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
   create_github_release:
     runs-on: ubuntu-latest
