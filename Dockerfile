@@ -85,6 +85,17 @@ RUN  rm -rf /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/lib/p
 
 # Squash the previous layers to reduce the image size (mostly due to the package updates)
 FROM scratch AS pinch-php
+SHELL ["/bin/bash", "-c"]
+ENTRYPOINT ["docker-php-entrypoint"]
+STOPSIGNAL SIGQUIT
+EXPOSE 9000
+CMD ["php-fpm"]
+ENV COMPOSER_CACHE_DIR="/app/build/composer/cache"
+ENV COMPOSER_HOME="/home/dev/.composer"
+ENV PATH="/app/bin:/app/vendor/bin:/app/build/composer/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ENV PINCH_BUILD_STAGE="development"
+ENV XDEBUG_MODE="off"
+
 COPY --link --from=pinch-php-base / /
 
 # Install Composer, the PHP package manager, using the official Composer image
@@ -105,7 +116,3 @@ RUN ln -s /usr/bin/vim.tiny /usr/bin/vim
 
 # Create a non-root user for running the application (Note: the build args can invalidate the cache)
 WORKDIR /app
-ENTRYPOINT ["docker-php-entrypoint"]
-STOPSIGNAL SIGQUIT
-EXPOSE 9000
-CMD ["php-fpm"]
