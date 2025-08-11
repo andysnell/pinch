@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Tests\Time\TimeInterval;
+namespace PhoneBurner\Pinch\Tests\Time\Interval;
 
-use PhoneBurner\Pinch\Time\TimeInterval\Duration;
-use PhoneBurner\Pinch\Time\TimeInterval\TimeInterval;
-use PhoneBurner\Pinch\Time\TimeUnit;
+use PhoneBurner\Pinch\Time\Domain\TimeUnit;
+use PhoneBurner\Pinch\Time\Interval\Duration;
+use PhoneBurner\Pinch\Time\Interval\TimeInterval;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

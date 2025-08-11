@@ -104,7 +104,7 @@ build/docker/pinch-%.json: packages/template/Dockerfile | build/docker
 # Build/Setup/Teardown Targets
 ##------------------------------------------------------------------------------
 
-$(BUILD_DIRS): | .env phpstan.neon phpunit.xml
+$(BUILD_DIRS): | .env
 	mkdir -p "$@"
 
 .env:

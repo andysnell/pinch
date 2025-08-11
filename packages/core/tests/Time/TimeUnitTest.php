@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Tests\Time;
 
-use PhoneBurner\Pinch\Time\TimeUnit;
+use PhoneBurner\Pinch\Time\Domain\TimeUnit;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

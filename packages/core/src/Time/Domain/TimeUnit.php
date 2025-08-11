@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Time;
+namespace PhoneBurner\Pinch\Time\Domain;
 
 use PhoneBurner\Pinch\Attribute\Usage\Internal;
 

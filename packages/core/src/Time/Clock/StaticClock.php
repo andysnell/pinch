@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Time\Clock;
 
 use Carbon\CarbonImmutable;
-use PhoneBurner\Pinch\Time\TimeUnit;
+use PhoneBurner\Pinch\Time\Domain\TimeUnit;
 
 final readonly class StaticClock implements Clock
 {

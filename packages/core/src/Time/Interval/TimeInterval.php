@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Time\TimeInterval;
+namespace PhoneBurner\Pinch\Time\Interval;
 
 use PhoneBurner\Pinch\Array\Arrayable;
-use PhoneBurner\Pinch\Time\TimeInterval\Duration;
-use PhoneBurner\Pinch\Time\TimeUnit;
+use PhoneBurner\Pinch\Time\Domain\TimeUnit;
+use PhoneBurner\Pinch\Time\Interval\Duration;
 
 use function PhoneBurner\Pinch\Array\array_map_with_key;
 use function PhoneBurner\Pinch\Math\int_clamp;

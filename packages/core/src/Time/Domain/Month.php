@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Math\Domain;
+namespace PhoneBurner\Pinch\Time\Domain;
 
 use function PhoneBurner\Pinch\Type\get_debug_value;
 

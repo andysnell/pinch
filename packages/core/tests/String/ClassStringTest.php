@@ -8,7 +8,7 @@ use PhoneBurner\Pinch\String\BinaryString\Traits\BinaryStringProhibitsSerializat
 use PhoneBurner\Pinch\String\ClassString\ClassString;
 use PhoneBurner\Pinch\String\ClassString\ClassStringType;
 use PhoneBurner\Pinch\String\Encoding\Encoding;
-use PhoneBurner\Pinch\Time\TimeInterval\TimeInterval;
+use PhoneBurner\Pinch\Time\Interval\TimeInterval;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

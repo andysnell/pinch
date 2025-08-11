@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Time\Clock;
 
 use Carbon\CarbonImmutable;
-use PhoneBurner\Pinch\Time\TimeUnit;
+use PhoneBurner\Pinch\Time\Domain\TimeUnit;
 
 use const PhoneBurner\Pinch\Time\NANOSECONDS_IN_MICROSECOND;
 use const PhoneBurner\Pinch\Time\NANOSECONDS_IN_MILLISECOND;

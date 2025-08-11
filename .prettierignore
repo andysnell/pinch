@@ -13,4 +13,5 @@ packages/template/resources/views/openapi.*
 packages/template/storage
 *.log
 
-!/.claude
+!.claude/
+.claude/*.local.json

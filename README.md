@@ -64,3 +64,26 @@ and should not be used in application code.
 - RabbitMQ for Message Queues and Job Processing
 - Task Scheduling with Cron Expression Parsing with Symfony Scheduler
 - SMTP/API Email Sending with Symfony Mailer
+
+## Docker
+
+The default Docker image used by this project is based on Docker's official PHP
+8.4 FPM image with default with a few additional extensions installed and configuration tweaks.
+The base image's "php.ini-production" configure is used as the basis for the php.ini
+file. The values in this file are overridden by the "php-development.ini" or
+"php-production.ini" files, depending on the environment.
+
+## Sodium
+
+The official PHP 8.4 FPM image ships with an older version of libsodium, which does not support
+the latest functionality added to PHP's Sodium extension. The project image updates
+1.0.20, so AEGIS-256 related functions are available.
+
+### XDebug
+
+The PHP Docker image used by this project includes the XDebug extension, but it is
+not enabled in the same way as the other extensions. To load the XDebug extension,
+"zend_extension=xdebug.so" must be added to an INI file. It is enabled by default
+in the Docker image as the "php-development.ini" is copied to the PHP INI directory
+as "settings.ini". Production builds should copy the "php-production.ini" file
+instead, which does not include the XDebug extension (enabling the JIT instead).

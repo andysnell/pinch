@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Time\TimeInterval;
+namespace PhoneBurner\Pinch\Time\Interval;
 
 use function PhoneBurner\Pinch\String\str_rpad;
 
