@@ -83,14 +83,6 @@ RUN docker-php-ext-install -j$(nproc) sodium
 # Unload Xdebug and remove needed files created by the extension install process
 RUN  rm -rf /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/lib/php/test /usr/local/lib/doc/amqp/stubs
 
-RUN --mount=type=cache,target=/var/lib/apt apt-get install --yes --quiet --no-install-recommends \
-    git \
-    jq \
-    less \
-    unzip \
-    vim-tiny \
-    zip
-
 # Create a symlink for vim to use the tiny version
 RUN ln -s /usr/bin/vim.tiny /usr/bin/vim
 
@@ -108,6 +100,15 @@ ENV PINCH_BUILD_STAGE="development"
 ENV XDEBUG_MODE="off"
 
 COPY --link --from=pinch-php-base / /
+
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked apt-get update
+RUN --mount=type=cache,target=/var/lib/apt apt-get install --yes --quiet --no-install-recommends \
+    git \
+    jq \
+    less \
+    unzip \
+    vim-tiny \
+    zip
 
 # Install Composer, the PHP package manager, using the official Composer image
 RUN mkdir -p /home/dev/.composer
