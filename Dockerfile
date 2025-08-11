@@ -83,6 +83,17 @@ RUN docker-php-ext-install -j$(nproc) sodium
 # Unload Xdebug and remove needed files created by the extension install process
 RUN  rm -rf /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/lib/php/test /usr/local/lib/doc/amqp/stubs
 
+RUN --mount=type=cache,target=/var/lib/apt apt-get install --yes --quiet --no-install-recommends \
+    git \
+    jq \
+    less \
+    unzip \
+    vim-tiny \
+    zip
+
+# Create a symlink for vim to use the tiny version
+RUN ln -s /usr/bin/vim.tiny /usr/bin/vim
+
 # Squash the previous layers to reduce the image size (mostly due to the package updates)
 FROM scratch AS pinch-php
 SHELL ["/bin/bash", "-c"]
@@ -102,17 +113,6 @@ COPY --link --from=pinch-php-base / /
 RUN mkdir -p /home/dev/.composer
 COPY --link --from=composer/composer /usr/bin/composer /usr/local/bin/composer
 COPY --link --from=composer/composer /tmp/* /home/dev/.composer/
-
-RUN --mount=type=cache,target=/var/lib/apt apt-get install --yes --quiet --no-install-recommends \
-    git \
-    jq \
-    less \
-    unzip \
-    vim-tiny \
-    zip
-
-# Create a symlink for vim to use the tiny version
-RUN ln -s /usr/bin/vim.tiny /usr/bin/vim
 
 # Create a non-root user for running the application (Note: the build args can invalidate the cache)
 WORKDIR /app
