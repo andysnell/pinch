@@ -93,7 +93,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: .Dockerfile
+          file: Dockerfile
           target: pinch-php
           tags: |
             ghcr.io/${{ github.repository }}-php:${{ steps.tags.outputs.docker_tag }}
@@ -107,7 +107,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: .Dockerfile
+          file: Dockerfile
           target: pinch-web
           tags: |
             ghcr.io/${{ github.repository }}-web:${{ github.sha }}
@@ -122,7 +122,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: .Dockerfile
+          file: Dockerfile
           target: pinch-prettier
           tags: |
             ghcr.io/${{ github.repository }}-prettier:${{ github.sha }}
