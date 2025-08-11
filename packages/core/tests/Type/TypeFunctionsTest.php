@@ -4,11 +4,26 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Tests\Type;
 
+use Carbon\CarbonImmutable;
 use PhoneBurner\Pinch\Array\Arrayable;
+use PhoneBurner\Pinch\Tests\Fixtures\IntBackedEnum;
+use PhoneBurner\Pinch\Tests\Fixtures\StoplightState;
+use PhoneBurner\Pinch\Time\Standards\AnsiSql;
 use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
+use function PhoneBurner\Pinch\Type\cast_nullable_bool;
+use function PhoneBurner\Pinch\Type\cast_nullable_datetime;
+use function PhoneBurner\Pinch\Type\cast_nullable_float;
+use function PhoneBurner\Pinch\Type\cast_nullable_int;
+use function PhoneBurner\Pinch\Type\cast_nullable_nonempty_array;
+use function PhoneBurner\Pinch\Type\cast_nullable_nonempty_bool;
+use function PhoneBurner\Pinch\Type\cast_nullable_nonempty_float;
+use function PhoneBurner\Pinch\Type\cast_nullable_nonempty_int;
+use function PhoneBurner\Pinch\Type\cast_nullable_nonempty_string;
+use function PhoneBurner\Pinch\Type\cast_nullable_string;
 use function PhoneBurner\Pinch\Type\get_debug_value;
 use function PhoneBurner\Pinch\Type\is_accessible;
 use function PhoneBurner\Pinch\Type\is_arrayable;
@@ -17,12 +32,12 @@ use function PhoneBurner\Pinch\Type\is_class;
 use function PhoneBurner\Pinch\Type\is_class_string;
 use function PhoneBurner\Pinch\Type\is_class_string_of;
 use function PhoneBurner\Pinch\Type\is_negative_int;
-use function PhoneBurner\Pinch\Type\is_non_empty_array;
-use function PhoneBurner\Pinch\Type\is_non_empty_list;
-use function PhoneBurner\Pinch\Type\is_non_empty_string;
 use function PhoneBurner\Pinch\Type\is_non_negative_int;
 use function PhoneBurner\Pinch\Type\is_non_positive_int;
 use function PhoneBurner\Pinch\Type\is_non_zero_int;
+use function PhoneBurner\Pinch\Type\is_nonempty_array;
+use function PhoneBurner\Pinch\Type\is_nonempty_list;
+use function PhoneBurner\Pinch\Type\is_nonempty_string;
 use function PhoneBurner\Pinch\Type\is_positive_int;
 use function PhoneBurner\Pinch\Type\is_stream_resource;
 use function PhoneBurner\Pinch\Type\is_stringable;
@@ -35,7 +50,7 @@ use function PhoneBurner\Pinch\Type\narrow_class_string;
 use function PhoneBurner\Pinch\Type\narrow_float;
 use function PhoneBurner\Pinch\Type\narrow_int;
 use function PhoneBurner\Pinch\Type\narrow_iterable;
-use function PhoneBurner\Pinch\Type\narrow_non_empty_string;
+use function PhoneBurner\Pinch\Type\narrow_nonempty_string;
 use function PhoneBurner\Pinch\Type\narrow_nullable_accessible;
 use function PhoneBurner\Pinch\Type\narrow_nullable_array;
 use function PhoneBurner\Pinch\Type\narrow_nullable_bool;
@@ -44,7 +59,7 @@ use function PhoneBurner\Pinch\Type\narrow_nullable_class_string;
 use function PhoneBurner\Pinch\Type\narrow_nullable_float;
 use function PhoneBurner\Pinch\Type\narrow_nullable_int;
 use function PhoneBurner\Pinch\Type\narrow_nullable_iterable;
-use function PhoneBurner\Pinch\Type\narrow_nullable_non_empty_string;
+use function PhoneBurner\Pinch\Type\narrow_nullable_nonempty_string;
 use function PhoneBurner\Pinch\Type\narrow_nullable_positive_int;
 use function PhoneBurner\Pinch\Type\narrow_nullable_resource;
 use function PhoneBurner\Pinch\Type\narrow_nullable_string;
@@ -60,9 +75,9 @@ use function PhoneBurner\Pinch\Type\narrow_string;
 #[CoversFunction('PhoneBurner\Pinch\Type\is_class_string')]
 #[CoversFunction('PhoneBurner\Pinch\Type\is_class_string_of')]
 #[CoversFunction('PhoneBurner\Pinch\Type\is_negative_int')]
-#[CoversFunction('PhoneBurner\Pinch\Type\is_non_empty_array')]
-#[CoversFunction('PhoneBurner\Pinch\Type\is_non_empty_list')]
-#[CoversFunction('PhoneBurner\Pinch\Type\is_non_empty_string')]
+#[CoversFunction('PhoneBurner\Pinch\Type\is_nonempty_array')]
+#[CoversFunction('PhoneBurner\Pinch\Type\is_nonempty_list')]
+#[CoversFunction('PhoneBurner\Pinch\Type\is_nonempty_string')]
 #[CoversFunction('PhoneBurner\Pinch\Type\is_non_negative_int')]
 #[CoversFunction('PhoneBurner\Pinch\Type\is_non_positive_int')]
 #[CoversFunction('PhoneBurner\Pinch\Type\is_non_zero_int')]
@@ -78,7 +93,7 @@ use function PhoneBurner\Pinch\Type\narrow_string;
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_float')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_int')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_iterable')]
-#[CoversFunction('PhoneBurner\Pinch\Type\narrow_non_empty_string')]
+#[CoversFunction('PhoneBurner\Pinch\Type\narrow_nonempty_string')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_accessible')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_array')]
@@ -88,13 +103,18 @@ use function PhoneBurner\Pinch\Type\narrow_string;
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_float')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_int')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_iterable')]
-#[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_non_empty_string')]
+#[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_nonempty_string')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_positive_int')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_resource')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_nullable_string')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_positive_int')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_resource')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_string')]
+#[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_string')]
+#[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_int')]
+#[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_float')]
+#[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_bool')]
+#[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_datetime')]
 final class TypeFunctionsTest extends TestCase
 {
     #[Test]
@@ -207,37 +227,37 @@ final class TypeFunctionsTest extends TestCase
     #[Test]
     public function isNonEmptyArrayReturnsTrueForNonEmptyArrays(): void
     {
-        self::assertTrue(is_non_empty_array([1, 2, 3]));
-        self::assertTrue(is_non_empty_array(['key' => 'value']));
-        self::assertTrue(is_non_empty_array([0]));
+        self::assertTrue(is_nonempty_array([1, 2, 3]));
+        self::assertTrue(is_nonempty_array(['key' => 'value']));
+        self::assertTrue(is_nonempty_array([0]));
     }
 
     #[Test]
     public function isNonEmptyArrayReturnsFalseForEmptyArraysAndNonArrays(): void
     {
-        self::assertFalse(is_non_empty_array([]));
-        self::assertFalse(is_non_empty_array('string'));
-        self::assertFalse(is_non_empty_array(42));
-        self::assertFalse(is_non_empty_array(null));
-        self::assertFalse(is_non_empty_array(new \stdClass()));
+        self::assertFalse(is_nonempty_array([]));
+        self::assertFalse(is_nonempty_array('string'));
+        self::assertFalse(is_nonempty_array(42));
+        self::assertFalse(is_nonempty_array(null));
+        self::assertFalse(is_nonempty_array(new \stdClass()));
     }
 
     #[Test]
     public function isNonEmptyListReturnsTrueForNonEmptyLists(): void
     {
-        self::assertTrue(is_non_empty_list([1, 2, 3]));
-        self::assertTrue(is_non_empty_list(['a', 'b', 'c']));
-        self::assertTrue(is_non_empty_list([0]));
+        self::assertTrue(is_nonempty_list([1, 2, 3]));
+        self::assertTrue(is_nonempty_list(['a', 'b', 'c']));
+        self::assertTrue(is_nonempty_list([0]));
     }
 
     #[Test]
     public function isNonEmptyListReturnsFalseForEmptyListsAndNonLists(): void
     {
-        self::assertFalse(is_non_empty_list([]));
-        self::assertFalse(is_non_empty_list(['key' => 'value'])); // associative array
-        self::assertFalse(is_non_empty_list('string'));
-        self::assertFalse(is_non_empty_list(42));
-        self::assertFalse(is_non_empty_list(null));
+        self::assertFalse(is_nonempty_list([]));
+        self::assertFalse(is_nonempty_list(['key' => 'value'])); // associative array
+        self::assertFalse(is_nonempty_list('string'));
+        self::assertFalse(is_nonempty_list(42));
+        self::assertFalse(is_nonempty_list(null));
     }
 
     #[Test]
@@ -357,19 +377,19 @@ final class TypeFunctionsTest extends TestCase
     #[Test]
     public function isNonEmptyStringReturnsTrueForNonEmptyStrings(): void
     {
-        self::assertTrue(is_non_empty_string('hello'));
-        self::assertTrue(is_non_empty_string('0'));
-        self::assertTrue(is_non_empty_string(' '));
+        self::assertTrue(is_nonempty_string('hello'));
+        self::assertTrue(is_nonempty_string('0'));
+        self::assertTrue(is_nonempty_string(' '));
     }
 
     #[Test]
     public function isNonEmptyStringReturnsFalseForEmptyStringsAndNonStrings(): void
     {
-        self::assertFalse(is_non_empty_string(''));
-        self::assertFalse(is_non_empty_string(42));
-        self::assertFalse(is_non_empty_string(null));
-        self::assertFalse(is_non_empty_string([]));
-        self::assertFalse(is_non_empty_string(new \stdClass()));
+        self::assertFalse(is_nonempty_string(''));
+        self::assertFalse(is_nonempty_string(42));
+        self::assertFalse(is_nonempty_string(null));
+        self::assertFalse(is_nonempty_string([]));
+        self::assertFalse(is_nonempty_string(new \stdClass()));
     }
 
     #[Test]
@@ -472,20 +492,20 @@ final class TypeFunctionsTest extends TestCase
     #[Test]
     public function narrowNullableNonEmptyStringReturnsStringForValidInput(): void
     {
-        self::assertSame('test', narrow_nullable_non_empty_string('test'));
+        self::assertSame('test', narrow_nullable_nonempty_string('test'));
     }
 
     #[Test]
     public function narrowNullableNonEmptyStringReturnsNullForNull(): void
     {
-        self::assertNull(narrow_nullable_non_empty_string(null));
+        self::assertNull(narrow_nullable_nonempty_string(null));
     }
 
     #[Test]
     public function narrowNullableNonEmptyStringThrowsForEmptyString(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        narrow_nullable_non_empty_string('');
+        narrow_nullable_nonempty_string('');
     }
 
     #[Test]
@@ -734,14 +754,14 @@ final class TypeFunctionsTest extends TestCase
     #[Test]
     public function narrowNonEmptyStringReturnsStringForValidInput(): void
     {
-        self::assertSame('test', narrow_non_empty_string('test'));
+        self::assertSame('test', narrow_nonempty_string('test'));
     }
 
     #[Test]
     public function narrowNonEmptyStringThrowsForEmptyString(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        narrow_non_empty_string('');
+        narrow_nonempty_string('');
     }
 
     #[Test]
@@ -894,5 +914,372 @@ final class TypeFunctionsTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         narrow_class_string(\DateTimeImmutable::class, \stdClass::class);
+    }
+
+    #[DataProvider('providesIntegerTestCases')]
+    #[Test]
+    public function integerReturnsExpectedValue(mixed $input, int|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_int($input));
+    }
+
+    public static function providesIntegerTestCases(): \Generator
+    {
+        yield [0, 0];
+        yield [1, 1];
+        yield [-1, -1];
+        yield [1.4433, 1];
+        yield [\PHP_INT_MAX, \PHP_INT_MAX];
+        yield ['432', 432];
+        yield ["hello, world", 0];
+        yield ['0', 0];
+        yield [true, 1];
+        yield [false, 0];
+        yield [null, null];
+    }
+
+    #[DataProvider('providesFloatTestCases')]
+    #[Test]
+    public function floatReturnsExpectedValue(mixed $input, float|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_float($input));
+    }
+
+    public static function providesFloatTestCases(): \Generator
+    {
+        yield [0, 0.0];
+        yield [1, 1.0];
+        yield [-1, -1.0];
+        yield [1.4433, 1.4433];
+        yield [\PHP_INT_MAX, (float)\PHP_INT_MAX];
+        yield ['432', 432.0];
+        yield ["hello, world", 0.0];
+        yield ['0', 0.0];
+        yield [true, 1.0];
+        yield [false, 0.0];
+        yield [null, null];
+        yield [IntBackedEnum::Bar, 2.0];
+        yield [StoplightState::Red, 0.0];
+    }
+
+    #[DataProvider('providesStringTestCases')]
+    #[Test]
+    public function stringReturnsExpectedValue(mixed $input, string|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_string($input));
+    }
+
+    public static function providesStringTestCases(): \Generator
+    {
+        yield [0, '0'];
+        yield [1, '1'];
+        yield [-1, '-1'];
+        yield [1.4433, '1.4433'];
+        yield [\PHP_INT_MAX, (string)\PHP_INT_MAX];
+        yield ['432', '432'];
+        yield ["hello, world", "hello, world"];
+        yield ['0', '0'];
+        yield [true, '1'];
+        yield [false, ''];
+        yield [null, null];
+        yield [IntBackedEnum::Bar, '2'];
+        yield [StoplightState::Red, 'red'];
+    }
+
+    #[DataProvider('providesBooleanTestCases')]
+    #[Test]
+    public function booleanReturnsExpectedValue(mixed $input, bool|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_bool($input));
+    }
+
+    public static function providesBooleanTestCases(): \Generator
+    {
+        yield [0, false];
+        yield [1, true];
+        yield [-1, true];
+        yield [1.4433, true];
+        yield [\PHP_INT_MAX, true];
+        yield ['432', true];
+        yield ["hello, world", true];
+        yield ['0', false];
+        yield [true, true];
+        yield [false, false];
+        yield [null, null];
+        yield [IntBackedEnum::Bar, true];
+        yield [StoplightState::Red, true];
+    }
+
+    #[DataProvider('providesDatetimeTestCases')]
+    #[Test]
+    public function datetimeReturnsExpectedValue(mixed $input, CarbonImmutable|null $expected): void
+    {
+        $datetime = cast_nullable_datetime($input);
+        if ($expected instanceof CarbonImmutable) {
+            self::assertInstanceOf(CarbonImmutable::class, $datetime);
+            self::assertEquals($expected->getTimestamp(), $datetime->getTimestamp());
+        } else {
+            self::assertNull($datetime);
+        }
+    }
+
+    public static function providesDatetimeTestCases(): \Generator
+    {
+        $datetime = new CarbonImmutable('2025-02-03 19:19:31');
+
+        yield [null, null];
+        yield ['', null];
+        yield ['invalid time string', null];
+        yield [0, CarbonImmutable::createFromTimestamp(0)];
+        yield [AnsiSql::NULL_DATETIME, null];
+        yield ['2021-01-01 00:00:00', new CarbonImmutable('2021-01-01 00:00:00')];
+        yield ['2021-01-01', new CarbonImmutable('2021-01-01')];
+        yield ['19:19:31', new CarbonImmutable('19:19:31')];
+        yield [new CarbonImmutable('2025-02-03 19:19:31'), $datetime];
+        yield [new CarbonImmutable('2025-02-03T14:19:31-0500'), $datetime];
+        yield [new \DateTimeImmutable('2025-02-03 19:19:31'), $datetime];
+        /** @phpstan-ignore disallowed.class (this is a test) */
+        yield [new \DateTime('2025-02-03 19:19:31'), $datetime];
+        yield [1738610371, $datetime];
+    }
+
+    #[Test]
+    public function integerThrowsInvalidArgumentExceptionForInvalidType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for integer cast: array');
+        cast_nullable_int([]);
+    }
+
+    #[Test]
+    public function integerThrowsInvalidArgumentExceptionForObject(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for integer cast: stdClass');
+        cast_nullable_int(new \stdClass());
+    }
+
+    #[Test]
+    public function integerHandlesBackedEnum(): void
+    {
+        self::assertSame(2, cast_nullable_int(IntBackedEnum::Bar));
+        self::assertSame(0, cast_nullable_int(StoplightState::Red));
+    }
+
+    #[Test]
+    public function floatThrowsInvalidArgumentExceptionForInvalidType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for float cast: array');
+        cast_nullable_float([]);
+    }
+
+    #[Test]
+    public function floatThrowsInvalidArgumentExceptionForObject(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for float cast: stdClass');
+        cast_nullable_float(new \stdClass());
+    }
+
+    #[Test]
+    public function stringThrowsInvalidArgumentExceptionForInvalidType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for string cast: array');
+        cast_nullable_string([]);
+    }
+
+    #[Test]
+    public function stringThrowsInvalidArgumentExceptionForObject(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for string cast: stdClass');
+        cast_nullable_string(new \stdClass());
+    }
+
+    #[Test]
+    public function stringHandlesStringableObject(): void
+    {
+        $stringable = new class implements \Stringable {
+            public function __toString(): string
+            {
+                return 'test';
+            }
+        };
+
+        self::assertSame('test', cast_nullable_string($stringable));
+    }
+
+    #[DataProvider('providesNonemptyIntegerTestCases')]
+    #[Test]
+    public function castNullableNonemptyIntReturnsExpectedValue(mixed $input, int|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_nonempty_int($input));
+    }
+
+    public static function providesNonemptyIntegerTestCases(): \Generator
+    {
+        yield [0, null];
+        yield [1, 1];
+        yield [-1, -1];
+        yield [1.4433, 1];
+        yield [\PHP_INT_MAX, \PHP_INT_MAX];
+        yield [\PHP_INT_MIN, \PHP_INT_MIN];
+        yield ['432', 432];
+        yield ["hello, world", null];
+        yield ['0', null];
+        yield ['0.0', null];
+        yield [true, 1];
+        yield [false, null];
+        yield [null, null];
+    }
+
+    #[DataProvider('providesNonemptyFloatTestCases')]
+    #[Test]
+    public function castNullableNonemptyFloatReturnsExpectedValue(mixed $input, float|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_nonempty_float($input));
+    }
+
+    public static function providesNonemptyFloatTestCases(): \Generator
+    {
+        yield [0, null];
+        yield [0.0, null];
+        yield [1, 1.0];
+        yield [-1, -1.0];
+        yield [1.4433, 1.4433];
+        yield [\PHP_INT_MAX, (float)\PHP_INT_MAX];
+        yield [\PHP_INT_MIN, (float)\PHP_INT_MIN];
+        yield ['432', 432.0];
+        yield ["hello, world", null];
+        yield ['0', null];
+        yield ['0.0', null];
+        yield [true, 1.0];
+        yield [false, null];
+        yield [null, null];
+    }
+
+    #[DataProvider('providesNonemptyStringTestCases')]
+    #[Test]
+    public function castNullableNonemptyStringReturnsExpectedValue(mixed $input, string|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_nonempty_string($input));
+    }
+
+    public static function providesNonemptyStringTestCases(): \Generator
+    {
+        yield [0, null];
+        yield [0.0, null];
+        yield [1, '1'];
+        yield [-1, '-1'];
+        yield [1.4433, '1.4433'];
+        yield [\PHP_INT_MAX, (string)\PHP_INT_MAX];
+        yield [\PHP_INT_MIN, (string)\PHP_INT_MIN];
+        yield ['432', '432'];
+        yield ["hello, world", "hello, world"];
+        yield ['0', null];
+        yield ['0.0', '0.0'];
+        yield [true, '1'];
+        yield [false, null];
+        yield [null, null];
+    }
+
+    #[DataProvider('providesNonemptyBooleanTestCases')]
+    #[Test]
+    public function castNullableNonemptyBoolReturnsExpectedValue(mixed $input, bool|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_nonempty_bool($input));
+    }
+
+    public static function providesNonemptyBooleanTestCases(): \Generator
+    {
+        yield [0, null];
+        yield [1, true];
+        yield [-1, true];
+        yield [1.4433, true];
+        yield [\PHP_INT_MAX, true];
+        yield [\PHP_INT_MIN, true];
+        yield ['432', true];
+        yield ["hello, world", true];
+        yield ['0', null];
+        yield ['0.0', true];
+        yield [true, true];
+        yield [false, null];
+        yield [null, null];
+        yield [[], null];
+        yield [[1,2,3], true];
+        yield [['foo' => 'bar'], true];
+        yield [new \stdClass(), true];
+    }
+
+    /**
+     * @param array<mixed>|null $input
+     * @param array<mixed>|null $expected
+     */
+    #[DataProvider('providesNonemptyArrayTestCases')]
+    #[Test]
+    public function castNullableNonemptyArrayReturnsExpectedValue(array|null $input, array|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_nonempty_array($input));
+    }
+
+    /**
+     * @return \Generator<array{0: array<mixed>|null, 1: array<mixed>|null}>
+     */
+    public static function providesNonemptyArrayTestCases(): \Generator
+    {
+        yield [null, null];
+        yield [[], null];
+        yield [[1,2,3], [1,2,3]];
+        yield [['foo' => 'bar'], ['foo' => 'bar']];
+    }
+
+    #[Test]
+    public function castNullableNonemptyIntThrowsInvalidArgumentExceptionForObject(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for integer cast: stdClass');
+        cast_nullable_nonempty_int(new \stdClass());
+    }
+
+    #[Test]
+    public function castNullableNonemptyIntThrowsInvalidArgumentExceptionForArray(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for integer cast: array');
+        cast_nullable_nonempty_int([]);
+    }
+
+    #[Test]
+    public function castNullableNonemptyFloatThrowsInvalidArgumentExceptionForObject(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for float cast: stdClass');
+        cast_nullable_nonempty_float(new \stdClass());
+    }
+
+    #[Test]
+    public function castNullableNonemptyFloatThrowsInvalidArgumentExceptionForArray(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for float cast: array');
+        cast_nullable_nonempty_float([]);
+    }
+
+    #[Test]
+    public function castNullableNonemptyStringThrowsInvalidArgumentExceptionForObject(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for string cast: stdClass');
+        cast_nullable_nonempty_string(new \stdClass());
+    }
+
+    #[Test]
+    public function castNullableNonemptyStringThrowsInvalidArgumentExceptionForArray(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid type for string cast: array');
+        cast_nullable_nonempty_string([]);
     }
 }

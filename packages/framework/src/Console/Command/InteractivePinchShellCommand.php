@@ -35,7 +35,6 @@ use PhoneBurner\Pinch\String\Encoding\ConstantTimeEncoder;
 use PhoneBurner\Pinch\String\Encoding\Encoder;
 use PhoneBurner\Pinch\String\Encoding\Encoding;
 use PhoneBurner\Pinch\Time\Interval\TimeInterval;
-use PhoneBurner\Pinch\Type\Cast\NullableCast;
 use PhoneBurner\Pinch\Type\Reflect;
 use PhoneBurner\Pinch\Uuid\Uuid;
 use Psr\Container\ContainerInterface;
@@ -112,7 +111,6 @@ class InteractivePinchShellCommand extends Command
         Reflect::class,
         Uuid::class,
         Psr7::class,
-        NullableCast::class,
         SharedKey::class,
         Ciphertext::class,
         EncryptionKeyPair::class,

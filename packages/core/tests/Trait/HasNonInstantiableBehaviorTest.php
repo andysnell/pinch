@@ -9,9 +9,6 @@ use PhoneBurner\Pinch\Iterator\Iter;
 use PhoneBurner\Pinch\Tests\Trait\Fixtures\ChildClassUsingTrait;
 use PhoneBurner\Pinch\Tests\Trait\Fixtures\TestClassUsingTrait;
 use PhoneBurner\Pinch\Trait\HasNonInstantiableBehavior;
-use PhoneBurner\Pinch\Type\Cast\NonEmptyCast;
-use PhoneBurner\Pinch\Type\Cast\NonEmptyNullableCast;
-use PhoneBurner\Pinch\Type\Cast\NullableCast;
 use PhoneBurner\Pinch\Type\Reflect;
 use PhoneBurner\Pinch\Uuid\Uuid;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -69,9 +66,6 @@ final class HasNonInstantiableBehaviorTest extends TestCase
      */
     public static function utilityClassProvider(): \Iterator
     {
-        yield 'NullableCast' => [NullableCast::class];
-        yield 'NonEmptyNullableCast' => [NonEmptyNullableCast::class];
-        yield 'NonEmptyCast' => [NonEmptyCast::class];
         yield 'Uuid' => [Uuid::class];
         yield 'Iter' => [Iter::class];
         yield 'Reflect' => [Reflect::class];
