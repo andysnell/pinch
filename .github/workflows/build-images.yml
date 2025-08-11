@@ -92,9 +92,9 @@ jobs:
       - name: Build and Push Image - pinch-php
         uses: docker/build-push-action@v6
         with:
-          context: ./packages/template
-          file: ./packages/template/Dockerfile
-          target: development-php
+          context: .
+          file: .Dockerfile
+          target: pinch-php
           tags: |
             ghcr.io/${{ github.repository }}-php:${{ steps.tags.outputs.docker_tag }}
             ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-php:latest', github.repository) || '' }}
@@ -106,9 +106,9 @@ jobs:
       - name: Build and Push Image - pinch-web
         uses: docker/build-push-action@v6
         with:
-          context: ./packages/template
-          file: ./packages/template/Dockerfile
-          target: development-web
+          context: .
+          file: .Dockerfile
+          target: pinch-web
           tags: |
             ghcr.io/${{ github.repository }}-web:${{ github.sha }}
             ghcr.io/${{ github.repository }}-web:${{ steps.tags.outputs.docker_tag }}
@@ -121,9 +121,9 @@ jobs:
       - name: Build and Push Image - pinch-prettier
         uses: docker/build-push-action@v6
         with:
-          context: ./packages/template
-          file: ./packages/template/Dockerfile
-          target: prettier
+          context: .
+          file: .Dockerfile
+          target: pinch-prettier
           tags: |
             ghcr.io/${{ github.repository }}-prettier:${{ github.sha }}
             ghcr.io/${{ github.repository }}-prettier:${{ steps.tags.outputs.docker_tag }}

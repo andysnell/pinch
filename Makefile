@@ -93,12 +93,12 @@ BUILD_DIRS = build/.phpunit.cache \
 
 build/docker/docker-compose.json: packages/template/Dockerfile compose.yaml | build/docker
 	docker compose pull --quiet --ignore-buildable
-	COMPOSE_BAKE=true docker compose build --pull --build-arg USER_UID=$$(id -u) --build-arg USER_GID=$$(id -g)
+	COMPOSE_BAKE=true docker compose build --pull --no-cache --build-arg USER_UID=$$(id -u) --build-arg USER_GID=$$(id -g)
 	touch "$@" # required to consistently update the file mtime
 
-build/docker/pinch-%.json: packages/template/Dockerfile | build/docker
-	docker buildx build --target="$*" --pull --load --tag="pinch-$*" --file packages/template/Dockerfile .
-	docker image inspect "pinch-$*" > "$@"
+build/docker/pinch-prettier.json:
+	docker pull ghcr.io/phoneburner/pinch-prettier
+	@echo '{"image":"ghcr.io/phoneburner/pinch-prettier:latest"}' > "$@"
 
 ##------------------------------------------------------------------------------
 # Build/Setup/Teardown Targets
