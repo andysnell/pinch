@@ -7,7 +7,7 @@ namespace PhoneBurner\Pinch\Component\Tests\Http;
 use Laminas\Diactoros\Stream;
 use Laminas\Diactoros\Uri;
 use PhoneBurner\Pinch\Component\Http\Domain\HttpMethod;
-use PhoneBurner\Pinch\Component\Http\RequestFactory;
+use PhoneBurner\Pinch\Component\Http\Request\RequestFactory;
 use PhoneBurner\Pinch\Component\IpAddress\IpAddress;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

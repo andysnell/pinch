@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Component\Http;
+namespace PhoneBurner\Pinch\Component\Http\Stream;
 
 use Laminas\Diactoros\Stream;
 use PhoneBurner\Pinch\Component\Http\Stream\FileStream;
-use PhoneBurner\Pinch\Component\Http\Stream\InMemoryStream;
+use PhoneBurner\Pinch\Component\Http\Stream\MemoryStream;
 use PhoneBurner\Pinch\Filesystem\File;
 use PhoneBurner\Pinch\Filesystem\FileMode;
 use Psr\Http\Message\StreamFactoryInterface;
 
 class StreamFactory implements StreamFactoryInterface
 {
-    public function createStream(string $content = ''): InMemoryStream
+    public function createStream(string $content = ''): MemoryStream
     {
-        return new InMemoryStream($content);
+        return new MemoryStream($content);
     }
 
     public function createStreamFromFile(
@@ -34,7 +34,7 @@ class StreamFactory implements StreamFactoryInterface
         return new Stream($resource);
     }
 
-    public static function memory(string $content = ''): InMemoryStream|null
+    public static function memory(string $content = ''): MemoryStream|null
     {
         try {
             return new self()->createStream($content);

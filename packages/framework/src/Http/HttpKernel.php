@@ -15,7 +15,7 @@ use PhoneBurner\Pinch\Component\Http\Event\EmittingHttpResponseStart;
 use PhoneBurner\Pinch\Component\Http\Event\HandlingHttpRequestComplete;
 use PhoneBurner\Pinch\Component\Http\Event\HandlingHttpRequestFailed;
 use PhoneBurner\Pinch\Component\Http\Event\HandlingHttpRequestStart;
-use PhoneBurner\Pinch\Component\Http\RequestFactory;
+use PhoneBurner\Pinch\Component\Http\Request\RequestFactory;
 use PhoneBurner\Pinch\Component\Http\Response\Exceptional\ServerErrorResponse;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;

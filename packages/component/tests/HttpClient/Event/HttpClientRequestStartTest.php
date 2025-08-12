@@ -6,7 +6,7 @@ namespace PhoneBurner\Pinch\Component\Tests\HttpClient\Event;
 
 use Laminas\Diactoros\Request;
 use PhoneBurner\Pinch\Component\Http\Domain\HttpMethod;
-use PhoneBurner\Pinch\Component\Http\Stream\InMemoryStream;
+use PhoneBurner\Pinch\Component\Http\Stream\MemoryStream;
 use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStart;
 use PhoneBurner\Pinch\Component\Logging\LogEntry;
 use PHPUnit\Framework\Attributes\Test;
@@ -29,7 +29,7 @@ final class HttpClientRequestStartTest extends TestCase
         $request = new Request(
             'https://example.com/test',
             HttpMethod::Post->value,
-            body: new InMemoryStream('test body'),
+            body: new MemoryStream('test body'),
             headers: [
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer token123',

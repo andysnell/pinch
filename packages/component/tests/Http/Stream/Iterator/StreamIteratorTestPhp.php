@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Http\Stream\Iterator;
 
-use PhoneBurner\Pinch\Component\Http\Stream\InMemoryStream;
 use PhoneBurner\Pinch\Component\Http\Stream\Iterator\StreamIterator;
+use PhoneBurner\Pinch\Component\Http\Stream\MemoryStream;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -16,7 +16,7 @@ final class StreamIteratorTest extends TestCase
     {
         $content = \random_bytes(8192 * 10);
 
-        $stream = new InMemoryStream();
+        $stream = new MemoryStream();
         $stream->write($content);
 
         $iterator = new StreamIterator($stream, 1000);
@@ -55,7 +55,7 @@ final class StreamIteratorTest extends TestCase
     {
         $content = \random_bytes(8192 * 10);
 
-        $stream = new class extends InMemoryStream {
+        $stream = new class extends MemoryStream {
             protected bool $seekable = false;
         };
         $stream->write($content);

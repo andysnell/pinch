@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\HttpClient\Event;
 
+use PhoneBurner\Pinch\Component\Http\RequestAware;
+use PhoneBurner\Pinch\Component\Http\ResponseAware;
 use PhoneBurner\Pinch\Component\Logging\LogEntry;
 use PhoneBurner\Pinch\Component\Logging\Loggable;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-final readonly class HttpClientRequestComplete implements Loggable
+final readonly class HttpClientRequestComplete implements Loggable, RequestAware, ResponseAware
 {
     public function __construct(
         public RequestInterface $request,

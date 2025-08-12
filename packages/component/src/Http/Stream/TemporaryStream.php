@@ -6,12 +6,15 @@ namespace PhoneBurner\Pinch\Component\Http\Stream;
 
 use PhoneBurner\Pinch\Filesystem\File;
 use PhoneBurner\Pinch\Filesystem\FileMode;
+use PhoneBurner\Pinch\Memory\Bytes;
 use Psr\Http\Message\StreamInterface;
 
 /**
- * StreamInterface optimized for a stream kept completely within memory
+ * StreamInterface optimized for a stream kept in memory if the data remains
+ * under a given size, otherwise it is written to a temporary file, whose
+ * lifecycle is managed by PHP.
  */
-class InMemoryStream implements \Stringable, StreamInterface
+class TemporaryStream implements \Stringable, StreamInterface
 {
     public const int CHUNK_BYTES = 8192;
 
@@ -26,9 +29,13 @@ class InMemoryStream implements \Stringable, StreamInterface
      */
     private mixed $stream;
 
-    public function __construct(string $content = '')
+    public function __construct(string $content = '', Bytes $max_memory = new Bytes(2048))
     {
-        $this->stream = File::open('php://memory', FileMode::ReadWriteCreateOnly);
+        $this->stream = File::open(
+            'php://temp/maxmemory:' . $max_memory->value,
+            FileMode::ReadWriteCreateOnly,
+        );
+
         if ($content) {
             $this->write($content);
             $this->rewind();
@@ -40,9 +47,32 @@ class InMemoryStream implements \Stringable, StreamInterface
         $this->close();
     }
 
-    public static function make(string $content = ''): self
+    public static function make(string $content = '', Bytes $max_memory = new Bytes(2048)): self
     {
-        return new self($content);
+        return new self($content, $max_memory);
+    }
+
+    public static function copy(
+        StreamInterface $stream,
+        bool $rewind_original = true,
+        Bytes $max_memory = new Bytes(2048),
+    ): self {
+        // if the stream is safely rewindable, rewind it to the beginning
+        if ($rewind_original && $stream->isSeekable()) {
+            $stream->rewind();
+        }
+
+        $copy = new self(max_memory: $max_memory);
+        while (! $stream->eof()) {
+            $copy->write($stream->read(self::CHUNK_BYTES));
+        }
+        $copy->rewind();
+
+        if ($rewind_original && $stream->isSeekable()) {
+            $stream->rewind();
+        }
+
+        return $copy;
     }
 
     public function close(): void

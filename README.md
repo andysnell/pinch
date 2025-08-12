@@ -87,3 +87,7 @@ not enabled in the same way as the other extensions. To load the XDebug extensio
 in the Docker image as the "php-development.ini" is copied to the PHP INI directory
 as "settings.ini". Production builds should copy the "php-production.ini" file
 instead, which does not include the XDebug extension (enabling the JIT instead).
+
+## Notes
+
+- Events can be defined at the component level; Event listeners must be defined at the framework or application level.

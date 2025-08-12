@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Component\Http;
+namespace PhoneBurner\Pinch\Component\Http\Request;
 
 use Laminas\Diactoros\Request;
 use Laminas\Diactoros\ServerRequest;

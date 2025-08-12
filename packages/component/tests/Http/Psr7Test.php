@@ -7,7 +7,7 @@ namespace PhoneBurner\Pinch\Component\Tests\Http;
 use Laminas\Diactoros\StreamFactory;
 use PhoneBurner\Pinch\Component\Http\Domain\HttpMethod;
 use PhoneBurner\Pinch\Component\Http\Psr7;
-use PhoneBurner\Pinch\Component\Http\RequestFactory;
+use PhoneBurner\Pinch\Component\Http\Request\RequestFactory;
 use PhoneBurner\Pinch\Component\Tests\Fixtures\MockRequestHandler;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;

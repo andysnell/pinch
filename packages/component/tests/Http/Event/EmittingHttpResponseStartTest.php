@@ -17,6 +17,6 @@ final class EmittingHttpResponseStartTest extends TestCase
         $response = new Response();
         $event = new EmittingHttpResponseStart($response);
 
-        self::assertSame($response, $event->request);
+        self::assertSame($response, $event->response);
     }
 }

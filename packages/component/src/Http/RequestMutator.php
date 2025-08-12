@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Component\Http\Request;
+namespace PhoneBurner\Pinch\Component\Http;
 
 use Psr\Http\Message\ServerRequestInterface;
 

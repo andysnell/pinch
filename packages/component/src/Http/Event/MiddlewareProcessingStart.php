@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Component\Http\Event;
 
 use PhoneBurner\Pinch\Component\Http\Middleware\LazyMiddleware;
+use PhoneBurner\Pinch\Component\Http\RequestAware;
 use PhoneBurner\Pinch\Component\Logging\LogEntry;
 use PhoneBurner\Pinch\Component\Logging\Loggable;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 
-final readonly class MiddlewareProcessingStart implements Loggable
+final readonly class MiddlewareProcessingStart implements Loggable, RequestAware
 {
     public function __construct(
         public MiddlewareInterface $middleware,
