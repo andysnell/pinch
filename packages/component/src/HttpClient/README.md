@@ -72,9 +72,9 @@ The HTTP Client emits three types of events during request processing:
 ### HttpClientRequestStart
 
 ```php
-use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStart;
+use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStarted;
 
-$event_dispatcher->addListener(HttpClientRequestStart::class, function (HttpClientRequestStart $event) {
+$event_dispatcher->addListener(HttpClientRequestStarted::class, function (HttpClientRequestStarted $event) {
     $request = $event->request;
     echo "Starting request to: " . $request->getUri();
 });
@@ -83,9 +83,9 @@ $event_dispatcher->addListener(HttpClientRequestStart::class, function (HttpClie
 ### HttpClientRequestComplete
 
 ```php
-use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestComplete;
+use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestCompleted;
 
-$event_dispatcher->addListener(HttpClientRequestComplete::class, function (HttpClientRequestComplete $event) {
+$event_dispatcher->addListener(HttpClientRequestCompleted::class, function (HttpClientRequestCompleted $event) {
     $request = $event->request;
     $response = $event->response;
     echo "Request completed with status: " . $response->getStatusCode();
@@ -169,20 +169,20 @@ $app->set(HttpClient::class, $mock_client);
 Create event listeners for HTTP monitoring:
 
 ```php
-use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStart;
-use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestComplete;
+use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStarted;
+use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestCompleted;
 use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestFailed;
 
 class HttpMetricsListener
 {
     private array $metrics = [];
 
-    public function onRequestStart(HttpClientRequestStart $event): void
+    public function onRequestStart(HttpClientRequestStarted $event): void
     {
         $this->metrics['requests_started']++;
     }
 
-    public function onRequestComplete(HttpClientRequestComplete $event): void
+    public function onRequestComplete(HttpClientRequestCompleted $event): void
     {
         $this->metrics['requests_completed']++;
         $this->metrics['status_codes'][$event->response->getStatusCode()]++;
@@ -259,9 +259,9 @@ try {
 All events implement the `Loggable` interface and provide structured log entries:
 
 ```php
-use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStart;
+use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStarted;
 
-$event = new HttpClientRequestStart($request);
+$event = new HttpClientRequestStarted($request);
 $log_entry = $event->getLogEntry();
 
 // Log entry includes:

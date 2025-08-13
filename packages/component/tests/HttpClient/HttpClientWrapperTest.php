@@ -7,9 +7,9 @@ namespace PhoneBurner\Pinch\Component\Tests\HttpClient;
 use Laminas\Diactoros\Request;
 use Laminas\Diactoros\Response;
 use PhoneBurner\Pinch\Component\Http\Domain\HttpMethod;
-use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestComplete;
+use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestCompleted;
 use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestFailed;
-use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStart;
+use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStarted;
 use PhoneBurner\Pinch\Component\HttpClient\Exception\HttpClientException;
 use PhoneBurner\Pinch\Component\HttpClient\HttpClientWrapper;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -56,10 +56,10 @@ final class HttpClientWrapperTest extends TestCase
                 ++$call_count;
 
                 if ($call_count === 1) {
-                    return $event instanceof HttpClientRequestStart && $event->request === $request;
+                    return $event instanceof HttpClientRequestStarted && $event->request === $request;
                 }
 
-                return $event instanceof HttpClientRequestComplete;
+                return $event instanceof HttpClientRequestCompleted;
             }));
 
         $this->mock_client
@@ -87,10 +87,10 @@ final class HttpClientWrapperTest extends TestCase
                 ++$call_count;
 
                 if ($call_count === 1) {
-                    return $event instanceof HttpClientRequestStart;
+                    return $event instanceof HttpClientRequestStarted;
                 }
 
-                return $event instanceof HttpClientRequestComplete
+                return $event instanceof HttpClientRequestCompleted
                     && $event->request === $request
                     && $event->response === $response;
             }));
@@ -120,7 +120,7 @@ final class HttpClientWrapperTest extends TestCase
                 ++$call_count;
 
                 if ($call_count === 1) {
-                    return $event instanceof HttpClientRequestStart;
+                    return $event instanceof HttpClientRequestStarted;
                 }
 
                 return $event instanceof HttpClientRequestFailed

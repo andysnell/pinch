@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\HttpClient\Event;
 
+use PhoneBurner\Pinch\Attribute\Psr14Event;
 use PhoneBurner\Pinch\Component\Http\NullableRequestAware;
 use PhoneBurner\Pinch\Component\Http\NullableResponseAware;
 use PhoneBurner\Pinch\Component\HttpClient\Webhook\Message\WebhookDeliveryMessage;
@@ -14,6 +15,7 @@ use PhoneBurner\Pinch\Time\Timer\ElapsedTime;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
+#[Psr14Event]
 final readonly class WebhookDeliveryFailed implements Loggable, NullableRequestAware, NullableResponseAware
 {
     public function __construct(

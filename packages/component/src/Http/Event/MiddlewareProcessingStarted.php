@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\Http\Event;
 
+use PhoneBurner\Pinch\Attribute\Psr14Event;
+use PhoneBurner\Pinch\Component\Http\Middleware\LazyMiddleware;
 use PhoneBurner\Pinch\Component\Http\RequestAware;
 use PhoneBurner\Pinch\Component\Logging\LogEntry;
 use PhoneBurner\Pinch\Component\Logging\Loggable;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Server\MiddlewareInterface;
 
-final readonly class FallbackHandlerHandlingStart implements Loggable, RequestAware
+#[Psr14Event]
+final readonly class MiddlewareProcessingStarted implements Loggable, RequestAware
 {
     public function __construct(
-        public RequestHandlerInterface $request_handler,
+        public MiddlewareInterface $middleware,
         public ServerRequestInterface $request,
     ) {
     }
@@ -21,9 +24,9 @@ final readonly class FallbackHandlerHandlingStart implements Loggable, RequestAw
     public function getLogEntry(): LogEntry
     {
         return new LogEntry(
-            message: 'Handling Request with Fallback Handler: {fallback_handler}',
+            message: 'Processing Request with Middleware: {middleware}',
             context: [
-                'fallback_handler' => $this->request_handler::class,
+                'middleware' => $this->middleware instanceof LazyMiddleware ? $this->middleware->middleware : $this->middleware::class,
             ],
         );
     }
