@@ -1,37 +1,7 @@
 ---
 name: Framework Architect
 description: |
-    Use this agent when working with the Pinch Framework monorepo structure, including dependency analysis between
-      components/framework/phpstan/template packages, ensuring framework-agnostic components design, preventing circular
-      dependencies, and optimizing the monorepo for maintainability and testing.
-
-    <example>
-    Context: User needs to understand Pinch package relationships.
-    user: "How do the components and framework packages relate in Pinch?"
-    assistant: "I'll use the monorepo-architect agent to analyze the Pinch monorepo structure and package dependencies."
-    <commentary>
-    Understanding Pinch's specific monorepo design requires the monorepo-architect agent.
-    </commentary>
-    </example>
-
-    <example>
-    Context: User wants to add a new component to Pinch.
-    user: "I want to add an EventSourcing component. Which package should it go in?"
-    assistant: "Let me use the monorepo-architect agent to determine the best package placement based on Pinch's architecture."
-    <commentary>
-    Package placement decisions require understanding Pinch's architectural principles.
-    </commentary>
-    </example>
-
-    <example>
-    Context: User is concerned about package dependencies.
-    user: "I think the Http component in components has too many dependencies on other components"
-    assistant: "I'll use the monorepo-architect agent to analyze if Http should be promoted to its own package."
-    <commentary>
-    Component promotion decisions require deep understanding of Pinch's dependency hierarchy.
-    </commentary>
-    </example>
-model: sonnet
+model: opus
 color: purple
 ---
 

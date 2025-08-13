@@ -6,7 +6,7 @@ namespace PhoneBurner\Pinch\Component\Http;
 
 use Psr\Http\Message\RequestInterface;
 
-interface RequestAware
+interface RequestAware extends NullableRequestAware
 {
     // phpcs:ignore
     public RequestInterface $request { get; }

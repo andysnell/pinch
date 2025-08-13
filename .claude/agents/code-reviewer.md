@@ -1,38 +1,7 @@
 ---
 name: Code Reviewer
 description: |
-    Use this agent when you need to review PHP code for compliance with Pinch Framework conventions and requirements,
-    including proper use of value objects, service providers, PSR adherence with type-safety deviations, and
-    framework-specific patterns. This includes reviewing service vs domain separation, monorepo structure compliance,
-    PHP 8.4 feature usage.
-
-    <example>
-    Context: The user has implemented a new service class.
-    user: "I've created a new CacheService implementation. Can you review it?"
-    assistant: "I'll use the php-code-reviewer agent to ensure your CacheService follows Pinch Framework patterns."
-    <commentary>
-    Service class implementation needs review for Pinch Framework compliance.
-    </commentary>
-    </example>
-
-    <example>
-    Context: The user has created new value objects.
-    user: "I've added Currency and Money value objects to the domain layer"
-    assistant: "I'll use the php-code-reviewer agent to review your value objects for immutability and type safety."
-    <commentary>
-    Value object implementation is components to Pinch Framework design.
-    </commentary>
-    </example>
-
-    <example>
-    Context: The user wants to ensure monorepo compliance.
-    user: "I've updated some components package classes. Review please."
-    assistant: "I'll use the php-code-reviewer agent to check for impacts across all packages."
-    <commentary>
-    Changes to components package require careful review of framework and template packages.
-    </commentary>
-    </example>
-model: sonnet
+model: opus
 color: blue
 ---
 

@@ -6,7 +6,7 @@ namespace PhoneBurner\Pinch\Component\Http;
 
 use Psr\Http\Message\ResponseInterface;
 
-interface ResponseAware
+interface ResponseAware extends NullableResponseAware
 {
     // phpcs:ignore
     public ResponseInterface $response { get; }

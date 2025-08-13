@@ -10,6 +10,8 @@ use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
+use function PhoneBurner\Pinch\Type\is_nonempty_string;
+
 /**
  * @implements MessageSerializer<ResponseInterface>
  */
@@ -21,7 +23,10 @@ class ResponseSerializer implements MessageSerializer
             throw new \InvalidArgumentException('Message must be an instance of ResponseInterface');
         }
 
-        return Serializer::toString($message);
+        $serialized = Serializer::toString($message);
+        \assert(is_nonempty_string($serialized));
+
+        return $serialized;
     }
 
     public function deserialize(\Stringable|StreamInterface|string $message): ResponseInterface

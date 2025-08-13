@@ -10,6 +10,8 @@ use PhoneBurner\Pinch\Component\Logging\LogTrace;
 use PhoneBurner\Pinch\Filesystem\FileWriter;
 use Psr\Log\LoggerInterface;
 
+use function PhoneBurner\Pinch\String\str_suffix;
+
 use const PhoneBurner\Pinch\Framework\APP_ROOT;
 
 class WriteSerializedResponseToFile
@@ -26,7 +28,7 @@ class WriteSerializedResponseToFile
     {
         try {
             FileWriter::string(
-                $this->file_path . $this->log_trace . '_response.http',
+                str_suffix($this->file_path, '/') . $this->log_trace . '_response.http',
                 $this->serializer->serialize($event->response),
             );
         } catch (\Throwable $e) {

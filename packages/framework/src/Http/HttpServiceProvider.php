@@ -18,7 +18,7 @@ use PhoneBurner\Pinch\Component\Http\Middleware\MiddlewareRequestHandlerFactory;
 use PhoneBurner\Pinch\Component\Http\Middleware\ThrottleRequests;
 use PhoneBurner\Pinch\Component\Http\RateLimiter\NullRateLimiter;
 use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimiter;
-use PhoneBurner\Pinch\Component\Http\Request\RequestFactory;
+use PhoneBurner\Pinch\Component\Http\Request\RequestFactory as RequestFactoryContract;
 use PhoneBurner\Pinch\Component\Http\Request\RequestHandlerFactory;
 use PhoneBurner\Pinch\Component\Http\Response\Exceptional\TransformerStrategies\HtmlResponseTransformerStrategy;
 use PhoneBurner\Pinch\Component\Http\Response\Exceptional\TransformerStrategies\JsonResponseTransformerStrategy;
@@ -42,6 +42,7 @@ use PhoneBurner\Pinch\Framework\Http\EventListener\WriteSerializedResponseToFile
 use PhoneBurner\Pinch\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\Pinch\Framework\Http\Middleware\TransformHttpExceptionResponses;
 use PhoneBurner\Pinch\Framework\Http\RateLimiter\RedisRateLimiter;
+use PhoneBurner\Pinch\Framework\Http\Request\RequestFactory;
 use PhoneBurner\Pinch\Framework\Http\RequestHandler\CspViolationReportRequestHandler;
 use PhoneBurner\Pinch\Framework\Http\RequestHandler\ErrorRequestHandler;
 use PhoneBurner\Pinch\Framework\Http\RequestHandler\LogoutRequestHandler;
@@ -121,6 +122,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             Router::class => FastRouter::class,
             SessionManagerContract::class => SessionManager::class,
             RateLimiter::class => RedisRateLimiter::class,
+            RequestFactoryContract::class => RequestFactory::class,
         ];
     }
 

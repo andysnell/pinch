@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use PhoneBurner\Pinch\Component\App\Event\ApplicationBootstrap;
 use PhoneBurner\Pinch\Component\App\Event\ApplicationTeardown;
+use PhoneBurner\Pinch\Component\HttpClient\Event\WebhookDeliveryCompleted;
+use PhoneBurner\Pinch\Component\HttpClient\Event\WebhookDeliveryFailed;
+use PhoneBurner\Pinch\Component\HttpClient\Event\WebhookDeliveryStarted;
 use PhoneBurner\Pinch\Component\Logging\LogLevel;
 use PhoneBurner\Pinch\Component\MessageBus\Event\InvokableMessageHandlingComplete;
 use PhoneBurner\Pinch\Component\MessageBus\Event\InvokableMessageHandlingFailed;
@@ -69,6 +72,14 @@ return [
             ConsoleErrorEvent::class => [],
             ConsoleSignalEvent::class => [],
             ConsoleTerminateEvent::class => [],
+
+            // HTTP Client Events
+
+
+            // Webhook Delivery Events
+            WebhookDeliveryStarted::class => [],
+            WebhookDeliveryCompleted::class => [],
+            WebhookDeliveryFailed::class => [],
 
             // Application Events & Listeners
         ],

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Component\Tests\Http;
+namespace PhoneBurner\Pinch\Framework\Tests\Http\Request;
 
 use Laminas\Diactoros\Stream;
 use Laminas\Diactoros\Uri;
 use PhoneBurner\Pinch\Component\Http\Domain\HttpMethod;
-use PhoneBurner\Pinch\Component\Http\Request\RequestFactory;
 use PhoneBurner\Pinch\Component\IpAddress\IpAddress;
+use PhoneBurner\Pinch\Framework\Http\Request\RequestFactory;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
@@ -125,12 +125,12 @@ final class RequestFactoryTest extends TestCase
         $protocol = '2.0';
         $attributes = ['attr1' => 'value1'];
 
-        $request = $this->factory->server(
+        $request = $this->factory->createServerRequest(
             HttpMethod::Post,
             $uri,
+            $server,
             $body,
             $headers,
-            $server,
             $query,
             $cookies,
             $files,
