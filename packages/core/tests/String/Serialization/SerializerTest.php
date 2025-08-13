@@ -15,9 +15,9 @@ final class SerializerTest extends TestCase
 {
     #[Test]
     #[DataProvider('providesSerializerCases')]
-    public function serializerEnumCasesExist(Serializer $serializer, string $expectedName): void
+    public function serializerEnumCasesExist(Serializer $serializer, string $expected_name): void
     {
-        self::assertSame($expectedName, $serializer->name);
+        self::assertSame($expected_name, $serializer->name);
     }
 
     #[Test]

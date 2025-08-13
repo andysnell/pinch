@@ -15,12 +15,12 @@ final class PackFormatTest extends TestCase
 {
     #[Test]
     #[DataProvider('providesPackFormatConstants')]
-    public function packFormatConstantsAreCorrect(string $constantName, string $expectedValue): void
+    public function packFormatConstantsAreCorrect(string $constant_name, string $expected_value): void
     {
         $reflection = new \ReflectionClass(PackFormat::class);
-        $constant = $reflection->getConstant($constantName);
+        $constant = $reflection->getConstant($constant_name);
 
-        self::assertSame($expectedValue, $constant);
+        self::assertSame($expected_value, $constant);
     }
 
     public static function providesPackFormatConstants(): \Generator

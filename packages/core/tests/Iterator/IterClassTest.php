@@ -14,12 +14,12 @@ final class IterClassTest extends TestCase
 {
     #[Test]
     #[DataProvider('providesIterCastTestCases')]
-    public function castConvertsIterableToIterator(mixed $input, array $expectedArray): void
+    public function castConvertsIterableToIterator(mixed $input, array $expected_array): void
     {
         /** @phpstan-ignore argument.templateType, argument.templateType (cannot resolve TKey, TValue for test input) */
         $iterator = Iter::cast($input);
         self::assertInstanceOf(\Iterator::class, $iterator);
-        self::assertSame($expectedArray, \iterator_to_array($iterator));
+        self::assertSame($expected_array, \iterator_to_array($iterator));
     }
 
     /**
@@ -92,10 +92,10 @@ final class IterClassTest extends TestCase
 
     #[Test]
     #[DataProvider('providesFirstLastTestCases')]
-    public function firstAndLastReturnCorrectValues(iterable $input, mixed $expectedFirst, mixed $expectedLast): void
+    public function firstAndLastReturnCorrectValues(iterable $input, mixed $expected_first, mixed $expected_last): void
     {
-        self::assertSame($expectedFirst, Iter::first($input));
-        self::assertSame($expectedLast, Iter::last($input));
+        self::assertSame($expected_first, Iter::first($input));
+        self::assertSame($expected_last, Iter::last($input));
     }
 
     /**

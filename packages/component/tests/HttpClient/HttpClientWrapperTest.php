@@ -52,10 +52,10 @@ final class HttpClientWrapperTest extends TestCase
             ->expects(self::exactly(2))
             ->method('dispatch')
             ->with(self::callback(static function ($event) use ($request): bool {
-                static $callCount = 0;
-                ++$callCount;
+                static $call_count = 0;
+                ++$call_count;
 
-                if ($callCount === 1) {
+                if ($call_count === 1) {
                     return $event instanceof HttpClientRequestStart && $event->request === $request;
                 }
 
@@ -83,10 +83,10 @@ final class HttpClientWrapperTest extends TestCase
             ->expects(self::exactly(2))
             ->method('dispatch')
             ->with(self::callback(static function ($event) use ($request, $response): bool {
-                static $callCount = 0;
-                ++$callCount;
+                static $call_count = 0;
+                ++$call_count;
 
-                if ($callCount === 1) {
+                if ($call_count === 1) {
                     return $event instanceof HttpClientRequestStart;
                 }
 
@@ -116,10 +116,10 @@ final class HttpClientWrapperTest extends TestCase
             ->expects(self::exactly(2))
             ->method('dispatch')
             ->with(self::callback(static function ($event) use ($request, $exception): bool {
-                static $callCount = 0;
-                ++$callCount;
+                static $call_count = 0;
+                ++$call_count;
 
-                if ($callCount === 1) {
+                if ($call_count === 1) {
                     return $event instanceof HttpClientRequestStart;
                 }
 

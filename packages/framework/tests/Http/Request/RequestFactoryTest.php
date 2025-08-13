@@ -11,8 +11,6 @@ use PhoneBurner\Pinch\Component\IpAddress\IpAddress;
 use PhoneBurner\Pinch\Framework\Http\Request\RequestFactory;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 final class RequestFactoryTest extends TestCase
 {
@@ -29,7 +27,6 @@ final class RequestFactoryTest extends TestCase
         $uri = 'https://example.com/test';
         $request = $this->factory->createRequest(HttpMethod::Get, $uri);
 
-        self::assertInstanceOf(RequestInterface::class, $request);
         self::assertSame('GET', $request->getMethod());
         self::assertSame($uri, (string)$request->getUri());
     }
@@ -40,7 +37,6 @@ final class RequestFactoryTest extends TestCase
         $uri = new Uri('https://example.com/test');
         $request = $this->factory->createRequest(HttpMethod::Post, $uri);
 
-        self::assertInstanceOf(RequestInterface::class, $request);
         self::assertSame('POST', $request->getMethod());
         self::assertSame($uri, $request->getUri());
     }
@@ -50,7 +46,6 @@ final class RequestFactoryTest extends TestCase
     {
         $request = $this->factory->createRequest('PUT', 'https://example.com/test');
 
-        self::assertInstanceOf(RequestInterface::class, $request);
         self::assertSame('PUT', $request->getMethod());
     }
 
@@ -80,7 +75,6 @@ final class RequestFactoryTest extends TestCase
         $uri = 'https://example.com/test';
         $request = $this->factory->createServerRequest(HttpMethod::Get, $uri);
 
-        self::assertInstanceOf(ServerRequestInterface::class, $request);
         self::assertSame('GET', $request->getMethod());
         self::assertSame($uri, (string)$request->getUri());
     }
@@ -91,7 +85,6 @@ final class RequestFactoryTest extends TestCase
         $uri = new Uri('https://example.com/test');
         $request = $this->factory->createServerRequest(HttpMethod::Post, $uri);
 
-        self::assertInstanceOf(ServerRequestInterface::class, $request);
         self::assertSame('POST', $request->getMethod());
         self::assertSame($uri, $request->getUri());
     }
@@ -99,14 +92,14 @@ final class RequestFactoryTest extends TestCase
     #[Test]
     public function createServerRequestWithServerParams(): void
     {
-        $serverParams = ['SERVER_NAME' => 'example.com', 'REMOTE_ADDR' => '127.0.0.1'];
+        $server_params = ['SERVER_NAME' => 'example.com', 'REMOTE_ADDR' => '127.0.0.1'];
         $request = $this->factory->createServerRequest(
             HttpMethod::Get,
             'https://example.com/test',
-            $serverParams,
+            $server_params,
         );
 
-        self::assertSame($serverParams, $request->getServerParams());
+        self::assertSame($server_params, $request->getServerParams());
     }
 
     #[Test]
@@ -139,7 +132,6 @@ final class RequestFactoryTest extends TestCase
             $attributes,
         );
 
-        self::assertInstanceOf(ServerRequestInterface::class, $request);
         self::assertSame('POST', $request->getMethod());
         self::assertSame($uri, $request->getUri());
         self::assertSame('test body', (string)$request->getBody());
@@ -164,7 +156,6 @@ final class RequestFactoryTest extends TestCase
 
             $request = $this->factory->fromGlobals();
 
-            self::assertInstanceOf(ServerRequestInterface::class, $request);
             $ip = $request->getAttribute(IpAddress::class);
 
             self::assertInstanceOf(IpAddress::class, $ip);

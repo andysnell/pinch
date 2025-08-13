@@ -98,14 +98,14 @@ final class DefaultRequestFactoryTest extends TestCase
     #[Test]
     public function createServerRequestWithServerParams(): void
     {
-        $serverParams = ['SERVER_NAME' => 'example.com', 'REMOTE_ADDR' => '127.0.0.1'];
+        $server_params = ['SERVER_NAME' => 'example.com', 'REMOTE_ADDR' => '127.0.0.1'];
         $request = $this->factory->createServerRequest(
             HttpMethod::Get,
             'https://example.com/test',
-            $serverParams,
+            $server_params,
         );
 
-        self::assertSame($serverParams, $request->getServerParams());
+        self::assertSame($server_params, $request->getServerParams());
     }
 
     #[Test]

@@ -124,33 +124,33 @@ final class IntegerRangeTest extends TestCase
     #[Test]
     public function includesMinimumWorksCorrectly(): void
     {
-        $closedClosed = new IntegerRange(1, 10, IntervalBoundary::ClosedClosed);
-        self::assertTrue($closedClosed->includesMinimum());
+        $closed_closed = new IntegerRange(1, 10, IntervalBoundary::ClosedClosed);
+        self::assertTrue($closed_closed->includesMinimum());
 
-        $closedOpen = new IntegerRange(1, 10, IntervalBoundary::ClosedOpen);
-        self::assertTrue($closedOpen->includesMinimum());
+        $closed_open = new IntegerRange(1, 10, IntervalBoundary::ClosedOpen);
+        self::assertTrue($closed_open->includesMinimum());
 
-        $openClosed = new IntegerRange(1, 10, IntervalBoundary::OpenClosed);
-        self::assertFalse($openClosed->includesMinimum());
+        $open_closed = new IntegerRange(1, 10, IntervalBoundary::OpenClosed);
+        self::assertFalse($open_closed->includesMinimum());
 
-        $openOpen = new IntegerRange(1, 10, IntervalBoundary::OpenOpen);
-        self::assertFalse($openOpen->includesMinimum());
+        $open_open = new IntegerRange(1, 10, IntervalBoundary::OpenOpen);
+        self::assertFalse($open_open->includesMinimum());
     }
 
     #[Test]
     public function includesMaximumWorksCorrectly(): void
     {
-        $closedClosed = new IntegerRange(1, 10, IntervalBoundary::ClosedClosed);
-        self::assertTrue($closedClosed->includesMaximum());
+        $closed_closed = new IntegerRange(1, 10, IntervalBoundary::ClosedClosed);
+        self::assertTrue($closed_closed->includesMaximum());
 
-        $closedOpen = new IntegerRange(1, 10, IntervalBoundary::ClosedOpen);
-        self::assertFalse($closedOpen->includesMaximum());
+        $closed_open = new IntegerRange(1, 10, IntervalBoundary::ClosedOpen);
+        self::assertFalse($closed_open->includesMaximum());
 
-        $openClosed = new IntegerRange(1, 10, IntervalBoundary::OpenClosed);
-        self::assertTrue($openClosed->includesMaximum());
+        $open_closed = new IntegerRange(1, 10, IntervalBoundary::OpenClosed);
+        self::assertTrue($open_closed->includesMaximum());
 
-        $openOpen = new IntegerRange(1, 10, IntervalBoundary::OpenOpen);
-        self::assertFalse($openOpen->includesMaximum());
+        $open_open = new IntegerRange(1, 10, IntervalBoundary::OpenOpen);
+        self::assertFalse($open_open->includesMaximum());
     }
 
     #[Test]

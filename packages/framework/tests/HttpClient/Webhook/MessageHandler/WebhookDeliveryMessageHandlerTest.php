@@ -76,10 +76,10 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->exactly(2))
             ->method('dispatch')
             ->willReturnCallback(function ($event) use ($message): WebhookDeliveryCompleted|WebhookDeliveryStarted {
-                static $callCount = 0;
-                ++$callCount;
+                static $call_count = 0;
+                ++$call_count;
 
-                if ($callCount === 1) {
+                if ($call_count === 1) {
                     self::assertInstanceOf(WebhookDeliveryStarted::class, $event);
                     self::assertSame($message, $event->message);
                 } else {
@@ -111,10 +111,10 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->exactly(2))
             ->method('dispatch')
             ->willReturnCallback(function ($event) use ($message): WebhookDeliveryFailed|WebhookDeliveryStarted {
-                static $callCount = 0;
-                ++$callCount;
+                static $call_count = 0;
+                ++$call_count;
 
-                if ($callCount === 1) {
+                if ($call_count === 1) {
                     self::assertInstanceOf(WebhookDeliveryStarted::class, $event);
                 } else {
                     self::assertInstanceOf(WebhookDeliveryFailed::class, $event);
@@ -129,9 +129,9 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         // Message should be retried with next attempt
         $this->message_bus->expects($this->once())
             ->method('dispatch')
-            ->with(self::callback(function ($retryMessage) use ($message): bool {
-                return $retryMessage instanceof WebhookDeliveryMessage &&
-                       $retryMessage->attempt === $message->attempt + 1;
+            ->with(self::callback(function ($retry_message) use ($message): bool {
+                return $retry_message instanceof WebhookDeliveryMessage &&
+                       $retry_message->attempt === $message->attempt + 1;
             }));
 
         // Act
@@ -158,10 +158,10 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->exactly(2))
             ->method('dispatch')
             ->willReturnCallback(function ($event) use ($message, $exception): WebhookDeliveryFailed|WebhookDeliveryStarted {
-                static $callCount = 0;
-                ++$callCount;
+                static $call_count = 0;
+                ++$call_count;
 
-                if ($callCount === 1) {
+                if ($call_count === 1) {
                     self::assertInstanceOf(WebhookDeliveryStarted::class, $event);
                 } else {
                     self::assertInstanceOf(WebhookDeliveryFailed::class, $event);
@@ -177,9 +177,9 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         // Message should be retried with next attempt
         $this->message_bus->expects($this->once())
             ->method('dispatch')
-            ->with(self::callback(function ($retryMessage) use ($message): bool {
-                return $retryMessage instanceof WebhookDeliveryMessage &&
-                       $retryMessage->attempt === $message->attempt + 1;
+            ->with(self::callback(function ($retry_message) use ($message): bool {
+                return $retry_message instanceof WebhookDeliveryMessage &&
+                       $retry_message->attempt === $message->attempt + 1;
             }));
 
         // Act
@@ -206,10 +206,10 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->exactly(2))
             ->method('dispatch')
             ->willReturnCallback(function ($event) use ($message): WebhookDeliveryFailed|WebhookDeliveryStarted {
-                static $callCount = 0;
-                ++$callCount;
+                static $call_count = 0;
+                ++$call_count;
 
-                if ($callCount === 1) {
+                if ($call_count === 1) {
                     self::assertInstanceOf(WebhookDeliveryStarted::class, $event);
                 } else {
                     self::assertInstanceOf(WebhookDeliveryFailed::class, $event);
@@ -261,7 +261,7 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
     #[DataProvider('providePayloadTypes')]
     public function createAndSignRequestHandlesDifferentPayloadTypes(
         \JsonSerializable|\Stringable|string|array $payload,
-        string $expectedBody,
+        string $expected_body,
     ): void {
         // Arrange
         $webhook_id = Uuid::uuid4();
@@ -334,7 +334,7 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
     public function createAndSignRequestIncludesExtraHeaders(): void
     {
         // Arrange
-        $extraHeaders = [
+        $extra_headers = [
             'Authorization' => 'Bearer token123',
             'X-Custom-Header' => 'custom-value',
         ];
@@ -342,7 +342,7 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         $uri = $this->createMock(UriInterface::class);
         $configuration = new MockWebhookConfiguration(
             uri: $uri,
-            extra_headers: $extraHeaders,
+            extra_headers: $extra_headers,
         );
 
         $message = new MockWebhookDeliveryMessage(
@@ -355,9 +355,9 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         // Expect extra headers to be included in the request
         $this->signature_factory->expects($this->once())
             ->method('sign')
-            ->with(self::callback(function (RequestInterface $request) use ($extraHeaders): bool {
+            ->with(self::callback(function (RequestInterface $request) use ($extra_headers): bool {
                 $headers = $request->getHeaders();
-                foreach ($extraHeaders as $key => $value) {
+                foreach ($extra_headers as $key => $value) {
                     if (! isset($headers[$key]) || $headers[$key][0] !== $value) {
                         return false;
                     }
@@ -386,10 +386,10 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->exactly(2))
             ->method('dispatch')
             ->willReturnCallback(function ($event) {
-                static $callCount = 0;
-                ++$callCount;
+                static $call_count = 0;
+                ++$call_count;
 
-                if ($callCount === 2) {
+                if ($call_count === 2) {
                     self::assertInstanceOf(WebhookDeliveryCompleted::class, $event);
                     self::assertNotNull($event->elapsed_time);
                 }
@@ -460,10 +460,10 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->exactly(2))
             ->method('dispatch')
             ->willReturnCallback(function ($event) use ($message, $exception) {
-                static $callCount = 0;
-                ++$callCount;
+                static $call_count = 0;
+                ++$call_count;
 
-                if ($callCount === 2) {
+                if ($call_count === 2) {
                     self::assertInstanceOf(WebhookDeliveryFailed::class, $event);
                     self::assertSame($message, $event->message);
                     self::assertNull($event->request);

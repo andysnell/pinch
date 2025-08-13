@@ -13,9 +13,9 @@ final class ComparisonTest extends TestCase
 {
     #[Test]
     #[DataProvider('providesComparisonValues')]
-    public function comparisonEnumHasCorrectValues(Comparison $comparison, int $expectedValue): void
+    public function comparisonEnumHasCorrectValues(Comparison $comparison, int $expected_value): void
     {
-        self::assertSame($expectedValue, $comparison->value);
+        self::assertSame($expected_value, $comparison->value);
     }
 
     /**
@@ -47,7 +47,7 @@ final class ComparisonTest extends TestCase
     #[Test]
     public function comparisonEnumCases(): void
     {
-        $expectedCases = [
+        $expected_cases = [
             'Regular',
             'String',
             'StringCaseInsensitive',
@@ -57,14 +57,14 @@ final class ComparisonTest extends TestCase
             'Locale',
         ];
 
-        $actualCaseNames = \array_map(static fn(Comparison $case): string => $case->name, Comparison::cases());
-        self::assertSame($expectedCases, $actualCaseNames);
+        $actual_case_names = \array_map(static fn(Comparison $case): string => $case->name, Comparison::cases());
+        self::assertSame($expected_cases, $actual_case_names);
     }
 
     #[Test]
     public function comparisonEnumTryFromWithInvalidValue(): void
     {
-        $invalidValue = 999999; // Value that doesn't correspond to any case
-        self::assertNull(Comparison::tryFrom($invalidValue));
+        $invalid_value = 999999; // Value that doesn't correspond to any case
+        self::assertNull(Comparison::tryFrom($invalid_value));
     }
 }

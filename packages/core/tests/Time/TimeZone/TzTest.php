@@ -37,9 +37,9 @@ final class TzTest extends TestCase
     #[DataProvider('provideCasesForTimezone')]
     public function timezoneReturnsCorrectDatetimezoneObject(Tz $tz): void
     {
-        $dateTimeZone = $tz->timezone();
-        self::assertInstanceOf(DateTimeZone::class, $dateTimeZone);
-        self::assertSame($tz->value, $dateTimeZone->getName());
+        $timezone = $tz->timezone();
+        self::assertInstanceOf(DateTimeZone::class, $timezone);
+        self::assertSame($tz->value, $timezone->getName());
     }
 
     public static function provideCasesForTimezone(): \Generator

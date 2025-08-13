@@ -85,7 +85,7 @@ enum Status: string
 }
 
 // Get all attributes on the case
-$allAttributes = case_attr_find(Status::Active);
+$all_attributes = case_attr_find(Status::Active);
 // Result: [Description instance, Category instance]
 
 // Get only Description attributes
@@ -119,7 +119,7 @@ use function PhoneBurner\Pinch\Enum\case_attr_first;
 // Using the same enums from the previous example
 
 // Get first attribute of any type
-$firstAttr = case_attr_first(Status::Active);
+$first_attr = case_attr_first(Status::Active);
 // Result: Description instance (first one defined)
 
 // Get first Description attribute
@@ -131,7 +131,7 @@ $category = case_attr_first(Status::Active, Category::class);
 // Result: Category instance with name "user-status"
 
 // No matching attribute
-$notFound = case_attr_first(Status::Inactive, Category::class);
+$not_found = case_attr_first(Status::Inactive, Category::class);
 // Result: null
 ```
 
@@ -185,7 +185,7 @@ $statuses = enum_values(Status::Active, Status::Pending);
 $sql = "SELECT * FROM users WHERE status IN (" . implode(',', array_fill(0, count($statuses), '?')) . ")";
 
 // Create a validation rule
-$allowedValues = enum_values(...Status::cases());
+$allowed_values = enum_values(...Status::cases());
 ```
 
 ### Attribute-Driven Enum Behavior

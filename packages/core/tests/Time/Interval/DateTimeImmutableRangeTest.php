@@ -111,19 +111,19 @@ final class DateTimeImmutableRangeTest extends TestCase
     #[Test]
     #[DataProvider('containsProvider')]
     public function containsWorksCorrectly(
-        string $startDate,
-        string $endDate,
+        string $start_date,
+        string $end_date,
         IntervalBoundary $boundary,
-        string $checkDate,
+        string $check_date,
         bool $expected,
     ): void {
         $range = new DateTimeImmutableRange(
-            new \DateTimeImmutable($startDate),
-            new \DateTimeImmutable($endDate),
+            new \DateTimeImmutable($start_date),
+            new \DateTimeImmutable($end_date),
             $boundary,
         );
 
-        self::assertSame($expected, $range->contains(new \DateTimeImmutable($checkDate)));
+        self::assertSame($expected, $range->contains(new \DateTimeImmutable($check_date)));
     }
 
     public static function containsProvider(): \Iterator
@@ -171,8 +171,8 @@ final class DateTimeImmutableRangeTest extends TestCase
             new \DateTimeImmutable('2024-12-31'),
         );
 
-        $dateTime = \DateTimeImmutable::createFromFormat('Y-m-d', '2024-06-15') ?: throw new \RuntimeException();
-        self::assertTrue($range->contains($dateTime));
+        $datetime = \DateTimeImmutable::createFromFormat('Y-m-d', '2024-06-15') ?: throw new \RuntimeException();
+        self::assertTrue($range->contains($datetime));
     }
 
     #[Test]
@@ -230,8 +230,8 @@ final class DateTimeImmutableRangeTest extends TestCase
     #[DataProvider('periodBoundaryProvider')]
     public function periodRespectsIntervalBoundary(
         IntervalBoundary $boundary,
-        bool $expectStartIncluded,
-        bool $expectEndIncluded,
+        bool $expect_start_included,
+        bool $expect_end_included,
     ): void {
         $start = new \DateTimeImmutable('2024-01-01');
         $end = new \DateTimeImmutable('2024-01-03');
@@ -240,13 +240,13 @@ final class DateTimeImmutableRangeTest extends TestCase
         $period = $range->period(new TimeInterval(days: 1));
         $dates = \iterator_to_array($period);
 
-        if ($expectStartIncluded) {
+        if ($expect_start_included) {
             self::assertEquals($start, $dates[\array_key_first($dates)]);
         } elseif ($dates !== []) {
             self::assertNotEquals($start, $dates[\array_key_first($dates)]);
         }
 
-        if ($expectEndIncluded && $dates !== []) {
+        if ($expect_end_included && $dates !== []) {
             self::assertEquals($end, $dates[\array_key_last($dates)]);
         } elseif ($dates !== []) {
             self::assertNotEquals($end, $dates[\array_key_last($dates)]);
@@ -275,10 +275,10 @@ final class DateTimeImmutableRangeTest extends TestCase
 
     #[Test]
     #[DataProvider('timezoneProvider')]
-    public function handlesTimezonesCorrectly(string $startTz, string $endTz): void
+    public function handlesTimezonesCorrectly(string $start_tz, string $end_tz): void
     {
-        $start = new \DateTimeImmutable('2024-01-01 12:00:00', new \DateTimeZone($startTz));
-        $end = new \DateTimeImmutable('2024-01-01 12:00:00', new \DateTimeZone($endTz));
+        $start = new \DateTimeImmutable('2024-01-01 12:00:00', new \DateTimeZone($start_tz));
+        $end = new \DateTimeImmutable('2024-01-01 12:00:00', new \DateTimeZone($end_tz));
 
         if ($start > $end) {
             [$start, $end] = [$end, $start];
@@ -314,10 +314,10 @@ final class DateTimeImmutableRangeTest extends TestCase
 
     #[Test]
     #[DataProvider('edgeCaseProvider')]
-    public function handlesEdgeCasesCorrectly(string $startDate, string $endDate): void
+    public function handlesEdgeCasesCorrectly(string $start_date, string $end_date): void
     {
-        $start = new \DateTimeImmutable($startDate);
-        $end = new \DateTimeImmutable($endDate);
+        $start = new \DateTimeImmutable($start_date);
+        $end = new \DateTimeImmutable($end_date);
         $range = new DateTimeImmutableRange($start, $end);
 
         self::assertEquals($start, $range->min());

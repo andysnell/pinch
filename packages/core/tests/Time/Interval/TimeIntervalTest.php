@@ -34,11 +34,11 @@ final class TimeIntervalTest extends TestCase
         int|float $minutes,
         int|float $seconds,
         int $microseconds,
-        int $expectedMicroseconds,
+        int $expected_microseconds,
     ): void {
         $interval = new TimeInterval($days, $hours, $minutes, $seconds, $microseconds);
 
-        self::assertSame($expectedMicroseconds, $interval->microseconds);
+        self::assertSame($expected_microseconds, $interval->microseconds);
     }
 
     public static function constructorParametersProvider(): \Generator
@@ -59,11 +59,11 @@ final class TimeIntervalTest extends TestCase
 
     #[Test]
     #[DataProvider('makeFactoryMethodProvider')]
-    public function makeFactoryMethod(mixed $input, int $expectedMicroseconds): void
+    public function makeFactoryMethod(mixed $input, int $expected_microseconds): void
     {
         $interval = TimeInterval::make($input);
 
-        self::assertSame($expectedMicroseconds, $interval->microseconds);
+        self::assertSame($expected_microseconds, $interval->microseconds);
     }
 
     public static function makeFactoryMethodProvider(): \Generator
@@ -364,8 +364,8 @@ final class TimeIntervalTest extends TestCase
     #[Test]
     public function instanceMethodWithDateInterval(): void
     {
-        $dateInterval = new \DateInterval('P1DT2H3M4S');
-        $instance = TimeInterval::instance($dateInterval);
+        $date_interval = new \DateInterval('P1DT2H3M4S');
+        $instance = TimeInterval::instance($date_interval);
 
         self::assertSame(93784000000, $instance->microseconds);
         self::assertSame(1, $instance->d);
@@ -377,10 +377,10 @@ final class TimeIntervalTest extends TestCase
     #[Test]
     public function instanceMethodWithDateIntervalWithFractionalSeconds(): void
     {
-        $dateInterval = new \DateInterval('PT1S');
-        $dateInterval->f = 0.5;
+        $date_interval = new \DateInterval('PT1S');
+        $date_interval->f = 0.5;
 
-        $instance = TimeInterval::instance($dateInterval);
+        $instance = TimeInterval::instance($date_interval);
 
         self::assertSame(1500000, $instance->microseconds);
     }
@@ -391,8 +391,8 @@ final class TimeIntervalTest extends TestCase
         $this->expectException(\UnexpectedValueException::class);
         $this->expectExceptionMessage('Cannot Create a TimeInterval from DateInterval with Non-Zero Year or Month Values');
 
-        $dateInterval = new \DateInterval('P1Y');
-        TimeInterval::instance($dateInterval);
+        $date_interval = new \DateInterval('P1Y');
+        TimeInterval::instance($date_interval);
     }
 
     #[Test]
@@ -450,10 +450,10 @@ final class TimeIntervalTest extends TestCase
     public function createMethod(): void
     {
         $interval = new TimeInterval(hours: 1);
-        $newInterval = $interval->create(days: 1, hours: 2);
+        $new_interval = $interval->create(days: 1, hours: 2);
 
-        self::assertNotSame($interval, $newInterval);
-        self::assertSame(93600000000, $newInterval->microseconds);
+        self::assertNotSame($interval, $new_interval);
+        self::assertSame(93600000000, $new_interval->microseconds);
     }
 
     #[Test]

@@ -72,12 +72,12 @@ final class StaticClockTest extends TestCase
     #[DataProvider('providesConstructorInputs')]
     public function constructorHandlesDifferentInputTypes(
         \DateTimeInterface|string|null $input,
-        string $expectedFormat,
+        string $expected_format,
     ): void {
         $clock = new StaticClock($input);
         $result = $clock->now()->format('Y-m-d H:i:s');
 
-        self::assertMatchesRegularExpression($expectedFormat, $result);
+        self::assertMatchesRegularExpression($expected_format, $result);
     }
 
     public static function providesConstructorInputs(): \Generator

@@ -160,12 +160,12 @@ final class NullableDateTimeImmutableRangeTest extends TestCase
         \DateTimeInterface|null $start,
         \DateTimeInterface|null $end,
         IntervalBoundary $boundary,
-        string $checkDate,
+        string $check_date,
         bool $expected,
     ): void {
         $range = new NullableDateTimeImmutableRange($start, $end, $boundary);
 
-        self::assertSame($expected, $range->contains(new \DateTimeImmutable($checkDate)));
+        self::assertSame($expected, $range->contains(new \DateTimeImmutable($check_date)));
     }
 
     public static function containsProvider(): \Iterator
@@ -205,8 +205,8 @@ final class NullableDateTimeImmutableRangeTest extends TestCase
         $end = new \DateTimeImmutable('2024-12-31');
         $range = new NullableDateTimeImmutableRange($start, $end);
 
-        $dateTime = \DateTimeImmutable::createFromFormat('Y-m-d', '2024-06-15') ?: throw new \RuntimeException();
-        self::assertTrue($range->contains($dateTime));
+        $datetime = \DateTimeImmutable::createFromFormat('Y-m-d', '2024-06-15') ?: throw new \RuntimeException();
+        self::assertTrue($range->contains($datetime));
     }
 
     #[Test]
@@ -249,10 +249,10 @@ final class NullableDateTimeImmutableRangeTest extends TestCase
 
     #[Test]
     #[DataProvider('timezoneProvider')]
-    public function handlesTimezonesCorrectly(string $startTz, string $endTz): void
+    public function handlesTimezonesCorrectly(string $start_tz, string $end_tz): void
     {
-        $start = new \DateTimeImmutable('2024-01-01 12:00:00', new \DateTimeZone($startTz));
-        $end = new \DateTimeImmutable('2024-01-01 12:00:00', new \DateTimeZone($endTz));
+        $start = new \DateTimeImmutable('2024-01-01 12:00:00', new \DateTimeZone($start_tz));
+        $end = new \DateTimeImmutable('2024-01-01 12:00:00', new \DateTimeZone($end_tz));
 
         if ($start > $end) {
             [$start, $end] = [$end, $start];
@@ -275,19 +275,19 @@ final class NullableDateTimeImmutableRangeTest extends TestCase
     #[Test]
     #[DataProvider('edgeCaseProvider')]
     public function handlesEdgeCasesCorrectly(
-        \DateTimeInterface|null $startDate,
-        \DateTimeInterface|null $endDate,
+        \DateTimeInterface|null $start_date,
+        \DateTimeInterface|null $end_date,
     ): void {
-        $range = new NullableDateTimeImmutableRange($startDate, $endDate);
+        $range = new NullableDateTimeImmutableRange($start_date, $end_date);
 
-        if ($startDate !== null) {
-            self::assertEquals($startDate, $range->min());
+        if ($start_date !== null) {
+            self::assertEquals($start_date, $range->min());
         } else {
             self::assertNull($range->min());
         }
 
-        if ($endDate !== null) {
-            self::assertEquals($endDate, $range->max());
+        if ($end_date !== null) {
+            self::assertEquals($end_date, $range->max());
         } else {
             self::assertNull($range->max());
         }
@@ -335,13 +335,13 @@ final class NullableDateTimeImmutableRangeTest extends TestCase
 
     public static function nullParameterProvider(): \Iterator
     {
-        $datetimeImmutable1 = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2024-06-15 12:00:00') ?: throw new \RuntimeException();
-        $datetimeImmutable2 = new \DateTimeImmutable('2024-06-15 12:00:00');
+        $datetime_immutable1 = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2024-06-15 12:00:00') ?: throw new \RuntimeException();
+        $datetime_immutable2 = new \DateTimeImmutable('2024-06-15 12:00:00');
 
-        yield 'DateTimeImmutable from format and null' => [$datetimeImmutable1, null];
-        yield 'null and DateTimeImmutable from format' => [null, $datetimeImmutable1];
-        yield 'DateTimeImmutable and null' => [$datetimeImmutable2, null];
-        yield 'null and DateTimeImmutable' => [null, $datetimeImmutable2];
+        yield 'DateTimeImmutable from format and null' => [$datetime_immutable1, null];
+        yield 'null and DateTimeImmutable from format' => [null, $datetime_immutable1];
+        yield 'DateTimeImmutable and null' => [$datetime_immutable2, null];
+        yield 'null and DateTimeImmutable' => [null, $datetime_immutable2];
         yield 'null and null' => [null, null];
     }
 }

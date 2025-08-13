@@ -147,11 +147,11 @@ final class ConstantTimeEncoderTest extends TestCase
     #[Test]
     public function equalsWorksWithBinaryStrings(): void
     {
-        $binaryString = new MockBinaryString('test data');
+        $binary_string = new MockBinaryString('test data');
 
-        self::assertTrue(ConstantTimeEncoder::equals($binaryString, 'test data'));
-        self::assertTrue(ConstantTimeEncoder::equals('test data', $binaryString));
-        self::assertFalse(ConstantTimeEncoder::equals($binaryString, 'different data'));
+        self::assertTrue(ConstantTimeEncoder::equals($binary_string, 'test data'));
+        self::assertTrue(ConstantTimeEncoder::equals('test data', $binary_string));
+        self::assertFalse(ConstantTimeEncoder::equals($binary_string, 'different data'));
     }
 
     #[Test]

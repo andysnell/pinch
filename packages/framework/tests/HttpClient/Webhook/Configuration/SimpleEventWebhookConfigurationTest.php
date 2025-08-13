@@ -57,7 +57,7 @@ final class SimpleEventWebhookConfigurationTest extends TestCase
 
     public static function provideValidConstructorParameters(): \Generator
     {
-        $mockUri = new class implements UriInterface {
+        $mock_uri = new class implements UriInterface {
             public function __toString(): string
             {
                 return 'https://example.com/webhook';
@@ -149,7 +149,7 @@ final class SimpleEventWebhookConfigurationTest extends TestCase
         ];
 
         yield 'uri interface with multiple events' => [
-            $mockUri,
+            $mock_uri,
             ['App\\Events\\UserCreated', 'App\\Events\\UserUpdated'], // @phpstan-ignore argument.type
             ['Authorization' => 'Bearer token', 'Content-Type' => 'application/json'], // @phpstan-ignore argument.type
             15,
@@ -286,7 +286,7 @@ final class SimpleEventWebhookConfigurationTest extends TestCase
     public function toArrayWithUriInterfaceConvertsToString(): void
     {
         $uri_string = 'https://example.com/webhook';
-        $mockUri = new readonly class ($uri_string) implements UriInterface {
+        $mock_uri = new readonly class ($uri_string) implements UriInterface {
             public function __construct(private string $uri)
             {
             }
@@ -372,7 +372,7 @@ final class SimpleEventWebhookConfigurationTest extends TestCase
             }
         };
 
-        $configuration = new SimpleEventWebhookConfiguration(uri: $mockUri);
+        $configuration = new SimpleEventWebhookConfiguration(uri: $mock_uri);
         $array = $configuration->toArray();
 
         self::assertSame($uri_string, $array['url']);

@@ -349,8 +349,8 @@ final class DurationTest extends TestCase
     public static function providesParseEdgeCases(): \Generator
     {
         // Test with Duration instance (should return same instance)
-        $existingDuration = new Duration(1, 2, 0, 3);
-        yield 'existing Duration instance' => [$existingDuration, $existingDuration];
+        $existing_duration = new Duration(1, 2, 0, 3);
+        yield 'existing Duration instance' => [$existing_duration, $existing_duration];
 
         // Test with DateInterval
         $interval = new \DateInterval('PT2H30M');
@@ -372,25 +372,25 @@ final class DurationTest extends TestCase
         yield 'Stringable object' => [$stringable, new Duration(0, 0, 0, 1, 2, 0, 0, 0)];
 
         // Test exception-causing scenarios within the try-catch
-        $invalidStringable = new class implements \Stringable {
+        $invalid_stringable = new class implements \Stringable {
             public function __toString(): string
             {
                 throw new \Exception('Test exception');
             }
         };
-        yield 'Stringable that throws exception' => [$invalidStringable, null];
+        yield 'Stringable that throws exception' => [$invalid_stringable, null];
     }
 
     #[Test]
     #[DataProvider('providesConstructorValidationCases')]
     public function constructorValidatesInputs(
         array $args,
-        string $expectedExceptionClass,
-        string $expectedMessage,
+        string $expected_exception_class,
+        string $expected_message,
     ): void {
-        /** @var class-string<\Throwable> $expectedExceptionClass */
-        $this->expectException($expectedExceptionClass);
-        $this->expectExceptionMessage($expectedMessage);
+        /** @var class-string<\Throwable> $expected_exception_class */
+        $this->expectException($expected_exception_class);
+        $this->expectExceptionMessage($expected_message);
 
         new Duration(...$args);
     }

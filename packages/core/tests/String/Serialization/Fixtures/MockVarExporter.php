@@ -15,9 +15,9 @@ final class MockVarExporter implements VarExporter
         \DateTimeImmutable $timestamp = new \DateTimeImmutable(),
     ): bool {
         $content = $this->string($value);
-        $fullContent = "<?php\n\n// {$header_message}\n// Generated: {$timestamp->format('Y-m-d H:i:s')}\n\nreturn {$content};\n";
+        $full_content = "<?php\n\n// {$header_message}\n// Generated: {$timestamp->format('Y-m-d H:i:s')}\n\nreturn {$content};\n";
 
-        return \file_put_contents((string)$filename, $fullContent) !== false;
+        return \file_put_contents((string)$filename, $full_content) !== false;
     }
 
     public function string(mixed $value): string

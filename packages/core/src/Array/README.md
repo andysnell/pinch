@@ -25,7 +25,7 @@ use function PhoneBurner\Pinch\Array\is_arrayable;
 
 is_arrayable([]); // true
 is_arrayable(new ArrayIterator([1, 2, 3])); // true
-is_arrayable($arrayableObject); // true
+is_arrayable($arrayable_object); // true
 ```
 
 ### `arr_cast(Arrayable|iterable $value): array`
@@ -37,7 +37,7 @@ use function PhoneBurner\Pinch\Array\array_cast;
 
 array_cast([1, 2, 3]); // Returns [1, 2, 3]
 array_cast(new ArrayIterator(['a' => 1, 'b' => 2])); // Returns ['a' => 1, 'b' => 2]
-array_cast($arrayableObject); // Returns $arrayableObject->toArray()
+array_cast($arrayable_object); // Returns $arrayable_object->toArray()
 ```
 
 ### `arr_first(iterable|Arrayable $value): mixed`

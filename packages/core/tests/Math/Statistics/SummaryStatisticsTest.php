@@ -284,9 +284,9 @@ final class SummaryStatisticsTest extends TestCase
         $reflection = new \ReflectionClass($stats);
 
         $properties = ['n', 'mean', 'sd', 'min', 'q1', 'median', 'q3', 'max'];
-        foreach ($properties as $propertyName) {
-            $property = $reflection->getProperty($propertyName);
-            self::assertTrue($property->isReadOnly(), \sprintf('Property %s should be readonly', $propertyName));
+        foreach ($properties as $property_name) {
+            $property = $reflection->getProperty($property_name);
+            self::assertTrue($property->isReadOnly(), \sprintf('Property %s should be readonly', $property_name));
         }
     }
 }

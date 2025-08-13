@@ -41,8 +41,8 @@ final class Rfc4648EncoderTest extends TestCase
 
         self::assertTrue($method->isStatic());
         self::assertTrue($method->isPublic());
-        $returnType = $method->getReturnType();
-        self::assertSame('string', $returnType instanceof \ReflectionNamedType ? $returnType->getName() : null);
+        $return_type = $method->getReturnType();
+        self::assertSame('string', $return_type instanceof \ReflectionNamedType ? $return_type->getName() : null);
 
         $parameters = $method->getParameters();
         self::assertCount(3, $parameters);
@@ -61,8 +61,8 @@ final class Rfc4648EncoderTest extends TestCase
 
         self::assertTrue($method->isStatic());
         self::assertTrue($method->isPublic());
-        $returnType = $method->getReturnType();
-        self::assertSame('string', $returnType instanceof \ReflectionNamedType ? $returnType->getName() : null);
+        $return_type = $method->getReturnType();
+        self::assertSame('string', $return_type instanceof \ReflectionNamedType ? $return_type->getName() : null);
 
         $parameters = $method->getParameters();
         self::assertCount(2, $parameters);

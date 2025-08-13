@@ -35,7 +35,7 @@ final class HttpFixtures
                 return '/webhook';
             }
 
-            public function withRequestTarget(string $requestTarget): RequestInterface
+            public function withRequestTarget(string $request_target): RequestInterface
             {
                 return $this;
             }
@@ -139,7 +139,7 @@ final class HttpFixtures
                 };
             }
 
-            public function withUri(UriInterface $uri, bool $preserveHost = false): RequestInterface
+            public function withUri(UriInterface $uri, bool $preserve_host = false): RequestInterface
             {
                 return $this;
             }
@@ -284,15 +284,15 @@ final class HttpFixtures
     }
 
     public static function createMockResponse(
-        int $statusCode = 200,
-        string $reasonPhrase = 'OK',
+        int $status_code = 200,
+        string $reason_phrase = 'OK',
         array $headers = ['Content-Type' => 'application/json'],
         string $body = '{"success":true}',
     ): ResponseInterface {
-        return new class ($statusCode, $reasonPhrase, $headers, $body) implements ResponseInterface {
+        return new class ($status_code, $reason_phrase, $headers, $body) implements ResponseInterface {
             public function __construct(
-                private readonly int $statusCode,
-                private readonly string $reasonPhrase,
+                private readonly int $status_code,
+                private readonly string $reason_phrase,
                 private array $headers,
                 private readonly string $body,
             ) {
@@ -300,17 +300,17 @@ final class HttpFixtures
 
             public function getStatusCode(): int
             {
-                return $this->statusCode;
+                return $this->status_code;
             }
 
-            public function withStatus(int $code, string $reasonPhrase = ''): ResponseInterface
+            public function withStatus(int $code, string $reason_phrase = ''): ResponseInterface
             {
-                return new self($code, $reasonPhrase, $this->headers, $this->body);
+                return new self($code, $reason_phrase, $this->headers, $this->body);
             }
 
             public function getReasonPhrase(): string
             {
-                return $this->reasonPhrase;
+                return $this->reason_phrase;
             }
 
             public function getProtocolVersion(): string
@@ -347,7 +347,7 @@ final class HttpFixtures
             {
                 $headers = $this->headers;
                 $headers[$name] = $value;
-                return new self($this->statusCode, $this->reasonPhrase, $headers, $this->body);
+                return new self($this->status_code, $this->reason_phrase, $headers, $this->body);
             }
 
             public function withAddedHeader(string $name, $value): ResponseInterface
@@ -359,7 +359,7 @@ final class HttpFixtures
             {
                 $headers = $this->headers;
                 unset($headers[$name]);
-                return new self($this->statusCode, $this->reasonPhrase, $headers, $this->body);
+                return new self($this->status_code, $this->reason_phrase, $headers, $this->body);
             }
 
             public function getBody(): StreamInterface

@@ -12,7 +12,7 @@ Checks if a value is a string or implements Stringable.
 use function PhoneBurner\Pinch\String\is_stringable;
 
 is_stringable('hello'); // true
-is_stringable($stringableObject); // true
+is_stringable($stringable_object); // true
 is_stringable(123); // false
 ```
 

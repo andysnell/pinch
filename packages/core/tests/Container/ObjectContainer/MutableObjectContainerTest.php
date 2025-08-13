@@ -428,16 +428,16 @@ final class MutableObjectContainerTest extends TestCase
         // Note: MutableObjectContainer expects objects, so testing falsy values
         // requires a container that allows mixed types, or careful object setup.
         // Using boolean objects for simplicity.
-        $trueObj = new class extends stdClass { public bool $value = true;
+        $true_obj = new class extends stdClass { public bool $value = true;
         };
-        $falseObj = new class extends stdClass { public bool $value = false;
+        $false_obj = new class extends stdClass { public bool $value = false;
         }; // Treat as non-empty object
 
         /** @var MutableObjectContainer<stdClass> $container */
         $container = new MutableObjectContainer();
-        $container->set('key1', $trueObj);
-        $container->set('key2', $falseObj);
-        $container->set('key3', $trueObj);
+        $container->set('key1', $true_obj);
+        $container->set('key2', $false_obj);
+        $container->set('key3', $true_obj);
 
         // Default filter removes *empty* values (e.g., null, false, 0, '').
         // Objects are generally not empty unless they implement specific logic.
@@ -446,14 +446,14 @@ final class MutableObjectContainerTest extends TestCase
         $result = $this->container->filter(fn($obj) => $obj->value ?? false);
 
         // Re-add entries to the main container for the test
-        $this->container->set('key1', $trueObj);
-        $this->container->set('key2', $falseObj);
-        $this->container->set('key3', $trueObj);
+        $this->container->set('key1', $true_obj);
+        $this->container->set('key2', $false_obj);
+        $this->container->set('key3', $true_obj);
 
         $result = $this->container->filter(fn($obj) => $obj->value);
 
         self::assertSame($this->container, $result);
-        $expected = ['key1' => $trueObj, 'key3' => $trueObj];
+        $expected = ['key1' => $true_obj, 'key3' => $true_obj];
         self::assertEquals($expected, $this->container->toArray());
     }
 

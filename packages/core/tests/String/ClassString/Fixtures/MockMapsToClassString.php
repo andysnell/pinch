@@ -14,9 +14,9 @@ use PhoneBurner\Pinch\String\ClassString\MapsToClassString;
 final readonly class MockMapsToClassString implements MapsToClassString
 {
     /**
-     * @param ClassString<T> $classString
+     * @param ClassString<T> $class_string
      */
-    public function __construct(private ClassString $classString)
+    public function __construct(private ClassString $class_string)
     {
     }
 
@@ -25,6 +25,6 @@ final readonly class MockMapsToClassString implements MapsToClassString
      */
     public function mapsTo(): ClassString
     {
-        return $this->classString;
+        return $this->class_string;
     }
 }

@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 
 final class WriteSerializedResponseToFileTest extends TestCase
 {
-    private const string TEST_DIRECTORY = __DIR__ . '/tmp';
+    private const string TEST_DIRECTORY = __DIR__ . '/tmp-responses/';
 
     private ResponseSerializer&MockObject $serializer;
 

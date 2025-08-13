@@ -225,7 +225,7 @@ final class IteratorFunctionsTest extends TestCase
     #[Test]
     public function iterCastHandlesArrayableWithTraversable(): void
     {
-        $arrayableTraversable = new class implements Arrayable, \Traversable, \IteratorAggregate {
+        $arrayable_traversable = new class implements Arrayable, \Traversable, \IteratorAggregate {
             public function toArray(): array
             {
                 return ['from_array' => 1];
@@ -239,7 +239,7 @@ final class IteratorFunctionsTest extends TestCase
 
         // When an object is both Traversable and Arrayable, iter_cast should treat it as Traversable
         /** @phpstan-ignore argument.templateType (cannot resolve template for mixed Arrayable/Traversable) */
-        $iterator = iter_cast($arrayableTraversable);
+        $iterator = iter_cast($arrayable_traversable);
         self::assertInstanceOf(\IteratorIterator::class, $iterator);
         self::assertSame(['from_iterator' => 2], \iterator_to_array($iterator));
     }

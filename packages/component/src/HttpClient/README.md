@@ -41,13 +41,13 @@ use PhoneBurner\Pinch\Component\HttpClient\HttpClientWrapper;
 use GuzzleHttp\Client as GuzzleClient;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
-$httpClient = new HttpClientWrapper(
+$http_client = new HttpClientWrapper(
     new GuzzleClient(),
-    $eventDispatcher
+    $event_dispatcher
 );
 
 $request = new Request('https://api.example.com/users', 'GET');
-$response = $httpClient->sendRequest($request);
+$response = $http_client->sendRequest($request);
 ```
 
 ### Using NullHttpClient for Testing
@@ -56,12 +56,12 @@ $response = $httpClient->sendRequest($request);
 use PhoneBurner\Pinch\Component\HttpClient\NullHttpClient;
 
 // Returns 200 OK by default
-$nullClient = new NullHttpClient();
+$null_client = new NullHttpClient();
 
 // Returns custom status code and reason phrase
-$notFoundClient = new NullHttpClient(404, 'Not Found');
+$not_found_client = new NullHttpClient(404, 'Not Found');
 
-$response = $nullClient->sendRequest($request);
+$response = $null_client->sendRequest($request);
 echo $response->getStatusCode(); // 200 (or 404 with custom client)
 ```
 
@@ -74,7 +74,7 @@ The HTTP Client emits three types of events during request processing:
 ```php
 use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStart;
 
-$eventDispatcher->addListener(HttpClientRequestStart::class, function (HttpClientRequestStart $event) {
+$event_dispatcher->addListener(HttpClientRequestStart::class, function (HttpClientRequestStart $event) {
     $request = $event->request;
     echo "Starting request to: " . $request->getUri();
 });
@@ -85,7 +85,7 @@ $eventDispatcher->addListener(HttpClientRequestStart::class, function (HttpClien
 ```php
 use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestComplete;
 
-$eventDispatcher->addListener(HttpClientRequestComplete::class, function (HttpClientRequestComplete $event) {
+$event_dispatcher->addListener(HttpClientRequestComplete::class, function (HttpClientRequestComplete $event) {
     $request = $event->request;
     $response = $event->response;
     echo "Request completed with status: " . $response->getStatusCode();
@@ -97,7 +97,7 @@ $eventDispatcher->addListener(HttpClientRequestComplete::class, function (HttpCl
 ```php
 use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestFailed;
 
-$eventDispatcher->addListener(HttpClientRequestFailed::class, function (HttpClientRequestFailed $event) {
+$event_dispatcher->addListener(HttpClientRequestFailed::class, function (HttpClientRequestFailed $event) {
     $request = $event->request;
     $exception = $event->exception;
     error_log("Request failed: " . $exception->getMessage());
@@ -113,8 +113,8 @@ use PhoneBurner\Pinch\Component\HttpClient\HttpClient;
 use Psr\Http\Client\ClientInterface;
 
 // Both interfaces resolve to EventAwareHttpClient wrapping GuzzleHttp\Client
-$httpClient = $app->get(HttpClient::class);
-$psrClient = $app->get(ClientInterface::class);
+$http_client = $app->get(HttpClient::class);
+$psr_client = $app->get(ClientInterface::class);
 ```
 
 ### Configuration
@@ -156,8 +156,8 @@ Use `NullHttpClient` for testing:
 use PhoneBurner\Pinch\Component\HttpClient\NullHttpClient;
 
 // In test setup
-$mockClient = new NullHttpClient(200, 'OK');
-$app->set(HttpClient::class, $mockClient);
+$mock_client = new NullHttpClient(200, 'OK');
+$app->set(HttpClient::class, $mock_client);
 
 // All HTTP requests will return 200 OK responses
 ```
@@ -209,7 +209,7 @@ class RetryHttpClient implements HttpClient
 {
     public function __construct(
         private HttpClient $client,
-        private int $maxRetries = 3,
+        private int $max_retries = 3,
     ) {}
 
     public function sendRequest(RequestInterface $request): ResponseInterface
@@ -241,7 +241,7 @@ use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Client\RequestExceptionInterface;
 
 try {
-    $response = $httpClient->sendRequest($request);
+    $response = $http_client->sendRequest($request);
 } catch (NetworkExceptionInterface $e) {
     // Network-related errors (DNS, connection timeout, etc.)
     error_log("Network error: " . $e->getMessage());
@@ -262,7 +262,7 @@ All events implement the `Loggable` interface and provide structured log entries
 use PhoneBurner\Pinch\Component\HttpClient\Event\HttpClientRequestStart;
 
 $event = new HttpClientRequestStart($request);
-$logEntry = $event->getLogEntry();
+$log_entry = $event->getLogEntry();
 
 // Log entry includes:
 // - message: "HTTP Client Request Starting"

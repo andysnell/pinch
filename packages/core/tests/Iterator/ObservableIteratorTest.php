@@ -141,18 +141,18 @@ final class ObservableIteratorTest extends TestCase
     {
         $data = ['x' => 100];
         $observer = self::getObserver();
-        $nonAttachedObserver = self::getObserver();
+        $non_attached_observer = self::getObserver();
 
         $sut = new ObservableIterator($data);
         $sut->attach($observer);
-        $sut->detach($nonAttachedObserver); // This should not cause any issues
+        $sut->detach($non_attached_observer); // This should not cause any issues
 
         foreach ($sut as $value) {
             // Just iterate
         }
 
         self::assertSame(1, $observer->counter);
-        self::assertSame(0, $nonAttachedObserver->counter);
+        self::assertSame(0, $non_attached_observer->counter);
     }
 
     #[Test]

@@ -73,11 +73,11 @@ final class TimeZoneFactoryTest extends TestCase
 
     #[Test]
     #[DataProvider('providesTryFromInputs')]
-    public function tryFromHandlesDifferentInputTypes(mixed $input, bool $shouldSucceed): void
+    public function tryFromHandlesDifferentInputTypes(mixed $input, bool $should_succeed): void
     {
         $result = TimeZoneFactory::tryFrom($input);
 
-        if ($shouldSucceed) {
+        if ($should_succeed) {
             self::assertInstanceOf(\DateTimeZone::class, $result);
         } else {
             self::assertNull($result);

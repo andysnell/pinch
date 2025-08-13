@@ -27,14 +27,14 @@ final class Rfc3339Test extends TestCase
         $rfc3339Result = $date->format(Rfc3339::DATETIME);
         self::assertMatchesRegularExpression('/2024-01-15T14:30:45\+00:00/', $rfc3339Result);
 
-        $millisecondResult = $date->format(Rfc3339::DATETIME_MILLISECOND);
-        self::assertMatchesRegularExpression('/2024-01-15T14:30:45\.123\+00:00/', $millisecondResult);
+        $millisecond_result = $date->format(Rfc3339::DATETIME_MILLISECOND);
+        self::assertMatchesRegularExpression('/2024-01-15T14:30:45\.123\+00:00/', $millisecond_result);
 
-        $microsecondResult = $date->format(Rfc3339::DATETIME_MICROSECOND);
-        self::assertMatchesRegularExpression('/2024-01-15T14:30:45\.123456\+00:00/', $microsecondResult);
+        $microsecond_result = $date->format(Rfc3339::DATETIME_MICROSECOND);
+        self::assertMatchesRegularExpression('/2024-01-15T14:30:45\.123456\+00:00/', $microsecond_result);
 
-        $zResult = $date->format(Rfc3339::DATETIME_Z);
-        self::assertSame('2024-01-15T14:30:45Z', $zResult);
+        $z_result = $date->format(Rfc3339::DATETIME_Z);
+        self::assertSame('2024-01-15T14:30:45Z', $z_result);
     }
 
     #[Test]
@@ -45,7 +45,7 @@ final class Rfc3339Test extends TestCase
         $rfc3339Result = $date->format(Rfc3339::DATETIME);
         self::assertMatchesRegularExpression('/2024-01-15T14:30:45-05:00/', $rfc3339Result);
 
-        $millisecondResult = $date->format(Rfc3339::DATETIME_MILLISECOND);
-        self::assertMatchesRegularExpression('/2024-01-15T14:30:45\.000-05:00/', $millisecondResult);
+        $millisecond_result = $date->format(Rfc3339::DATETIME_MILLISECOND);
+        self::assertMatchesRegularExpression('/2024-01-15T14:30:45\.000-05:00/', $millisecond_result);
     }
 }

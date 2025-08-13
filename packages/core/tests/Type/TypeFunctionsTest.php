@@ -634,8 +634,8 @@ final class TypeFunctionsTest extends TestCase
         $array = ['a', 'b', 'c'];
         self::assertSame($array, narrow_nullable_accessible($array));
 
-        $arrayObject = new \ArrayObject($array);
-        self::assertSame($arrayObject, narrow_nullable_accessible($arrayObject));
+        $array_object = new \ArrayObject($array);
+        self::assertSame($array_object, narrow_nullable_accessible($array_object));
     }
 
     #[Test]
@@ -854,8 +854,8 @@ final class TypeFunctionsTest extends TestCase
         $array = ['a', 'b', 'c'];
         self::assertSame($array, narrow_accessible($array));
 
-        $arrayObject = new \ArrayObject($array);
-        self::assertSame($arrayObject, narrow_accessible($arrayObject));
+        $array_object = new \ArrayObject($array);
+        self::assertSame($array_object, narrow_accessible($array_object));
     }
 
     #[Test]

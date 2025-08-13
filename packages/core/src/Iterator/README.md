@@ -14,8 +14,8 @@ use function PhoneBurner\Pinch\Iterator\iter_cast;
 $array = ['a' => 1, 'b' => 2];
 $iterator = iter_cast($array); // Returns ArrayIterator
 
-$existingIterator = new ArrayIterator([1, 2, 3]);
-$result = iter_cast($existingIterator); // Returns the same iterator
+$existing_iterator = new ArrayIterator([1, 2, 3]);
+$result = iter_cast($existing_iterator); // Returns the same iterator
 ```
 
 ### `iter_first(iterable $iter): mixed`

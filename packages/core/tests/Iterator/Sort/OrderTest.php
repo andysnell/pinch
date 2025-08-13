@@ -13,10 +13,10 @@ final class OrderTest extends TestCase
     #[Test]
     public function orderEnumHasExpectedCases(): void
     {
-        $expectedCases = ['Ascending', 'Descending'];
-        $actualCaseNames = \array_map(static fn(Order $case): string => $case->name, Order::cases());
+        $expected_cases = ['Ascending', 'Descending'];
+        $actual_case_names = \array_map(static fn(Order $case): string => $case->name, Order::cases());
 
-        self::assertSame($expectedCases, $actualCaseNames);
+        self::assertSame($expected_cases, $actual_case_names);
     }
 
     #[Test]

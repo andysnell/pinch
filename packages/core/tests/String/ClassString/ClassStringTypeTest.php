@@ -15,9 +15,9 @@ final class ClassStringTypeTest extends TestCase
 {
     #[Test]
     #[DataProvider('providesClassStringTypes')]
-    public function classStringTypeEnumCasesExist(ClassStringType $type, string $expectedName): void
+    public function classStringTypeEnumCasesExist(ClassStringType $type, string $expected_name): void
     {
-        self::assertSame($expectedName, $type->name);
+        self::assertSame($expected_name, $type->name);
     }
 
     #[Test]

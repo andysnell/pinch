@@ -75,10 +75,10 @@ final class SystemClockTest extends TestCase
     public function sleepThrowsExceptionForInvalidInputs(
         int $delay,
         TimeUnit $unit,
-        string $expectedExceptionMessage,
+        string $expected_exception_message,
     ): void {
         $this->expectException(\UnexpectedValueException::class);
-        $this->expectExceptionMessage($expectedExceptionMessage);
+        $this->expectExceptionMessage($expected_exception_message);
 
         $clock = new SystemClock();
         $clock->sleep($delay, $unit);

@@ -148,31 +148,31 @@ final class StringFunctionsTest extends TestCase
 
     #[Test]
     #[DataProvider('providesStringCases')]
-    public function strCamelConvertsToCamelCase(string $input, string $expectedSnake): void
+    public function strCamelConvertsToCamelCase(string $input, string $expected_snake): void
     {
         // Convert expected snake case to camel case for comparison
-        $words = \explode('_', $expectedSnake);
-        $camelCase = $words[0] . \implode('', \array_map(\ucfirst(...), \array_slice($words, 1)));
+        $words = \explode('_', $expected_snake);
+        $camel_case = $words[0] . \implode('', \array_map(\ucfirst(...), \array_slice($words, 1)));
 
-        self::assertSame($camelCase, str_camel($input));
+        self::assertSame($camel_case, str_camel($input));
     }
 
     #[Test]
     #[DataProvider('providesStringCases')]
-    public function strPascalConvertsToPascalCase(string $input, string $expectedSnake): void
+    public function strPascalConvertsToPascalCase(string $input, string $expected_snake): void
     {
         // Convert expected snake case to pascal case for comparison
-        $words = \explode('_', $expectedSnake);
-        $pascalCase = \implode('', \array_map(\ucfirst(...), $words));
+        $words = \explode('_', $expected_snake);
+        $pascal_case = \implode('', \array_map(\ucfirst(...), $words));
 
-        self::assertSame($pascalCase, str_pascal($input));
+        self::assertSame($pascal_case, str_pascal($input));
     }
 
     #[Test]
     #[DataProvider('providesStringCases')]
-    public function strKabobConvertsToKabobCase(string $input, string $expectedSnake): void
+    public function strKabobConvertsToKabobCase(string $input, string $expected_snake): void
     {
-        $expected = \str_replace('_', '-', $expectedSnake);
+        $expected = \str_replace('_', '-', $expected_snake);
         self::assertSame($expected, str_kabob($input));
     }
 
@@ -287,25 +287,25 @@ final class StringFunctionsTest extends TestCase
 
     #[Test]
     #[DataProvider('providesStringCases')]
-    public function strDotConvertsToDotCase(string $input, string $expectedSnake): void
+    public function strDotConvertsToDotCase(string $input, string $expected_snake): void
     {
-        $expected = \str_replace('_', '.', $expectedSnake);
+        $expected = \str_replace('_', '.', $expected_snake);
         self::assertSame($expected, str_dot($input));
     }
 
     #[Test]
     #[DataProvider('providesStringCases')]
-    public function strScreamingConvertsToScreamingCase(string $input, string $expectedSnake): void
+    public function strScreamingConvertsToScreamingCase(string $input, string $expected_snake): void
     {
-        $expected = \strtoupper($expectedSnake);
+        $expected = \strtoupper($expected_snake);
         self::assertSame($expected, str_screaming($input));
     }
 
     #[Test]
     #[DataProvider('providesStringCases')]
-    public function strUcwordsConvertsToTitleCase(string $input, string $expectedSnake): void
+    public function strUcwordsConvertsToTitleCase(string $input, string $expected_snake): void
     {
-        $words = \explode('_', $expectedSnake);
+        $words = \explode('_', $expected_snake);
         $expected = \implode(' ', \array_map(\ucfirst(...), $words));
         self::assertSame($expected, str_ucwords($input));
     }
@@ -355,9 +355,9 @@ final class StringFunctionsTest extends TestCase
     #[Test]
     public function bytesHandlesBinaryString(): void
     {
-        $binaryString = new TestBinaryString('binary-data');
+        $binary_string = new TestBinaryString('binary-data');
 
-        self::assertSame('binary-data', bytes($binaryString));
+        self::assertSame('binary-data', bytes($binary_string));
     }
 
     #[Test]

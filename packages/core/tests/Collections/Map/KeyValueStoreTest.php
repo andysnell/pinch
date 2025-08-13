@@ -189,11 +189,11 @@ final class KeyValueStoreTest extends TestCase
     #[Test]
     public function itCanCheckIfEmpty(): void
     {
-        $emptyStore = new KeyValueStore();
-        $nonEmptyStore = new KeyValueStore(['key' => 'value']);
+        $empty_store = new KeyValueStore();
+        $non_empty_store = new KeyValueStore(['key' => 'value']);
 
-        self::assertTrue($emptyStore->isEmpty());
-        self::assertFalse($nonEmptyStore->isEmpty());
+        self::assertTrue($empty_store->isEmpty());
+        self::assertFalse($non_empty_store->isEmpty());
     }
 
     #[Test]

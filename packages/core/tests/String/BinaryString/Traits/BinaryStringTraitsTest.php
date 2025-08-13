@@ -20,9 +20,9 @@ final class BinaryStringTraitsTest extends TestCase
     #[Test]
     public function binaryStringExportBehaviorExportsWithDefaultEncoding(): void
     {
-        $binaryString = new MockBinaryString('test data');
+        $binary_string = new MockBinaryString('test data');
 
-        $exported = $binaryString->export();
+        $exported = $binary_string->export();
 
         // Base64Url encoding of 'test data'
         self::assertSame('dGVzdCBkYXRh', $exported);
@@ -31,9 +31,9 @@ final class BinaryStringTraitsTest extends TestCase
     #[Test]
     public function binaryStringExportBehaviorExportsWithSpecificEncoding(): void
     {
-        $binaryString = new MockBinaryString('test data');
+        $binary_string = new MockBinaryString('test data');
 
-        $exported = $binaryString->export(Encoding::Hex);
+        $exported = $binary_string->export(Encoding::Hex);
 
         self::assertSame('746573742064617461', $exported);
     }
@@ -41,9 +41,9 @@ final class BinaryStringTraitsTest extends TestCase
     #[Test]
     public function binaryStringExportBehaviorExportsWithPrefix(): void
     {
-        $binaryString = new MockBinaryString('test data');
+        $binary_string = new MockBinaryString('test data');
 
-        $exported = $binaryString->export(Encoding::Hex, true);
+        $exported = $binary_string->export(Encoding::Hex, true);
 
         self::assertSame('hex:746573742064617461', $exported);
     }
@@ -136,8 +136,8 @@ final class BinaryStringTraitsTest extends TestCase
     {
         $this->expectException(SerializationProhibited::class);
 
-        $binaryString = new MockSerializationProhibitedBinaryString('test');
-        $binaryString->__serialize();
+        $binary_string = new MockSerializationProhibitedBinaryString('test');
+        $binary_string->__serialize();
     }
 
     #[Test]
@@ -145,8 +145,8 @@ final class BinaryStringTraitsTest extends TestCase
     {
         $this->expectException(SerializationProhibited::class);
 
-        $binaryString = new MockSerializationProhibitedBinaryString('test');
-        $binaryString->__unserialize([]);
+        $binary_string = new MockSerializationProhibitedBinaryString('test');
+        $binary_string->__unserialize([]);
     }
 
     #[Test]
@@ -154,7 +154,7 @@ final class BinaryStringTraitsTest extends TestCase
     {
         $this->expectException(SerializationProhibited::class);
 
-        $binaryString = new MockSerializationProhibitedBinaryString('test');
-        $binaryString->jsonSerialize();
+        $binary_string = new MockSerializationProhibitedBinaryString('test');
+        $binary_string->jsonSerialize();
     }
 }
