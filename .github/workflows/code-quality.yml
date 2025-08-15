@@ -28,11 +28,39 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Set Up Cache for Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: build/composer
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer
+
+      - name: Set Up Cache for PHPStan
+        uses: actions/cache@v4
+        with:
+          path: build/phpstan
+          key: ${{ runner.os }}-phpstan-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-phpstan
+
+      - name: Set Up Cache for Rector
+        uses: actions/cache@v4
+        with:
+          path: build/rector
+          key: ${{ runner.os }}-rector-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-rector
+
+      - name: Set Up Cache for PHP_CodeSniffer
+        uses: actions/cache@v4
+        with:
+          path: build/phpcs
+          key: ${{ runner.os }}-phpcs-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-phpcs
+
       - name: Build Application
         run: |
           cp .env.dist .env;
           sed -i "s/^GITHUB_TOKEN=.*/GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}/" ".env";
-          make -j
+          make
 
       - name: Run Code Quality Checks
         run: make ci;

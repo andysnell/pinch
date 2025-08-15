@@ -184,6 +184,12 @@
   "scripts": {
     "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices",
     "behat": "@php vendor/bin/behat -c packages/template/behat.php",
+    "ci:behat": "@behat --format=progress --no-colors",
+    "ci:lint": "@lint --no-progress --no-colors",
+    "ci:paratest": "@paratest --no-progress",
+    "ci:phpcs": "@phpcs",
+    "ci:phpstan": "@phpstan --no-progress --no-interaction --no-ansi",
+    "ci:rector-dry-run": "@rector-dry-run --no-progress-bar --no-ansi",
     "lint": "@php vendor/bin/parallel-lint -j $(nproc --ignore=2) --show-deprecated --exclude vendor --exclude build .",
     "paratest": "@php vendor/bin/paratest",
     "paratest-coverage": "@php vendor/bin/paratest --coverage-html=build/phpunit",
