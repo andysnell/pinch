@@ -1,5 +1,20 @@
-SHELL := bash
-.SHELLFLAGS = -ec
+# By default, Makefiles are executed with /bin/sh, which may not support certain
+# features like `$(shell ...)` or `$(if ...)`. To ensure compatibility, we
+# explicitly set the shell to bash.
+SHELL := /bin/bash
+
+# Enable the `.ONESHELL` feature, which allows all commands in a recipe to be
+# executed in the same shell instance. This is useful for maintaining state
+# across commands, such as variable assignments or conditional checks.
+.ONESHELL:
+
+# Set bash shell flags for strict error handling
+# -e: Exit immediately if a command exits with a non-zero status.
+# -u: Treat unset variables as an error and exit immediately.
+# -o pipefail: Make pipelines (e.g. `printenv | sort` ) fail if any command in the pipeline fails.
+# -c: read the command from the following string (required).
+.SHELLFLAGS := -euo pipefail -c
+
 .DEFAULT_GOAL := build/.install
 .WAIT:
 
@@ -76,7 +91,8 @@ define confirm
 	fi
 endef
 
-BUILD_DIRS = build/.phpunit.cache \
+BUILD_DIRS = build \
+	build/.phpunit.cache \
 	build/composer \
 	build/docker \
 	build/phpstan \
@@ -87,24 +103,53 @@ BUILD_DIRS = build/.phpunit.cache \
 	build/rector \
 	build/xdebug
 
+BUILD_STAMP := build/.install
+MIGRATIONS_STAMP := build/.migrations
+COMPOSER_STAMP := build/.composer
+DOCKER_STAMP := build/.docker
+
 ##------------------------------------------------------------------------------
 # Docker Targets
 ##------------------------------------------------------------------------------
+DOCKER_PLATFORM ?= linux/amd64
+DOCKER_COMPOSE_FILE := compose.yaml
+DOCKER_BAKE_OPTIONS ?=
+ifeq ($(shell uname -s),Darwin)
+  DOCKER_UID ?= 1000
+  DOCKER_GID ?= 1000
+else
+  DOCKER_UID ?= $(shell id -u)
+  DOCKER_GID ?= $(shell id -g)
+endif
 
-build/docker/docker-compose.json: packages/template/Dockerfile compose.yaml | build/docker
-	docker compose pull --quiet --ignore-buildable
-	COMPOSE_BAKE=true docker compose build --pull --no-cache --build-arg USER_UID=$$(id -u) --build-arg USER_GID=$$(id -g)
-	touch "$@" # required to consistently update the file mtime
-
-build/docker/pinch-prettier.json:
+$(DOCKER_STAMP): $(DOCKER_COMPOSE_FILE) Dockerfile | .env $(BUILD_DIRS)
 	docker pull ghcr.io/phoneburner/pinch-prettier
-	@echo '{"image":"ghcr.io/phoneburner/pinch-prettier:latest"}' > "$@"
+	docker pull redocly/cli
+	docker compose pull --quiet --ignore-buildable
+	docker buildx bake --pull --load \
+		--file $(DOCKER_COMPOSE_FILE) \
+		--metadata-file $(DOCKER_STAMP) \
+		--set php.platform=$(DOCKER_PLATFORM) \
+		--set php.args.USER_UID=$(DOCKER_UID) \
+		--set php.args.USER_GID=$(DOCKER_GID) \
+		 $(DOCKER_BAKE_OPTIONS) php
+
+build/docker/%.json: | $(BUILD_DIRS)
+	@image=$(patsubst %/,%,$(dir $*)):$(notdir $*)
+	mkdir -p $(dir $@)
+	docker pull --quiet "$$image"
+	docker image inspect "$$image" > "$@"
 
 ##------------------------------------------------------------------------------
 # Build/Setup/Teardown Targets
 ##------------------------------------------------------------------------------
 
-$(BUILD_DIRS): | .env
+COMPOSER_OPTIONS ?=
+ifeq ($(GITHUB_ACTIONS),true)
+  COMPOSER_OPTIONS := --no-interaction --no-progress --prefer-dist --optimize-autoloader
+endif
+
+$(BUILD_DIRS):
 	mkdir -p "$@"
 
 .env:
@@ -117,20 +162,28 @@ phpstan.neon:
 phpunit.xml:
 	@$(call copy-safe,phpunit.dist.xml,phpunit.xml)
 
-composer.lock vendor: build/composer build/docker/docker-compose.json composer.json | .env
-	mkdir -p "$@"
-	@$(call check-token,GITHUB_TOKEN)
-	$(docker-php) composer install
-	@touch vendor composer.lock
-
-build/.install : $(BUILD_DIRS) vendor build/docker/pinch-prettier.json | $(BUILD_DIRS)
+$(BUILD_STAMP): $(DOCKER_STAMP) $(COMPOSER_STAMP) |  .env
 	@$(call generate-key,PINCH_APP_KEY)
 	@echo "Application Build Complete."
-	@touch build/.install
+	touch "$@"
 
-build/.migrations: database/migrations/*
+$(MIGRATIONS_STAMP): packages/template/database/migrations/*.php | .env $(BUILD_DIRS)
 	docker compose up --detach --wait --wait-timeout=30
-	$(docker-php) pinch migrations:migrate --no-interaction && touch $@
+	$(docker-php) pinch migrations:migrate --no-interaction
+	touch "$@"
+
+$(COMPOSER_STAMP): vendor/autoload.php composer.lock | .env $(BUILD_DIRS)
+	@$(call check-token,GITHUB_TOKEN)
+	$(docker-php) composer install $(COMPOSER_OPTIONS)
+	touch "$@"
+
+vendor/autoload.php composer.lock &: | .env $(DOCKER_STAMP)
+	@$(call check-token,GITHUB_TOKEN)
+	if [ ! -f composer.lock ]; then \
+		docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer update --bump-after-update $(COMPOSER_OPTIONS); \
+	else \
+    	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer install $(COMPOSER_OPTIONS); \
+	fi
 
 .PHONY: clean
 clean:
@@ -142,34 +195,41 @@ clean:
 ##------------------------------------------------------------------------------
 
 .PHONY: up
-up:
+up: $(DOCKER_STAMP)
 	docker compose up --detach
 
 .PHONY: down
 down:
 	docker compose down --remove-orphans
 
+.PHONY: app-key
+app-key: | .env
+	@$(call generate-key,PINCH_APP_KEY)
+
 .PHONY: bash
-bash: build/docker/docker-compose.json
+bash: | $(DOCKER_STAMP)
 	$(docker-php) bash
 
+# Run the PsySH REPL shell
 .PHONY: shell psysh
-shell psysh: build/.install
+shell psysh: $(BUILD_STAMP)
 	docker compose up --detach
-	$(docker-php) packages/template/bin/pinch shell
+	$(docker-php) pinch shell
+
+CI_PREFIX := $(if $(filter true,$(CI)),ci:,)
 
 .PHONY: lint phpcbf phpcs phpstan rector rector-dry-run
-lint phpcbf phpcs phpstan rector rector-dry-run: build/.install
-	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer run-script "$@"
+lint phpcbf phpcs phpstan rector rector-dry-run: $(BUILD_STAMP)
+	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer run-script "$(CI_PREFIX)$@"
 
 .PHONY: phpunit phpunit-coverage test behat paratest paratest-coverage
-phpunit phpunit-coverage test behat paratest paratest-coverage: build/.install
-	docker compose up --detach
-	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer run-script "$@"
+phpunit phpunit-coverage test behat paratest paratest-coverage: $(BUILD_STAMP)
+	docker compose --progress=quiet up --detach
+	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer run-script "$(CI_PREFIX)$@"
 
-.NOTPARALLEL: ci pre-ci preci
-.PHONY: ci pre-ci preci
-ci: lint phpcs phpstan test prettier-check rector-dry-run
+.NOTPARALLEL: ci
+.PHONY: ci
+ci: lint prettier-check phpcs phpstan rector-dry-run paratest behat
 
 .NOTPARALLEL: pre-ci preci
 .PHONY: pre-ci preci
@@ -177,7 +237,7 @@ pre-ci preci: prettier-write rector phpcbf ci
 
 # Run the PHP development server to serve the HTML test coverage report on port 8000.
 .PHONY: serve-coverage
-serve-coverage:
+serve-coverage: | build/phpunit
 	@docker compose run --rm --publish 8000:80 ghcr.io/phoneburner/pinch-php php -S 0.0.0.0:80 -t /app/build/phpunit
 
 ##------------------------------------------------------------------------------
@@ -186,7 +246,7 @@ serve-coverage:
 ##------------------------------------------------------------------------------
 
 .PHONY: prettier-%
-prettier-%: | build/.install
+prettier-%: | $(DOCKER_STAMP)
 	$(docker-run) --volume $${PWD}:/app --user=$$(id -u):$$(id -g) ghcr.io/phoneburner/pinch-prettier --$* .
 
 ##------------------------------------------------------------------------------
