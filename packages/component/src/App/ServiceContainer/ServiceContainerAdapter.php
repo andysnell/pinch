@@ -145,17 +145,6 @@ class ServiceContainerAdapter implements ServiceContainer
         );
     }
 
-//    private function doSet(string $id, object|null $resolved, object|null $factory): null
-//    {
-//        if (isset($this->resolved[$id])){
-//            unset($this->resolved[$id]);
-//        }
-//
-//        if (isset($this->factories[$id])){
-//            unset($this->factories[$id]);
-//        }
-//    }
-
     public function unset(\Stringable|string $id): void
     {
         $id = (string)$id;
