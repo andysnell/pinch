@@ -145,6 +145,17 @@ class ServiceContainerAdapter implements ServiceContainer
         );
     }
 
+//    private function doSet(string $id, object|null $resolved, object|null $factory): null
+//    {
+//        if (isset($this->resolved[$id])){
+//            unset($this->resolved[$id]);
+//        }
+//
+//        if (isset($this->factories[$id])){
+//            unset($this->factories[$id]);
+//        }
+//    }
+
     public function unset(\Stringable|string $id): void
     {
         $id = (string)$id;
@@ -170,7 +181,7 @@ class ServiceContainerAdapter implements ServiceContainer
                 new ReflectionMethodAutoResolver($this, $overrides)(...),
                 $class_reflection->getConstructor()?->getParameters() ?? [],
             )),
-            false => throw new NotFound($class),
+            false => throw NotFound::id($class),
         };
     }
 
@@ -227,7 +238,7 @@ class ServiceContainerAdapter implements ServiceContainer
     {
         try {
             if (! is_class_string($id)) {
-                throw new ResolutionFailure(\sprintf('Service "%s" must be a class string', $id));
+                throw ResolutionFailure::withIdNotClassString($id);
             }
 
             // First, check if the service registration for this $id was deferred, and
@@ -240,7 +251,7 @@ class ServiceContainerAdapter implements ServiceContainer
                 }
 
                 if (! isset($this->factories[$id])) {
-                    throw new ResolutionFailure(\sprintf('Deferred Service "%s" was not registered by its provider', $id));
+                    throw ResolutionFailure::withDeferredServiceNotRegistered($id);
                 }
             }
 
@@ -260,7 +271,7 @@ class ServiceContainerAdapter implements ServiceContainer
             // Check if the class-string is something we could potentially autowire.
             // If the class we're trying to resolve is an interface, trait, abstract
             // or has a non-public constructor, we can fail here with a "not found".
-            // i.e., not an interface, trait, or abstract class,  private constructor.
+            // i.e., not an interface, trait, or abstract class, private constructor.
             $class_reflection = new \ReflectionClass($id);
             if (! $class_reflection->isInstantiable()) {
                 throw new NotFound($id);

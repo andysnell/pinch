@@ -7,13 +7,21 @@ namespace PhoneBurner\Pinch\Component\Http\Event;
 use PhoneBurner\Pinch\Attribute\Psr14Event;
 use PhoneBurner\Pinch\Component\Http\RequestAware;
 use PhoneBurner\Pinch\Component\Http\ResponseAware;
+use PhoneBurner\Pinch\Component\Logging\LogEntry;
+use PhoneBurner\Pinch\Component\Logging\Loggable;
+use PhoneBurner\Pinch\Component\Logging\LogLevel;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 #[Psr14Event]
-final readonly class HandlingHttpRequestCompleted implements RequestAware, ResponseAware
+final readonly class HandlingHttpRequestCompleted implements RequestAware, ResponseAware, Loggable
 {
     public function __construct(public ServerRequestInterface $request, public ResponseInterface $response)
     {
+    }
+
+    public function getLogEntry(): LogEntry
+    {
+        return new LogEntry(LogLevel::Debug, 'Handling Http Request Completed');
     }
 }

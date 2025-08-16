@@ -8,6 +8,7 @@ use PhoneBurner\Pinch\Attribute\Psr14Event;
 use PhoneBurner\Pinch\Component\Http\RequestAware;
 use PhoneBurner\Pinch\Component\Logging\LogEntry;
 use PhoneBurner\Pinch\Component\Logging\Loggable;
+use PhoneBurner\Pinch\Component\Logging\LogLevel;
 use Psr\Http\Message\ServerRequestInterface;
 
 #[Psr14Event]
@@ -19,9 +20,6 @@ final readonly class HandlingHttpRequestStarted implements Loggable, RequestAwar
 
     public function getLogEntry(): LogEntry
     {
-        return new LogEntry(message: 'HTTP Request Received', context: [
-            'method' => $this->request->getMethod(),
-            'uri' => (string)$this->request->getUri(),
-        ]);
+        return new LogEntry(LogLevel::Debug, 'Handling Http Request Started');
     }
 }
