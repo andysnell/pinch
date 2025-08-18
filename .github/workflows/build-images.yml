@@ -25,8 +25,136 @@ on:
         default: false
 
 jobs:
-  build_and_push:
+  build_linux_and_push:
     runs-on: ubuntu-latest
+    if: github.repository == 'phoneburner/pinch'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Determine image tags
+        id: tags
+        run: |
+          REF="${{ inputs.ref }}"
+
+          # Use provided docker_tag or derive from ref
+          if [ -n "${{ inputs.docker_tag }}" ]; then
+            DOCKER_TAG="${{ inputs.docker_tag }}"
+            echo "🏷️ Using provided Docker tag: $DOCKER_TAG"
+          else
+            # Sanitize ref for use as Docker tag (replace / with -)
+            DOCKER_TAG=$(echo "$REF" | sed 's/\//-/g')
+            echo "🏷️ Derived Docker tag from ref: $DOCKER_TAG"
+          fi
+
+          echo "🏷️ Building from ref: $REF"
+          echo "🐳 Docker tag: $DOCKER_TAG"
+
+          # Check if we should also tag as latest
+          INCLUDE_LATEST="${{ inputs.always_latest }}"
+
+          if [ "$INCLUDE_LATEST" != "true" ]; then
+            # Get the SHA of the checked out ref
+            CURRENT_SHA=$(git rev-parse HEAD)
+            echo "📍 Current SHA: $CURRENT_SHA"
+
+            # Get the SHA of main branch HEAD
+            MAIN_SHA=$(git rev-parse origin/main)
+            echo "📍 Main branch SHA: $MAIN_SHA"
+
+            if [ "$CURRENT_SHA" = "$MAIN_SHA" ]; then
+              echo "✅ Current ref points to main branch HEAD - will also tag as 'latest'"
+              INCLUDE_LATEST="true"
+            else
+              echo "ℹ️ Current ref does not point to main branch HEAD - skipping 'latest' tag"
+              INCLUDE_LATEST="false"
+            fi
+          else
+            echo "✅ Always latest flag is set - will tag as 'latest'"
+          fi
+
+          echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+          echo "include_latest=$INCLUDE_LATEST" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Image - pinch-php
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: pinch-php
+          tags: |
+            ghcr.io/${{ github.repository }}-php:${{ steps.tags.outputs.docker_tag }}
+            ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-php:latest', github.repository) || '' }}
+          cache-from: type=gha,scope=${{ github.repository }}-php
+          cache-to: type=gha,scope=${{ github.repository }}-php,mode=max
+          pull: true
+          push: true
+
+      - name: Build and Push Image - pinch-web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: pinch-web
+          tags: |
+            ghcr.io/${{ github.repository }}-web:${{ github.sha }}
+            ghcr.io/${{ github.repository }}-web:${{ steps.tags.outputs.docker_tag }}
+            ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-web:latest', github.repository) || '' }}
+          cache-from: type=gha,scope=${{ github.repository }}-web
+          cache-to: type=gha,scope=${{ github.repository }}-web,mode=max
+          pull: true
+          push: true
+
+      - name: Build and Push Image - pinch-prettier
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: pinch-prettier
+          tags: |
+            ghcr.io/${{ github.repository }}-prettier:${{ github.sha }}
+            ghcr.io/${{ github.repository }}-prettier:${{ steps.tags.outputs.docker_tag }}
+            ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-prettier:latest', github.repository) || '' }}
+          cache-from: type=gha,scope=${{ github.repository }}-prettier
+          cache-to: type=gha,scope=${{ github.repository }}-prettier,mode=max
+          pull: true
+          push: true
+
+      - name: Summary
+        run: |
+          echo "## 🐳 Docker Images Built and Pushed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Reference:** \`${{ inputs.ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker Tag:** \`${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Images:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.repository }}-php:${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.repository }}-web:${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.repository }}-prettier:${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.tags.outputs.include_latest }}" = "true" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Also tagged as \`latest\`:" >> $GITHUB_STEP_SUMMARY
+            echo "- \`ghcr.io/${{ github.repository }}-php:latest\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`ghcr.io/${{ github.repository }}-web:latest\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`ghcr.io/${{ github.repository }}-prettier:latest\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  build_mac_and_push:
+    runs-on: macos-latest
     if: github.repository == 'phoneburner/pinch'
 
     steps:
