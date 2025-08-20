@@ -270,6 +270,16 @@ function narrow_string(mixed $value): string
     );
 }
 
+function cast_string(mixed $value): string
+{
+    return match (true) {
+        \is_string($value) => $value,
+        $value === null, \is_scalar($value), $value instanceof \Stringable => (string)$value,
+        $value instanceof \BackedEnum => (string)$value->value,
+        default => throw new \InvalidArgumentException('Invalid type for string cast: ' . \get_debug_type($value)),
+    };
+}
+
 /**
  * @phpstan-assert string|null $value
  */
