@@ -17,6 +17,7 @@ parameters:
     ignoreErrors:
         - identifier: missingType.iterableValue
         - identifier: staticMethod.alreadyNarrowedType
+        - message: '#PhoneBurner\\Pinch\\Framework\\APP_ROOT not found.$#'
 
     dynamicConstantNames:
         - PhoneBurner\Pinch\Framework\APP_ROOT
