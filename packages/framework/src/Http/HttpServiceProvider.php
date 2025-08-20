@@ -43,6 +43,7 @@ use PhoneBurner\Pinch\Framework\Http\Emitter\MappingEmitter;
 use PhoneBurner\Pinch\Framework\Http\EventListener\WriteSerializedRequestToFile;
 use PhoneBurner\Pinch\Framework\Http\EventListener\WriteSerializedResponseToFile;
 use PhoneBurner\Pinch\Framework\Http\MessageSignature\Rfc9421\HttpMessageSignatureFactory;
+use PhoneBurner\Pinch\Framework\Http\Middleware\AddCorrelationIdHeaderToResponse;
 use PhoneBurner\Pinch\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\Pinch\Framework\Http\Middleware\TransformHttpExceptionResponses;
 use PhoneBurner\Pinch\Framework\Http\RateLimiter\RedisRateLimiter;
@@ -50,6 +51,8 @@ use PhoneBurner\Pinch\Framework\Http\Request\RequestFactory;
 use PhoneBurner\Pinch\Framework\Http\RequestHandler\CspViolationReportRequestHandler;
 use PhoneBurner\Pinch\Framework\Http\RequestHandler\ErrorRequestHandler;
 use PhoneBurner\Pinch\Framework\Http\RequestHandler\LogoutRequestHandler;
+use PhoneBurner\Pinch\Framework\Http\RequestHandler\LoopbackRequestHandler;
+use PhoneBurner\Pinch\Framework\Http\RequestHandler\PhpInfoRequestHandler;
 use PhoneBurner\Pinch\Framework\Http\Routing\Command\CacheRoutesCommand;
 use PhoneBurner\Pinch\Framework\Http\Routing\Command\ListRoutesCommand;
 use PhoneBurner\Pinch\Framework\Http\Routing\FastRoute\FastRouteDispatcherFactory;
@@ -100,9 +103,11 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             JsonResponseTransformerStrategy::class,
             ListRoutesCommand::class,
             LogoutRequestHandler::class,
+            LoopbackRequestHandler::class,
             ManageCookies::class,
             MiddlewareRequestHandlerFactory::class,
             NotFoundRequestHandler::class,
+            PhpInfoRequestHandler::class,
             RateLimiter::class,
             RequestFactory::class,
             RequestFactoryContract::class,
@@ -191,6 +196,13 @@ final class HttpServiceProvider implements DeferrableServiceProvider
                     $app->get(HttpConfigStruct::class)->routing->fallback_handler ?: NotFoundRequestHandler::class,
                 )),
                 $app->get(HttpConfigStruct::class)->middleware,
+            ),
+        );
+
+        $app->set(
+            AddCorrelationIdHeaderToResponse::class,
+            static fn(App $app): AddCorrelationIdHeaderToResponse => new AddCorrelationIdHeaderToResponse(
+                $app->get(LogTrace::class),
             ),
         );
 
@@ -370,5 +382,14 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             $app->get(KeyChain::class),
             $app->get(Clock::class),
         ));
+
+        $app->set(
+            LoopbackRequestHandler::class,
+            static fn(App $app): LoopbackRequestHandler => new LoopbackRequestHandler(
+                $app->get(EventDispatcherInterface::class),
+            ),
+        );
+
+        $app->set(PhpInfoRequestHandler::class, NewInstanceServiceFactory::singleton());
     }
 }

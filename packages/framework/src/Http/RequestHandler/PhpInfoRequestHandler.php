@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Framework\Http\RequestHandler;
 
-use PhoneBurner\Pinch\Component\Http\Response\Exceptional\ServerErrorResponse;
 use PhoneBurner\Pinch\Component\Http\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,13 +13,11 @@ final readonly class PhpInfoRequestHandler implements RequestHandlerInterface
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $buffer = (static function (): string {
+        return new HtmlResponse((static function (): string {
             \ob_start();
             /** @phpstan-ignore-next-line */
             \phpinfo();
             return (string)\ob_get_clean();
-        })();
-
-        return $buffer ? new HtmlResponse($buffer) : new ServerErrorResponse();
+        })());
     }
 }
