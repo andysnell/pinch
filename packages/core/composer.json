@@ -60,6 +60,11 @@
   "extra": {
     "branch-alias": {
       "dev-main": "0.1.x-dev"
+    },
+    "phpstan/extension-installer": {
+      "ignore": [
+        "phoneburner/pinch-phpstan"
+      ]
     }
   },
   "config": {

@@ -1,8 +1,10 @@
 includes:
     - phar://phpstan.phar/conf/bleedingEdge.neon
+    - vendor/phoneburner/pinch-phpstan/config/architecture.neon
+    - vendor/phoneburner/pinch-phpstan/config/conventions.neon
 
 parameters:
-    level: max
+    level: 8
 
     tmpDir: build/phpstan
 
@@ -16,6 +18,18 @@ parameters:
         - identifier: function.alreadyNarrowedType
         - identifier: method.internalClass
           path: 'tests/'
+
+        # Temporarily ignoring these errors until converting to a monorepo is complete
+        - identifier: possiblyImpure.methodCall
+          path: src/Uuid/UuidWrapper.php
+
+        # Testing Allowances
+        - identifier: function.impossibleType
+          path: tests/Type/TypeFunctionsTest.php
+        - identifier: function.impossibleType
+          path: tests/String/StringFunctionsTest.php
+        - identifier: staticMethod.impossibleType
+          path: tests/Type/ReflectTest.php
 
     treatPhpDocTypesAsCertain: false
 

@@ -53,6 +53,7 @@
     "phpstan": {
       "includes": [
         "config/extension.neon",
+        "config/conventions.neon",
         "config/rules.neon"
       ]
     }

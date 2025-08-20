@@ -1,7 +1,3 @@
 rules:
-    - \PhoneBurner\Pinch\Phpstan\Rules\InvokableMessageClassesMustBeInvokableRule
-    - \PhoneBurner\Pinch\Phpstan\Rules\DeferrableServiceProvidersMustProvideAllServicesRule
     - \PhoneBurner\Pinch\Phpstan\Rules\ServiceProvidersMustBeRegisteredRule
-    - \PhoneBurner\Pinch\Phpstan\Rules\CommandsMustHaveAsCommandAttributeRule
     - \PhoneBurner\Pinch\Phpstan\Rules\CommandsMustBeRegisteredRule
-    - \PhoneBurner\Pinch\Phpstan\Rules\CommandsMustHaveCommandSuffixRule
