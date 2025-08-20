@@ -11,11 +11,32 @@ use PHPUnit\Framework\TestCase;
 final class NotResolvableTest extends TestCase
 {
     #[Test]
-    public function exceptionMessageContainsClassName(): void
+    public function explicitExceptionMessageContainsClassName(): void
     {
         $class = 'Some\\Class\\Name';
-        $exception = new NotResolvable($class);
+        self::assertSame(
+            $class . ' must be set explicitly at initialization',
+            NotResolvable::explicit($class)->getMessage(),
+        );
+    }
 
-        self::assertSame($class . ' Must Be Set Explicitly in the Container', $exception->getMessage());
+    #[Test]
+    public function forbiddenExceptionMessageContainsClassName(): void
+    {
+        $class = 'Some\\Class\\Name';
+        self::assertSame(
+            $class . ' may not be resolved directly from the container',
+            NotResolvable::forbidden($class)->getMessage(),
+        );
+    }
+
+    #[Test]
+    public function internalExceptionMessageContainsClassName(): void
+    {
+        $class = 'Some\\Class\\Name';
+        self::assertSame(
+            $class . ' is an internal class and should not be resolved directly',
+            NotResolvable::internal($class)->getMessage(),
+        );
     }
 }
