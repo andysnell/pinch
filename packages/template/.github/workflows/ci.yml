@@ -9,7 +9,7 @@ jobs:
   ci:
     # Uncomment and edit the following line to run this workflow only for a specific repository
     # if: github.repository == 'phoneburner/pinch-template'
-    runs-on: ubuntu-latest`
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
