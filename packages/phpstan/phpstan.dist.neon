@@ -22,6 +22,8 @@ parameters:
     dynamicConstantNames:
         - PhoneBurner\Pinch\Framework\APP_ROOT
 
+    treatPhpDocTypesAsCertain: false
+
     # Strict Analysis
     # https://phpstan.org/config-reference#stricter-analysis
     checkDynamicProperties: true
@@ -35,7 +37,12 @@ parameters:
     reportMaybesInPropertyPhpDocTypes: true
     reportStaticMethodSignatures: true
     reportUnmatchedIgnoredErrors: false
-    treatPhpDocTypesAsCertain: false
+    reportPossiblyNonexistentGeneralArrayOffset: false
+    reportPossiblyNonexistentConstantArrayOffset: false
+    reportAlwaysTrueInLastCondition: false
+    reportWrongPhpDocTypeInVarTag: false
+    reportAnyTypeWideningInVarTag: false
+    checkMissingOverrideMethodAttribute: false # update to true when Rector supports improves
 
     # Extension: Disallowed Calls For PHPStan
     # https://github.com/spaze/phpstan-disallowed-calls
@@ -47,15 +54,8 @@ parameters:
     disallowedNamespaces:
         - namespace: '\DateTime'
           message: 'Use DateTimeImmutable instead'
-          allowIn:
-            - '*/tests/unit/Module/Telephony/Router/ReservationTest.php'
-
         - namespace: \Carbon\Carbon
           message: 'Use \Carbon\CarbonImmutable instead'
-          allowIn:
-            - '*/tests/unit/TestSupport/TimeStopper.php'
-            - '*/tests/unit/TestSupport/ResetCarbonTestNowAfterTests.php'
-            - '*/tests/unit/TestSupport/ResetCarbonTestNowBeforeClass.php'
 
     disallowedFunctionCalls:
         - function: 'var_dump()'

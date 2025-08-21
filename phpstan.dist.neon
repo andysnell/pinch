@@ -1,6 +1,7 @@
 includes:
     - phar://phpstan.phar/conf/bleedingEdge.neon
     - packages/phpstan/config/architecture.neon
+    - packages/phpstan/config/conventions.neon
 
 parameters:
     level: 8
@@ -77,15 +78,8 @@ parameters:
     disallowedNamespaces:
         - namespace: '\DateTime'
           message: 'Use DateTimeImmutable instead'
-          allowIn:
-            - '*/tests/unit/Module/Telephony/Router/ReservationTest.php'
-
         - namespace: \Carbon\Carbon
           message: 'Use \Carbon\CarbonImmutable instead'
-          allowIn:
-            - '*/tests/unit/TestSupport/TimeStopper.php'
-            - '*/tests/unit/TestSupport/ResetCarbonTestNowAfterTests.php'
-            - '*/tests/unit/TestSupport/ResetCarbonTestNowBeforeClass.php'
 
     disallowedFunctionCalls:
         - function: 'var_dump()'

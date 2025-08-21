@@ -31,12 +31,9 @@ jobs:
     strategy:
       matrix:
         image:
-          - target: pinch-php
-            suffix: php
-          - target: pinch-web
-            suffix: web
-          - target: pinch-prettier
-            suffix: prettier
+          - target: php
+          - target: web
+          - target: prettier
 
     steps:
       - name: Checkout Code
@@ -91,15 +88,15 @@ jobs:
 
           if echo "$CLEAN_TAG" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "🔢 Detected semver version: $CLEAN_TAG"
-            
+
             if [ "$INCLUDE_LATEST" = "true" ]; then
               MAJOR=$(echo "$CLEAN_TAG" | cut -d. -f1)
               MINOR=$(echo "$CLEAN_TAG" | cut -d. -f1-2)
-              
+
               echo "📌 Additional semver tags: $MAJOR, $MINOR"
               SEMVER_TAGS="
-            ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:$MAJOR
-            ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:$MINOR"
+            ghcr.io/${{ github.repository }}-${{ matrix.image.target }}:$MAJOR
+            ghcr.io/${{ github.repository }}-${{ matrix.image.target }}:$MINOR"
             else
               echo "ℹ️ Semver detected but include_latest=false, using only full version"
             fi
@@ -121,39 +118,43 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Since we build for multiple platforms, we need to set up QEMU before Buildx
+      - name: Set Up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push Image - ${{ matrix.image.target }}
+      - name: Build and Push Image - pinch-${{ matrix.image.target }}
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           file: Dockerfile
-          target: ${{ matrix.image.target }}
+          target: pinch-${{ matrix.image.target }}
           tags: |
-            ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:${{ steps.tags.outputs.clean_tag }}
-            ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-{1}:latest', github.repository, matrix.image.suffix) || '' }}${{ steps.tags.outputs.semver_tags }}
-          cache-from: type=gha,scope=${{ github.repository }}-${{ matrix.image.suffix }}
-          cache-to: type=gha,scope=${{ github.repository }}-${{ matrix.image.suffix }},mode=max
+            ghcr.io/${{ github.repository }}-${{ matrix.image.target }}:${{ steps.tags.outputs.clean_tag }}
+            ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-{1}:latest', github.repository, matrix.image.target) || '' }}${{ steps.tags.outputs.semver_tags }}
+          cache-from: type=gha,scope=${{ github.repository }}-${{ matrix.image.target }}
+          cache-to: type=gha,scope=${{ github.repository }}-${{ matrix.image.target }},mode=max
           pull: true
           push: true
 
       - name: Summary
         run: |
-          echo "## 🐳 Docker Image Built and Pushed - ${{ matrix.image.target }}" >> $GITHUB_STEP_SUMMARY
+          echo "## 🐳 Docker Image Built and Pushed - pinch-${{ matrix.image.target }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Reference:** \`${{ inputs.ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Docker Tag:** \`${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Image:" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:${{ steps.tags.outputs.clean_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.repository }}-${{ matrix.image.target }}:${{ steps.tags.outputs.clean_tag }}\`" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ steps.tags.outputs.include_latest }}" = "true" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Also tagged as \`latest\`:" >> $GITHUB_STEP_SUMMARY
-            echo "- \`ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:latest\`" >> $GITHUB_STEP_SUMMARY
-            
+            echo "- \`ghcr.io/${{ github.repository }}-${{ matrix.image.target }}:latest\`" >> $GITHUB_STEP_SUMMARY
+
             # Add semver tags if they exist
             if [ -n "${{ steps.tags.outputs.semver_tags }}" ]; then
               echo "" >> $GITHUB_STEP_SUMMARY
