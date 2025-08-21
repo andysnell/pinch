@@ -28,6 +28,15 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     if: github.repository == 'phoneburner/pinch'
+    strategy:
+      matrix:
+        image:
+          - target: pinch-php
+            suffix: php
+          - target: pinch-web
+            suffix: web
+          - target: pinch-prettier
+            suffix: prettier
 
     steps:
       - name: Checkout Code
@@ -76,8 +85,34 @@ jobs:
             echo "✅ Always latest flag is set - will tag as 'latest'"
           fi
 
+          # Parse semver versions for additional tagging
+          SEMVER_TAGS=""
+          CLEAN_TAG=$(echo "$DOCKER_TAG" | sed 's/^v//')
+
+          if echo "$CLEAN_TAG" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "🔢 Detected semver version: $CLEAN_TAG"
+            
+            if [ "$INCLUDE_LATEST" = "true" ]; then
+              MAJOR=$(echo "$CLEAN_TAG" | cut -d. -f1)
+              MINOR=$(echo "$CLEAN_TAG" | cut -d. -f1-2)
+              
+              echo "📌 Additional semver tags: $MAJOR, $MINOR"
+              SEMVER_TAGS="
+            ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:$MAJOR
+            ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:$MINOR"
+            else
+              echo "ℹ️ Semver detected but include_latest=false, using only full version"
+            fi
+          else
+            echo "ℹ️ Not a semver version, skipping additional tags"
+          fi
+
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+          echo "clean_tag=$CLEAN_TAG" >> $GITHUB_OUTPUT
           echo "include_latest=$INCLUDE_LATEST" >> $GITHUB_OUTPUT
+          echo "semver_tags<<EOF" >> $GITHUB_OUTPUT
+          echo "$SEMVER_TAGS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -89,69 +124,40 @@ jobs:
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push Image - pinch-php
+      - name: Build and Push Image - ${{ matrix.image.target }}
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           file: Dockerfile
-          target: pinch-php
+          target: ${{ matrix.image.target }}
           tags: |
-            ghcr.io/${{ github.repository }}-php:${{ steps.tags.outputs.docker_tag }}
-            ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-php:latest', github.repository) || '' }}
-          cache-from: type=gha,scope=${{ github.repository }}-php
-          cache-to: type=gha,scope=${{ github.repository }}-php,mode=max
-          pull: true
-          push: true
-
-      - name: Build and Push Image - pinch-web
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          file: Dockerfile
-          target: pinch-web
-          tags: |
-            ghcr.io/${{ github.repository }}-web:${{ github.sha }}
-            ghcr.io/${{ github.repository }}-web:${{ steps.tags.outputs.docker_tag }}
-            ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-web:latest', github.repository) || '' }}
-          cache-from: type=gha,scope=${{ github.repository }}-web
-          cache-to: type=gha,scope=${{ github.repository }}-web,mode=max
-          pull: true
-          push: true
-
-      - name: Build and Push Image - pinch-prettier
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          file: Dockerfile
-          target: pinch-prettier
-          tags: |
-            ghcr.io/${{ github.repository }}-prettier:${{ github.sha }}
-            ghcr.io/${{ github.repository }}-prettier:${{ steps.tags.outputs.docker_tag }}
-            ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-prettier:latest', github.repository) || '' }}
-          cache-from: type=gha,scope=${{ github.repository }}-prettier
-          cache-to: type=gha,scope=${{ github.repository }}-prettier,mode=max
+            ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:${{ steps.tags.outputs.clean_tag }}
+            ${{ steps.tags.outputs.include_latest == 'true' && format('ghcr.io/{0}-{1}:latest', github.repository, matrix.image.suffix) || '' }}${{ steps.tags.outputs.semver_tags }}
+          cache-from: type=gha,scope=${{ github.repository }}-${{ matrix.image.suffix }}
+          cache-to: type=gha,scope=${{ github.repository }}-${{ matrix.image.suffix }},mode=max
           pull: true
           push: true
 
       - name: Summary
         run: |
-          echo "## 🐳 Docker Images Built and Pushed" >> $GITHUB_STEP_SUMMARY
+          echo "## 🐳 Docker Image Built and Pushed - ${{ matrix.image.target }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Reference:** \`${{ inputs.ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Docker Tag:** \`${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Images:" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.repository }}-php:${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.repository }}-web:${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.repository }}-prettier:${{ steps.tags.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "### Image:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:${{ steps.tags.outputs.clean_tag }}\`" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ steps.tags.outputs.include_latest }}" = "true" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Also tagged as \`latest\`:" >> $GITHUB_STEP_SUMMARY
-            echo "- \`ghcr.io/${{ github.repository }}-php:latest\`" >> $GITHUB_STEP_SUMMARY
-            echo "- \`ghcr.io/${{ github.repository }}-web:latest\`" >> $GITHUB_STEP_SUMMARY
-            echo "- \`ghcr.io/${{ github.repository }}-prettier:latest\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`ghcr.io/${{ github.repository }}-${{ matrix.image.suffix }}:latest\`" >> $GITHUB_STEP_SUMMARY
+            
+            # Add semver tags if they exist
+            if [ -n "${{ steps.tags.outputs.semver_tags }}" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Additional semver tags:" >> $GITHUB_STEP_SUMMARY
+              echo "${{ steps.tags.outputs.semver_tags }}" | grep -v '^$' | sed 's/^/- `/' | sed 's/$/`/' >> $GITHUB_STEP_SUMMARY
+            fi
           fi
