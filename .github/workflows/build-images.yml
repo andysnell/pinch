@@ -93,6 +93,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: Dockerfile
           target: pinch-php
           tags: |
@@ -107,6 +108,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: Dockerfile
           target: pinch-web
           tags: |
@@ -122,6 +124,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: Dockerfile
           target: pinch-prettier
           tags: |
