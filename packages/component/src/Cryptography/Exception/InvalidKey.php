@@ -15,4 +15,9 @@ class InvalidKey extends CryptographicRuntimeException
     {
         return new self("Unable to Decode Key into Binary String of Expected Length");
     }
+
+    public static function invalid(string $reason): self
+    {
+        return new self($reason);
+    }
 }

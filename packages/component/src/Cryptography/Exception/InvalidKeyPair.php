@@ -10,4 +10,9 @@ class InvalidKeyPair extends CryptographicRuntimeException
     {
         return new self(\sprintf("Key Pair Must Be Exactly %d Bytes", $expected));
     }
+
+    public static function invalid(string $reason): self
+    {
+        return new self($reason);
+    }
 }
