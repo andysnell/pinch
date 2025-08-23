@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\Cryptography\Jwt\Protocol;
 
+use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\KeyPair;
+use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\PublicKey;
 use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\RsaSignatureKeyPair;
 use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\RsaSignaturePublicKey;
-use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\SignatureKeyPair;
-use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\SignaturePublicKey;
 use PhoneBurner\Pinch\Component\Cryptography\Jwt\Claims\DecodedJwtToken;
 use PhoneBurner\Pinch\Component\Cryptography\Jwt\Claims\JwtHeader;
 use PhoneBurner\Pinch\Component\Cryptography\Jwt\Claims\JwtPayload;
@@ -37,13 +37,13 @@ final readonly class Rs256Protocol implements JwtProtocol
     ) {
     }
 
-    public function sign(SignatureKeyPair|RsaSignatureKeyPair $keyPair, JwtHeader $header, JwtPayload $payload): Jwt
+    public function sign(KeyPair $keyPair, JwtHeader $header, JwtPayload $payload): Jwt
     {
         if ($header->algorithm !== JwtAlgorithm::RS256) {
             throw new JwtLogicException('Header algorithm must be RS256');
         }
 
-        // Security: Prevent algorithm confusion attacks by enforcing RSA key usage
+        // Security: Strict RSA key type enforcement to prevent algorithm confusion attacks
         if (! ($keyPair instanceof RsaSignatureKeyPair)) {
             throw new JwtLogicException('RS256 algorithm requires RSA keys, but non-RSA key provided');
         }
@@ -67,7 +67,7 @@ final readonly class Rs256Protocol implements JwtProtocol
         return new Jwt($token);
     }
 
-    public function verify(SignaturePublicKey|RsaSignaturePublicKey $publicKey, Jwt $token): DecodedJwtToken
+    public function verify(PublicKey $publicKey, Jwt $token): DecodedJwtToken
     {
         $decoded = DecodedJwtToken::fromJwt($token, $this->clock);
 
@@ -82,7 +82,7 @@ final readonly class Rs256Protocol implements JwtProtocol
             throw new InvalidJwtToken('Token algorithm is not RS256');
         }
 
-        // Security: Prevent algorithm confusion attacks by enforcing RSA key usage
+        // Security: Strict RSA key type enforcement to prevent algorithm confusion attacks
         if (! ($publicKey instanceof RsaSignaturePublicKey)) {
             throw new InvalidJwtToken('RS256 algorithm requires RSA keys, but non-RSA key provided');
         }
@@ -144,39 +144,34 @@ final readonly class Rs256Protocol implements JwtProtocol
         throw new JwtLogicException('RS256 protocol does not support symmetric verification');
     }
 
-    private function signData(string $data, SignatureKeyPair|RsaSignatureKeyPair $keyPair): string
+    private function signData(string $data, KeyPair $keyPair): string
     {
-        // Handle both RSA and Ed25519 keys for compatibility
-        if ($keyPair instanceof RsaSignatureKeyPair) {
-            // Use proper RSA-SHA256 signing
-            $signature = '';
-            if (! \openssl_sign($data, $signature, $keyPair->secret->openSslKey(), 'SHA256')) {
-                throw new InvalidJwtToken('Failed to sign JWT with RSA key');
-            }
-            return $signature;
+        // SECURITY: Strict type checking to prevent algorithm confusion attacks
+        if (! ($keyPair instanceof RsaSignatureKeyPair)) {
+            throw new InvalidJwtToken('RS256 protocol requires RSA signature key pair');
         }
 
-        // Fallback to Ed25519 for existing tests
-        return \sodium_crypto_sign_detached($data, $keyPair->secret->bytes());
+        // Use RSA-SHA256 signing only - no algorithm confusion fallbacks
+        $signature = '';
+        if (! \openssl_sign($data, $signature, $keyPair->secret->openSslKey(), 'SHA256')) {
+            throw new InvalidJwtToken('Failed to sign JWT with RSA key');
+        }
+        return $signature;
     }
 
     private function verifySignature(
         string $data,
         string $signature,
-        SignaturePublicKey|RsaSignaturePublicKey $publicKey,
+        PublicKey $publicKey,
     ): bool {
         try {
-            // Handle both RSA and Ed25519 keys for compatibility
-            if ($publicKey instanceof RsaSignaturePublicKey) {
-                // Use proper RSA-SHA256 verification
-                return \openssl_verify($data, $signature, $publicKey->openSslKey(), 'SHA256') === 1;
+            // SECURITY: Strict type checking to prevent algorithm confusion attacks
+            if (! ($publicKey instanceof RsaSignaturePublicKey)) {
+                return false; // Wrong key type - verification must fail
             }
 
-            // Fallback to Ed25519 for existing tests
-            if ($signature === '') {
-                return false;
-            }
-            return \sodium_crypto_sign_verify_detached($signature, $data, $publicKey->bytes());
+            // Use RSA-SHA256 verification only - no algorithm confusion fallbacks
+            return \openssl_verify($data, $signature, $publicKey->openSslKey(), 'SHA256') === 1;
         } catch (\Throwable) {
             return false;
         }

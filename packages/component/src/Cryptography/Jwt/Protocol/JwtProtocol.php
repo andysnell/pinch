@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\Cryptography\Jwt\Protocol;
 
-use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\SignatureKeyPair;
-use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\SignaturePublicKey;
+use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\KeyPair;
+use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\PublicKey;
 use PhoneBurner\Pinch\Component\Cryptography\Jwt\Claims\DecodedJwtToken;
 use PhoneBurner\Pinch\Component\Cryptography\Jwt\Claims\JwtHeader;
 use PhoneBurner\Pinch\Component\Cryptography\Jwt\Claims\JwtPayload;
@@ -20,12 +20,12 @@ interface JwtProtocol
     /**
      * Sign a JWT token with asymmetric key
      */
-    public function sign(SignatureKeyPair $keyPair, JwtHeader $header, JwtPayload $payload): Jwt;
+    public function sign(KeyPair $keyPair, JwtHeader $header, JwtPayload $payload): Jwt;
 
     /**
      * Verify a JWT token with public key
      */
-    public function verify(SignaturePublicKey $publicKey, Jwt $token): DecodedJwtToken;
+    public function verify(PublicKey $publicKey, Jwt $token): DecodedJwtToken;
 
     /**
      * Sign a JWT token with symmetric key (HMAC)

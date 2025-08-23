@@ -18,8 +18,8 @@ use PhoneBurner\Pinch\String\Encoding\Encoding;
  */
 final readonly class RsaSignatureKeyPair implements KeyPair
 {
-    public const int DEFAULT_KEY_SIZE = 2048;
-    public const array ALLOWED_KEY_SIZES = [2048, 3072, 4096];
+    public const int DEFAULT_KEY_SIZE = 3072;
+    public const array ALLOWED_KEY_SIZES = [3072, 4096];
 
     public RsaSignatureSecretKey $secret;
     public RsaSignaturePublicKey $public;
@@ -93,7 +93,9 @@ final readonly class RsaSignatureKeyPair implements KeyPair
 
     public function bytes(): string
     {
-        return $this->secret->bytes();
+        // SECURITY: Private key material MUST NOT be exposed
+        // This would expose the secret key through delegation
+        throw new SerializationProhibited('Key pair bytes cannot be exported - contains private key material');
     }
 
     public function id(): KeyId
@@ -154,14 +156,8 @@ final readonly class RsaSignatureKeyPair implements KeyPair
         Encoding|null $encoding = null,
         bool $prefix = false,
     ): string {
-        $encoding ??= BinaryString::DEFAULT_ENCODING;
-
-        $encoded = ConstantTimeEncoder::encode($encoding, $this->bytes());
-
-        if ($prefix) {
-            return $encoding->prefix() . $encoded;
-        }
-
-        return $encoded;
+        // SECURITY: Export would expose private key material through bytes() method
+        // Key pairs containing secret keys must not be exportable
+        throw new SerializationProhibited('Key pair export prohibited - contains private key material');
     }
 }

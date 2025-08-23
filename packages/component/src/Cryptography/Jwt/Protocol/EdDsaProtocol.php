@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\Cryptography\Jwt\Protocol;
 
+use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\KeyPair;
+use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\PublicKey;
 use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\SignatureKeyPair;
 use PhoneBurner\Pinch\Component\Cryptography\Asymmetric\SignaturePublicKey;
 use PhoneBurner\Pinch\Component\Cryptography\Jwt\Claims\DecodedJwtToken;
@@ -30,10 +32,15 @@ final readonly class EdDsaProtocol implements JwtProtocol
     ) {
     }
 
-    public function sign(SignatureKeyPair $keyPair, JwtHeader $header, JwtPayload $payload): Jwt
+    public function sign(KeyPair $keyPair, JwtHeader $header, JwtPayload $payload): Jwt
     {
         if ($header->algorithm !== JwtAlgorithm::EdDSA) {
             throw new JwtLogicException('Header algorithm must be EdDSA');
+        }
+
+        // Security: Strict Ed25519 key type enforcement to prevent algorithm confusion attacks
+        if (! ($keyPair instanceof SignatureKeyPair)) {
+            throw new JwtLogicException('EdDSA algorithm requires Ed25519 keys, but non-Ed25519 key provided');
         }
 
         // Encode header and payload
@@ -55,12 +62,17 @@ final readonly class EdDsaProtocol implements JwtProtocol
         return new Jwt($token);
     }
 
-    public function verify(SignaturePublicKey $publicKey, Jwt $token): DecodedJwtToken
+    public function verify(PublicKey $publicKey, Jwt $token): DecodedJwtToken
     {
         $decoded = DecodedJwtToken::fromJwt($token, $this->clock);
 
         if ($decoded->header->algorithm !== JwtAlgorithm::EdDSA) {
             throw new InvalidJwtToken('Token algorithm is not EdDSA');
+        }
+
+        // Security: Strict Ed25519 key type enforcement to prevent algorithm confusion attacks
+        if (! ($publicKey instanceof SignaturePublicKey)) {
+            throw new InvalidJwtToken('EdDSA algorithm requires Ed25519 keys, but non-Ed25519 key provided');
         }
 
         // Extract parts

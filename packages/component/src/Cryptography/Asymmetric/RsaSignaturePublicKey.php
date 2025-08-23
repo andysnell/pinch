@@ -19,9 +19,9 @@ use function PhoneBurner\Pinch\String\bytes;
  */
 final readonly class RsaSignaturePublicKey implements PublicKey
 {
-    public const int MIN_KEY_SIZE = 2048;
-    public const int RECOMMENDED_KEY_SIZE = 2048;
-    public const array ALLOWED_KEY_SIZES = [2048, 3072, 4096];
+    public const int MIN_KEY_SIZE = 3072;
+    public const int RECOMMENDED_KEY_SIZE = 3072;
+    public const array ALLOWED_KEY_SIZES = [3072, 4096];
 
     private \OpenSSLAsymmetricKey $key;
     public readonly int $keySize;

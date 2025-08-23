@@ -35,7 +35,7 @@ final class Rs256ProtocolRsaTest extends TestCase
     public function signAndVerifyRoundTripWithRsaKeys(): void
     {
         // Generate proper RSA key pair for RS256
-        $keyPair = RsaSignatureKeyPair::generate(2048);
+        $keyPair = RsaSignatureKeyPair::generate(3072);
 
         $header = new JwtHeader(JwtAlgorithm::RS256);
         $payload = new JwtPayload(['sub' => '1234567890', 'name' => 'John Doe'], $this->clock);
@@ -54,8 +54,8 @@ final class Rs256ProtocolRsaTest extends TestCase
     #[Test]
     public function verifyRejectsInvalidSignatureWithRsaKeys(): void
     {
-        $keyPair1 = RsaSignatureKeyPair::generate(2048);
-        $keyPair2 = RsaSignatureKeyPair::generate(2048);
+        $keyPair1 = RsaSignatureKeyPair::generate(3072);
+        $keyPair2 = RsaSignatureKeyPair::generate(3072);
 
         $header = new JwtHeader(JwtAlgorithm::RS256);
         $payload = new JwtPayload(['sub' => '1234567890'], $this->clock);
@@ -73,7 +73,8 @@ final class Rs256ProtocolRsaTest extends TestCase
     #[Test]
     public function supportsMultipleRsaKeySizes(): void
     {
-        foreach ([2048, 3072, 4096] as $keySize) {
+        // Test only secure key sizes (2048-bit keys removed for security)
+        foreach ([3072, 4096] as $keySize) {
             $keyPair = RsaSignatureKeyPair::generate($keySize);
 
             $header = new JwtHeader(JwtAlgorithm::RS256);

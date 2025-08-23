@@ -19,9 +19,9 @@ use function PhoneBurner\Pinch\String\bytes;
  */
 final readonly class RsaSignatureSecretKey implements SecretKey
 {
-    public const int MIN_KEY_SIZE = 2048;
-    public const int RECOMMENDED_KEY_SIZE = 2048;
-    public const array ALLOWED_KEY_SIZES = [2048, 3072, 4096];
+    public const int MIN_KEY_SIZE = 3072;
+    public const int RECOMMENDED_KEY_SIZE = 3072;
+    public const array ALLOWED_KEY_SIZES = [3072, 4096];
 
     private \OpenSSLAsymmetricKey $key;
     public readonly int $keySize;
@@ -67,8 +67,9 @@ final readonly class RsaSignatureSecretKey implements SecretKey
 
     public function bytes(): string
     {
-        $details = \openssl_pkey_get_details($this->key);
-        return $details['key'] ?? throw InvalidKey::invalid('Cannot export RSA private key');
+        // SECURITY: Private key material MUST NOT be exposed
+        // This method would allow extraction of sensitive key data
+        throw new SerializationProhibited('Private key bytes cannot be exported for security reasons');
     }
 
     public function id(): KeyId
