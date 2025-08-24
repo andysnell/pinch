@@ -6,6 +6,7 @@ namespace PhoneBurner\Pinch\Framework\Http\Api\Handler;
 
 use PhoneBurner\ApiHandler\CreateHandler;
 use PhoneBurner\ApiHandler\DeleteHandler;
+use PhoneBurner\ApiHandler\HandlerFactory as HandlerFactoryContract;
 use PhoneBurner\ApiHandler\Hydrator;
 use PhoneBurner\ApiHandler\ReadHandler;
 use PhoneBurner\ApiHandler\Resolver;
@@ -27,7 +28,7 @@ use function PhoneBurner\Pinch\Type\narrow;
  *
  * @template T of object
  * @codeCoverageIgnore
- */class HandlerFactory implements \PhoneBurner\ApiHandler\HandlerFactory
+ */class HandlerFactory implements HandlerFactoryContract
 {
     public function __construct(
         private readonly ContainerInterface $container,
