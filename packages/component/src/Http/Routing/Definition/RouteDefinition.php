@@ -267,6 +267,20 @@ class RouteDefinition implements Route, Definition, \JsonSerializable, PhpSerial
         return $this->withAttribute(MiddlewareInterface::class, $middleware);
     }
 
+    /**
+     * Appends the middleware classes to any existing middleware in the definition
+     *
+     * @param class-string<MiddlewareInterface> ...$middleware
+     */
+    #[\Override]
+    public function withAddedMiddleware(string ...$middleware): self
+    {
+        return $this->withAttribute(
+            MiddlewareInterface::class,
+            [...($this->attributes[MiddlewareInterface::class] ?? []), ...$middleware],
+        );
+    }
+
     #[\Override]
     public function withAttribute(string $name, mixed $value): self
     {
