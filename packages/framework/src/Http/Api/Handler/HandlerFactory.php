@@ -19,6 +19,8 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
+use function PhoneBurner\Pinch\Type\narrow;
+
 /**
  * This should likely be part of API handler (or a separate package for rest)
  * and not in the application code, so not testing this here.
@@ -47,7 +49,7 @@ use Psr\Http\Server\RequestHandlerInterface;
                 hydrator: $this->getHydrator($attributes),
                 transformer: $this->getTransformer($attributes),
             ),
-            HttpMethod::Put => new UpdateHandler(
+            HttpMethod::Put, HttpMethod::Patch => new UpdateHandler(
                 resolver: $this->getResolver($attributes),
                 hydrator: $this->getHydrator($attributes),
                 transformer: $this->getTransformer($attributes),
@@ -73,7 +75,11 @@ use Psr\Http\Server\RequestHandlerInterface;
         return match (HttpMethod::tryFrom($request->getMethod())) {
             HttpMethod::Get => isset($attributes[Resolver::class], $attributes[Transformer::class]),
             HttpMethod::Post => isset($attributes[Hydrator::class], $attributes[Transformer::class]),
-            HttpMethod::Put, HttpMethod::Delete => isset($attributes[Resolver::class], $attributes[Hydrator::class], $attributes[Transformer::class]),
+            HttpMethod::Put, HttpMethod::Patch, HttpMethod::Delete => isset(
+                $attributes[Resolver::class],
+                $attributes[Hydrator::class],
+                $attributes[Transformer::class],
+            ),
             default => false,
         };
     }
@@ -88,20 +94,16 @@ use Psr\Http\Server\RequestHandlerInterface;
      */
     private function getResolver(array $attributes): Resolver
     {
-        $resolver = $this->container->get(
+        return narrow(Resolver::class, $this->container->get(
             $attributes[Resolver::class] ?? throw new \LogicException('resolver not found in request attributes'),
-        );
-
-        return $resolver instanceof Resolver ? $resolver : throw new \LogicException('resolver not defined in container');
+        ));
     }
 
     private function getTransformer(array $attributes): Transformer
     {
-        $transformer = $this->container->get(
+        return narrow(Transformer::class, $this->container->get(
             $attributes[Transformer::class] ?? throw new \LogicException('transformer not found in request attributes'),
-        );
-
-        return $transformer instanceof Transformer ? $transformer : throw new \LogicException('transformer not defined in container');
+        ));
     }
 
     /**
@@ -109,10 +111,8 @@ use Psr\Http\Server\RequestHandlerInterface;
      */
     private function getHydrator(array $attributes): Hydrator
     {
-        $hydrator = $this->container->get(
+        return narrow(Hydrator::class, $this->container->get(
             $attributes[Hydrator::class] ?? throw new \LogicException('hydrator not found in request attributes'),
-        );
-
-        return $hydrator instanceof Hydrator ? $hydrator : throw new \LogicException('hydrator not defined in container');
+        ));
     }
 }
