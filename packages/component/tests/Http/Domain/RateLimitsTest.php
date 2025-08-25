@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\Tests\Http\Domain;
 
-use PhoneBurner\Pinch\Component\Http\Domain\RateLimits;
-use PhoneBurner\Pinch\Component\Http\Exception\InvalidRateLimits;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\InvalidRateLimits;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -15,21 +15,21 @@ final class RateLimitsTest extends TestCase
     #[Test]
     public function constructorCreatesValidRateLimits(): void
     {
-        $limits = new RateLimits(id: 'test', per_second: 5, per_minute: 100);
+        $limits = new RequestRateLimits(id: 'test', second: 5, minute: 100);
 
         self::assertSame('test', $limits->id);
-        self::assertSame(5, $limits->per_second);
-        self::assertSame(100, $limits->per_minute);
+        self::assertSame(5, $limits->second);
+        self::assertSame(100, $limits->minute);
     }
 
     #[Test]
     public function constructorUsesDefaultValues(): void
     {
-        $limits = new RateLimits(id: 'test');
+        $limits = new RequestRateLimits(id: 'test');
 
         self::assertSame('test', $limits->id);
-        self::assertSame(10, $limits->per_second);
-        self::assertSame(60, $limits->per_minute);
+        self::assertSame(10, $limits->second);
+        self::assertSame(60, $limits->minute);
     }
 
     #[Test]
@@ -38,7 +38,7 @@ final class RateLimitsTest extends TestCase
         $this->expectException(InvalidRateLimits::class);
         $this->expectExceptionMessage('Rate limit ID cannot be empty');
 
-        new RateLimits(id: '');
+        new RequestRateLimits(id: '');
     }
 
     #[Test]
@@ -48,7 +48,7 @@ final class RateLimitsTest extends TestCase
         $this->expectException(InvalidRateLimits::class);
         $this->expectExceptionMessage('Per-second limit must be positive');
 
-        new RateLimits(id: 'test', per_second: $per_second);
+        new RequestRateLimits(id: 'test', second: $per_second);
     }
 
     #[Test]
@@ -58,7 +58,7 @@ final class RateLimitsTest extends TestCase
         $this->expectException(InvalidRateLimits::class);
         $this->expectExceptionMessage('Per-minute limit must be positive');
 
-        new RateLimits(id: 'test', per_minute: $per_minute);
+        new RequestRateLimits(id: 'test', minute: $per_minute);
     }
 
     #[Test]
@@ -67,7 +67,7 @@ final class RateLimitsTest extends TestCase
         $this->expectException(InvalidRateLimits::class);
         $this->expectExceptionMessage('Per-minute limit (5) cannot be less than per-second limit (10)');
 
-        new RateLimits(id: 'test', per_second: 10, per_minute: 5);
+        new RequestRateLimits(id: 'test', second: 10, minute: 5);
     }
 
     public static function invalidPerSecondProvider(): \Iterator

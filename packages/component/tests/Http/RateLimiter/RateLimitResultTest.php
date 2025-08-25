@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Component\Tests\Http\RateLimiter;
 
 use DateTimeImmutable;
-use PhoneBurner\Pinch\Component\Http\Domain\RateLimits;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimitResult;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimitResult;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -16,9 +16,9 @@ final class RateLimitResultTest extends TestCase
     public function constructorCreatesValidResult(): void
     {
         $reset_time = new DateTimeImmutable('+1 minute');
-        $rate_limits = new RateLimits(id: 'test', per_second: 10, per_minute: 60);
+        $rate_limits = new RequestRateLimits(id: 'test', second: 10, minute: 60);
 
-        $result = new RateLimitResult(
+        $result = new RequestRateLimitResult(
             allowed: true,
             remaining_per_second: 5,
             remaining_per_minute: 30,
@@ -37,9 +37,9 @@ final class RateLimitResultTest extends TestCase
     public function allowedFactoryCreatesAllowedResult(): void
     {
         $reset_time = new DateTimeImmutable('+1 minute');
-        $rate_limits = new RateLimits(id: 'test', per_second: 15, per_minute: 90);
+        $rate_limits = new RequestRateLimits(id: 'test', second: 15, minute: 90);
 
-        $result = RateLimitResult::allowed(
+        $result = RequestRateLimitResult::allowed(
             remaining_per_second: 8,
             remaining_per_minute: 45,
             reset_time: $reset_time,
@@ -56,9 +56,9 @@ final class RateLimitResultTest extends TestCase
     public function blockedFactoryCreatesBlockedResult(): void
     {
         $reset_time = new DateTimeImmutable('+1 minute');
-        $rate_limits = new RateLimits(id: 'test', per_second: 10, per_minute: 60);
+        $rate_limits = new RequestRateLimits(id: 'test', second: 10, minute: 60);
 
-        $result = RateLimitResult::blocked(
+        $result = RequestRateLimitResult::blocked(
             reset_time: $reset_time,
             rate_limits: $rate_limits,
         );
@@ -72,9 +72,9 @@ final class RateLimitResultTest extends TestCase
     #[Test]
     public function getRetryAfterSecondsReturnsZeroForAllowedRequests(): void
     {
-        $rate_limits = new RateLimits(id: 'test', per_second: 10, per_minute: 60);
+        $rate_limits = new RequestRateLimits(id: 'test', second: 10, minute: 60);
 
-        $result = RateLimitResult::allowed(
+        $result = RequestRateLimitResult::allowed(
             remaining_per_second: 5,
             remaining_per_minute: 30,
             reset_time: new DateTimeImmutable('+1 minute'),
@@ -88,9 +88,9 @@ final class RateLimitResultTest extends TestCase
     public function getRetryAfterSecondsReturnsPositiveForBlockedRequests(): void
     {
         $reset_time = new DateTimeImmutable('+30 seconds');
-        $rate_limits = new RateLimits(id: 'test', per_second: 10, per_minute: 60);
+        $rate_limits = new RequestRateLimits(id: 'test', second: 10, minute: 60);
 
-        $result = RateLimitResult::blocked(
+        $result = RequestRateLimitResult::blocked(
             reset_time: $reset_time,
             rate_limits: $rate_limits,
         );
@@ -105,9 +105,9 @@ final class RateLimitResultTest extends TestCase
     {
         // Use a reset time in the past to test minimum value
         $reset_time = new DateTimeImmutable('-10 seconds');
-        $rate_limits = new RateLimits(id: 'test', per_second: 10, per_minute: 60);
+        $rate_limits = new RequestRateLimits(id: 'test', second: 10, minute: 60);
 
-        $result = RateLimitResult::blocked(
+        $result = RequestRateLimitResult::blocked(
             reset_time: $reset_time,
             rate_limits: $rate_limits,
         );

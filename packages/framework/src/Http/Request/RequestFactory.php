@@ -7,6 +7,7 @@ namespace PhoneBurner\Pinch\Framework\Http\Request;
 use Laminas\Diactoros\Request;
 use Laminas\Diactoros\ServerRequestFactory;
 use PhoneBurner\Pinch\Component\Http\Domain\HttpMethod;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimitGroup;
 use PhoneBurner\Pinch\Component\Http\Request\DefaultRequestFactory;
 use PhoneBurner\Pinch\Component\Http\Request\RequestFactory as RequestFactoryContract;
 use PhoneBurner\Pinch\Component\Http\Stream\TemporaryStream;
@@ -16,10 +17,28 @@ use Psr\Http\Message\StreamInterface;
 
 class RequestFactory implements RequestFactoryContract
 {
+    /**
+     * Resolve the request from global state (e.g. the superglobals like $_SERVER)
+     * We'll also try to resolve the IP address and use it as the default rate
+     * limit group.
+     *
+     * Note: the IP address we resolve here is probably not actual IP address if
+     * the application is behind a load balancer or proxy. The real IP address
+     * is set in the TrustProxies, middleware, since we cannot trust the
+     * X-FORWARDED-* headers by default.
+     *
+     * @return ServerRequestInterface
+     */
     public function fromGlobals(): ServerRequestInterface
     {
-        return ServerRequestFactory::fromGlobals()
-            ->withAttribute(IpAddress::class, IpAddress::marshall($_SERVER));
+        $request = ServerRequestFactory::fromGlobals();
+        $ip_address = IpAddress::tryFrom($request->getServerParams()['REMOTE_ADDR'] ?? null);
+        if ($ip_address) {
+            $request = $request->withAttribute(IpAddress::class, $ip_address);
+            $request = $request->withAttribute(RequestRateLimitGroup::class, RequestRateLimitGroup::fromIpAddress($ip_address));
+        }
+
+        return $request;
     }
 
     /**

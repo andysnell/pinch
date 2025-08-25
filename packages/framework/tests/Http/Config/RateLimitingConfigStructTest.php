@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Framework\Tests\Http\Config;
 
 use PhoneBurner\Pinch\Component\Configuration\ConfigStruct;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\NullRateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\NullRequestRateLimiter;
 use PhoneBurner\Pinch\Framework\Http\Config\RateLimitingConfigStruct;
-use PhoneBurner\Pinch\Framework\Http\RateLimiter\RedisRateLimiter;
+use PhoneBurner\Pinch\Framework\Http\RateLimiter\RedisRequestRateLimiter;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +21,7 @@ final class RateLimitingConfigStructTest extends TestCase
         self::assertTrue($config->enabled);
         self::assertSame(10, $config->default_per_second_max);
         self::assertSame(60, $config->default_per_minute_max);
-        self::assertSame(NullRateLimiter::class, $config->rate_limiter_class);
+        self::assertSame(NullRequestRateLimiter::class, $config->rate_limiter_class);
         self::assertSame('rate_limit:', $config->redis_key_prefix);
     }
 
@@ -32,14 +32,14 @@ final class RateLimitingConfigStructTest extends TestCase
             enabled: false,
             default_per_second_max: 5,
             default_per_minute_max: 100,
-            rate_limiter_class: RedisRateLimiter::class,
+            rate_limiter_class: RedisRequestRateLimiter::class,
             redis_key_prefix: 'custom:',
         );
 
         self::assertFalse($config->enabled);
         self::assertSame(5, $config->default_per_second_max);
         self::assertSame(100, $config->default_per_minute_max);
-        self::assertSame(RedisRateLimiter::class, $config->rate_limiter_class);
+        self::assertSame(RedisRequestRateLimiter::class, $config->rate_limiter_class);
         self::assertSame('custom:', $config->redis_key_prefix);
     }
 
@@ -86,7 +86,7 @@ final class RateLimitingConfigStructTest extends TestCase
             enabled: false,
             default_per_second_max: 5,
             default_per_minute_max: 100,
-            rate_limiter_class: RedisRateLimiter::class,
+            rate_limiter_class: RedisRequestRateLimiter::class,
             redis_key_prefix: 'test:',
         );
 
@@ -97,7 +97,7 @@ final class RateLimitingConfigStructTest extends TestCase
         self::assertFalse($unserialized->enabled);
         self::assertSame(5, $unserialized->default_per_second_max);
         self::assertSame(100, $unserialized->default_per_minute_max);
-        self::assertSame(RedisRateLimiter::class, $unserialized->rate_limiter_class);
+        self::assertSame(RedisRequestRateLimiter::class, $unserialized->rate_limiter_class);
         self::assertSame('test:', $unserialized->redis_key_prefix);
     }
 }

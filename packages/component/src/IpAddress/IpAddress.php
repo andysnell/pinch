@@ -27,7 +27,7 @@ readonly class IpAddress implements \Stringable
     {
         try {
             return match (true) {
-                $address instanceof self => $address,
+                $address instanceof self, $address === null => $address,
                 \is_string($address) => $address !== '' ? new self($address) : null,
                 $address instanceof \Stringable => self::tryFrom((string)$address),
                 default => null,

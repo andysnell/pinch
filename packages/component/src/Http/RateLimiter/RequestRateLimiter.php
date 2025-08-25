@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\Http\RateLimiter;
 
-use PhoneBurner\Pinch\Component\Http\Domain\RateLimits;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimitResult;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimitGroup;
 
 /**
  * Interface for rate limiting implementations
@@ -13,13 +12,13 @@ use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimitResult;
  * Implementations should track requests per identifier and enforce
  * per-second and per-minute limits using appropriate storage mechanisms.
  */
-interface RateLimiter
+interface RequestRateLimiter
 {
     /**
      * Check if a request is allowed under the given rate limits
      *
-     * @param RateLimits $limits The rate limits to enforce
-     * @return RateLimitResult Contains whether the request is allowed and remaining limits
+     * @param RequestRateLimits $limits The rate limits to enforce
+     * @return RequestRateLimitResult Contains whether the request is allowed and remaining limits
      */
-    public function throttle(RateLimits $limits): RateLimitResult;
+    public function throttle(RequestRateLimitGroup $group, RequestRateLimits $limits): RequestRateLimitResult;
 }

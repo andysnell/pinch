@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\Tests\Http\RateLimiter;
 
-use PhoneBurner\Pinch\Component\Http\Domain\RateLimits;
 use PhoneBurner\Pinch\Component\Http\Event\RequestRateLimitUpdated;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\NullRateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\NullRequestRateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
 use PhoneBurner\Pinch\Time\Clock\StaticClock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -16,13 +16,13 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 final class NullRateLimiterTest extends TestCase
 {
     private EventDispatcherInterface&MockObject $event_dispatcher;
-    private NullRateLimiter $limiter;
+    private NullRequestRateLimiter $limiter;
 
     protected function setUp(): void
     {
         $clock = new StaticClock(new \DateTimeImmutable('2022-01-20 14:30:00'));
         $this->event_dispatcher = $this->createMock(EventDispatcherInterface::class);
-        $this->limiter = new NullRateLimiter($clock, $this->event_dispatcher);
+        $this->limiter = new NullRequestRateLimiter($clock, $this->event_dispatcher);
     }
 
     #[Test]
@@ -32,7 +32,7 @@ final class NullRateLimiterTest extends TestCase
             ->method('dispatch')
             ->with($this->isInstanceOf(RequestRateLimitUpdated::class));
 
-        $limits = new RateLimits(id: 'test', per_second: 5, per_minute: 100);
+        $limits = new RequestRateLimits(id: 'test', second: 5, minute: 100);
 
         $result = $this->limiter->throttle($limits);
 
@@ -49,7 +49,7 @@ final class NullRateLimiterTest extends TestCase
             ->method('dispatch')
             ->with($this->isInstanceOf(RequestRateLimitUpdated::class));
 
-        $limits = new RateLimits(id: 'test');
+        $limits = new RequestRateLimits(id: 'test');
 
         $result = $this->limiter->throttle($limits);
 
@@ -65,7 +65,7 @@ final class NullRateLimiterTest extends TestCase
         $this->event_dispatcher->expects($this->once())
             ->method('dispatch');
 
-        $limits = new RateLimits(id: 'test');
+        $limits = new RequestRateLimits(id: 'test');
 
         $result = $this->limiter->throttle($limits);
 

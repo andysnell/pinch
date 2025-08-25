@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Component\Http\Middleware;
 
 use PhoneBurner\Pinch\Component\Http\Domain\HttpHeader;
-use PhoneBurner\Pinch\Component\Http\Domain\RateLimits;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
 use PhoneBurner\Pinch\Component\Http\Response\Exceptional\TooManyRequestsResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,7 +23,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class ThrottleRequests implements MiddlewareInterface
 {
     public function __construct(
-        private readonly RateLimiter $rate_limiter,
+        private readonly RequestRateLimiter $rate_limiter,
         private readonly int $default_per_second = 10,
         private readonly int $default_per_minute = 60,
     ) {
@@ -32,9 +32,9 @@ class ThrottleRequests implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // Check for existing RateLimits in request attributes
-        $rate_limits = $request->getAttribute(RateLimits::class);
+        $rate_limits = $request->getAttribute(RequestRateLimits::class);
 
-        if (! $rate_limits instanceof RateLimits) {
+        if (! $rate_limits instanceof RequestRateLimits) {
             $rate_limits = $this->createDefaultRateLimits($request);
         }
 
@@ -43,10 +43,10 @@ class ThrottleRequests implements MiddlewareInterface
         if (! $result->allowed) {
             return new TooManyRequestsResponse(
                 headers: [
-                    HttpHeader::RATELIMIT_POLICY => \sprintf('%d;w=1, %d;w=60', $result->rate_limits->per_second, $result->rate_limits->per_minute),
+                    HttpHeader::RATELIMIT_POLICY => \sprintf('"second";q=%d;w=1, "minute";q=%d;w=60', $result->rate_limits->second, $result->rate_limits->minute),
                     HttpHeader::RATELIMIT => \sprintf(
                         'limit=%d, remaining=%d, reset=%d',
-                        $result->rate_limits->per_second,
+                        $result->rate_limits->second,
                         $result->remaining_per_second,
                         $result->reset_time->getTimestamp(),
                     ),
@@ -59,10 +59,10 @@ class ThrottleRequests implements MiddlewareInterface
         $response = $handler->handle($request);
 
         return $response
-            ->withHeader(HttpHeader::RATELIMIT_POLICY, \sprintf('%d;w=1, %d;w=60', $result->rate_limits->per_second, $result->rate_limits->per_minute))
+            ->withHeader(HttpHeader::RATELIMIT_POLICY, \sprintf('%d;w=1, %d;w=60', $result->rate_limits->second, $result->rate_limits->minute))
             ->withHeader(HttpHeader::RATELIMIT, \sprintf(
                 'limit=%d, remaining=%d, reset=%d',
-                $result->rate_limits->per_second,
+                $result->rate_limits->second,
                 $result->remaining_per_second,
                 $result->reset_time->getTimestamp(),
             ));
@@ -71,15 +71,15 @@ class ThrottleRequests implements MiddlewareInterface
     /**
      * Create default rate limits based on client IP from request attributes
      */
-    private function createDefaultRateLimits(ServerRequestInterface $request): RateLimits
+    private function createDefaultRateLimits(ServerRequestInterface $request): RequestRateLimits
     {
         // Get IP address from request attributes (set by RequestFactory)
         $client_ip = $request->getAttribute('ip_address') ?? '127.0.0.1';
 
-        return new RateLimits(
-            id: 'ip:' . $client_ip,
-            per_second: $this->default_per_second,
-            per_minute: $this->default_per_minute,
+        return new RequestRateLimits(
+            key: 'ip:' . $client_ip,
+            second: $this->default_per_second,
+            minute: $this->default_per_minute,
         );
     }
 }

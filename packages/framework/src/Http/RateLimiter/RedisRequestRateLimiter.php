@@ -6,11 +6,11 @@ namespace PhoneBurner\Pinch\Framework\Http\RateLimiter;
 
 use DateTimeImmutable;
 use PhoneBurner\Pinch\Attribute\Usage\Experimental;
-use PhoneBurner\Pinch\Component\Http\Domain\RateLimits;
 use PhoneBurner\Pinch\Component\Http\Event\RequestRateLimitExceeded;
 use PhoneBurner\Pinch\Component\Http\Event\RequestRateLimitUpdated;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimiter;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimitResult;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimitResult;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
 use PhoneBurner\Pinch\Time\Clock\Clock;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Redis;
@@ -23,7 +23,7 @@ use Redis;
  * Provides accurate rate limiting even under high concurrency.
  */
 #[Experimental]
-final readonly class RedisRateLimiter implements RateLimiter
+final readonly class RedisRequestRateLimiter implements RequestRateLimiter
 {
     private readonly string $script_sha;
 
@@ -37,7 +37,7 @@ final readonly class RedisRateLimiter implements RateLimiter
         $this->script_sha = $this->loadScript();
     }
 
-    public function throttle(RateLimits $limits): RateLimitResult
+    public function throttle(RequestRateLimits $limits): RequestRateLimitResult
     {
         $now = $this->clock->now();
         $timestamp = $now->getTimestamp();
@@ -56,8 +56,8 @@ final readonly class RedisRateLimiter implements RateLimiter
                 $key,
                 $current_second,
                 $current_minute,
-                $limits->per_second,
-                $limits->per_minute,
+                $limits->second,
+                $limits->minute,
                 $timestamp,
             ], 1);
         } catch (\RedisException) {
@@ -68,15 +68,15 @@ final readonly class RedisRateLimiter implements RateLimiter
                     $key,
                     $current_second,
                     $current_minute,
-                    $limits->per_second,
-                    $limits->per_minute,
+                    $limits->second,
+                    $limits->minute,
                     $timestamp,
                 ], 1);
             } catch (\RedisException) {
                 // Fallback to allow if script fails
-                $result = RateLimitResult::allowed(
-                    remaining_per_second: $limits->per_second - 1,
-                    remaining_per_minute: $limits->per_minute - 1,
+                $result = RequestRateLimitResult::allowed(
+                    remaining_per_second: $limits->second - 1,
+                    remaining_per_minute: $limits->minute - 1,
                     reset_time: $this->getResetTime($now),
                     rate_limits: $limits,
                 );
@@ -88,9 +88,9 @@ final readonly class RedisRateLimiter implements RateLimiter
 
         if (! \is_array($result) || \count($result) !== 3) {
             // Fallback to allow if result is malformed
-            $fallback_result = RateLimitResult::allowed(
-                remaining_per_second: $limits->per_second - 1,
-                remaining_per_minute: $limits->per_minute - 1,
+            $fallback_result = RequestRateLimitResult::allowed(
+                remaining_per_second: $limits->second - 1,
+                remaining_per_minute: $limits->minute - 1,
                 reset_time: $this->getResetTime($now),
                 rate_limits: $limits,
             );
@@ -104,7 +104,7 @@ final readonly class RedisRateLimiter implements RateLimiter
         $remaining_per_minute = (int)$result[2];
 
         if ($allowed) {
-            $allowed_result = RateLimitResult::allowed(
+            $allowed_result = RequestRateLimitResult::allowed(
                 remaining_per_second: $remaining_per_second,
                 remaining_per_minute: $remaining_per_minute,
                 reset_time: $this->getResetTime($now),
@@ -115,7 +115,7 @@ final readonly class RedisRateLimiter implements RateLimiter
             return $allowed_result;
         }
 
-        $blocked_result = RateLimitResult::blocked(
+        $blocked_result = RequestRateLimitResult::blocked(
             reset_time: $this->getResetTime($now),
             rate_limits: $limits,
         );

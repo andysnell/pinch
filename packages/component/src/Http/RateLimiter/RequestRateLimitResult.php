@@ -5,22 +5,23 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Component\Http\RateLimiter;
 
 use DateTimeInterface;
-use PhoneBurner\Pinch\Component\Http\Domain\RateLimits;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
 
 /**
- * Result of a rate limit check
+ * Result of a request rate limit check. Not that our request rate limiting
+ * only tracks per-second and per-minute rates
  *
  * Contains information about whether the request is allowed,
  * remaining limits, and reset times for HTTP headers.
  */
-final readonly class RateLimitResult
+final readonly class RequestRateLimitResult
 {
     public function __construct(
         public bool $allowed,
-        public int $remaining_per_second,
-        public int $remaining_per_minute,
+        public int|null $remaining_per_second,
+        public int|null $remaining_per_minute,
         public DateTimeInterface $reset_time,
-        public RateLimits $rate_limits,
+        public RequestRateLimits $rate_limits,
     ) {
     }
 
@@ -28,10 +29,10 @@ final readonly class RateLimitResult
      * Create result for allowed request
      */
     public static function allowed(
-        int $remaining_per_second,
-        int $remaining_per_minute,
+        int|null $remaining_per_second,
+        int|null $remaining_per_minute,
         DateTimeInterface $reset_time,
-        RateLimits $rate_limits,
+        RequestRateLimits $rate_limits,
     ): self {
         return new self(
             allowed: true,
@@ -47,7 +48,7 @@ final readonly class RateLimitResult
      */
     public static function blocked(
         DateTimeInterface $reset_time,
-        RateLimits $rate_limits,
+        RequestRateLimits $rate_limits,
     ): self {
         return new self(
             allowed: false,
@@ -56,6 +57,19 @@ final readonly class RateLimitResult
             reset_time: $reset_time,
             rate_limits: $rate_limits,
         );
+    }
+
+    public function policy(): string|null
+    {
+        if()
+        \sprintf('q=%d;w=1, q=%d;w=60', $result->rate_limits->second, $result->rate_limits->minute)
+    }
+
+    public function remaining(): int
+    {
+        if($this->allowed === false){
+            return 0;
+        }
     }
 
     /**
@@ -68,8 +82,6 @@ final readonly class RateLimitResult
         }
 
         $now = new \DateTimeImmutable();
-        $diff = $this->reset_time->getTimestamp() - $now->getTimestamp();
-
-        return \max(1, $diff);
+        return \max(1, $this->reset_time->getTimestamp() - $now->getTimestamp());
     }
 }

@@ -19,8 +19,8 @@ use PhoneBurner\Pinch\Component\Http\Middleware\LazyMiddlewareRequestHandlerFact
 use PhoneBurner\Pinch\Component\Http\Middleware\MiddlewareRequestHandlerFactory;
 use PhoneBurner\Pinch\Component\Http\Middleware\NullThrottleRequests;
 use PhoneBurner\Pinch\Component\Http\Middleware\ThrottleRequests;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\NullRateLimiter;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\NullRequestRateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimiter;
 use PhoneBurner\Pinch\Component\Http\Request\RequestFactory as RequestFactoryContract;
 use PhoneBurner\Pinch\Component\Http\Request\RequestHandlerFactory;
 use PhoneBurner\Pinch\Component\Http\Response\Exceptional\TransformerStrategies\HtmlResponseTransformerStrategy;
@@ -46,7 +46,7 @@ use PhoneBurner\Pinch\Framework\Http\MessageSignature\Rfc9421\HttpMessageSignatu
 use PhoneBurner\Pinch\Framework\Http\Middleware\AddCorrelationIdHeaderToResponse;
 use PhoneBurner\Pinch\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\Pinch\Framework\Http\Middleware\TransformHttpExceptionResponses;
-use PhoneBurner\Pinch\Framework\Http\RateLimiter\RedisRateLimiter;
+use PhoneBurner\Pinch\Framework\Http\RateLimiter\RedisRequestRateLimiter;
 use PhoneBurner\Pinch\Framework\Http\Request\RequestFactory;
 use PhoneBurner\Pinch\Framework\Http\RequestHandler\CspViolationReportRequestHandler;
 use PhoneBurner\Pinch\Framework\Http\RequestHandler\ErrorRequestHandler;
@@ -111,7 +111,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             NotFoundRequestHandler::class,
             OpenApiRequestHandler::class,
             PhpInfoRequestHandler::class,
-            RateLimiter::class,
+            RequestRateLimiter::class,
             RequestFactory::class,
             RequestFactoryContract::class,
             RequestFactoryInterface::class,
@@ -140,7 +140,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         return [
             Router::class => FastRouter::class,
             SessionManagerContract::class => SessionManager::class,
-            RateLimiter::class => RedisRateLimiter::class,
+            RequestRateLimiter::class => RedisRequestRateLimiter::class,
             RequestFactoryContract::class => RequestFactory::class,
             RequestFactoryInterface::class => RequestFactory::class,
             StreamFactoryInterface::class => StreamFactory::class,
@@ -332,17 +332,17 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         ));
 
         $app->set(
-            RateLimiter::class,
-            static function (App $app): RateLimiter {
+            RequestRateLimiter::class,
+            static function (App $app): RequestRateLimiter {
                 $config = $app->get(HttpConfigStruct::class)->global_rate_limiting;
-                $rate_limiter_class = $config?->enabled ? $config->rate_limiter_class : NullRateLimiter::class;
+                $rate_limiter_class = $config?->enabled ? $config->rate_limiter_class : NullRequestRateLimiter::class;
 
                 return match ($rate_limiter_class) {
-                    NullRateLimiter::class => ghost(static fn(NullRateLimiter $ghost): null => $ghost->__construct(
+                    NullRequestRateLimiter::class => ghost(static fn(NullRequestRateLimiter $ghost): null => $ghost->__construct(
                         $app->get(Clock::class),
                         $app->get(EventDispatcherInterface::class),
                     )),
-                    RedisRateLimiter::class => ghost(static fn(RedisRateLimiter $ghost): null => $ghost->__construct(
+                    RedisRequestRateLimiter::class => ghost(static fn(RedisRequestRateLimiter $ghost): null => $ghost->__construct(
                         $app->get(Redis::class),
                         $app->get(Clock::class),
                         $app->get(EventDispatcherInterface::class),
@@ -361,7 +361,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
                 }
 
                 return new ThrottleRequests(
-                    $app->get(RateLimiter::class),
+                    $app->get(RequestRateLimiter::class),
                     $config->default_per_second_max,
                     $config->default_per_minute_max,
                 );

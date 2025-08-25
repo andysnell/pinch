@@ -10,9 +10,11 @@ use PhoneBurner\Pinch\Framework\Http\Config\RoutingConfigStruct;
 use PhoneBurner\Pinch\Framework\Http\Config\SessionConfigStruct;
 use PhoneBurner\Pinch\Framework\Http\Cookie\Middleware\ManageCookies;
 use PhoneBurner\Pinch\Framework\Http\Middleware\AddCorrelationIdHeaderToResponse;
+use PhoneBurner\Pinch\Framework\Http\Middleware\ApplyGlobalRateLimits;
 use PhoneBurner\Pinch\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\Pinch\Framework\Http\Middleware\EvaluateWrappedResponseFactories;
 use PhoneBurner\Pinch\Framework\Http\Middleware\TransformHttpExceptionResponses;
+use PhoneBurner\Pinch\Framework\Http\Middleware\TrustProxies;
 use PhoneBurner\Pinch\Framework\Http\Routing\Middleware\AttachRouteToRequest;
 use PhoneBurner\Pinch\Framework\Http\Routing\Middleware\DispatchRouteMiddleware;
 use PhoneBurner\Pinch\Framework\Http\Routing\Middleware\DispatchRouteRequestHandler;
@@ -44,12 +46,15 @@ return [
             add_xsrf_token_cookie: true,
         ),
         middleware: [
+            TrustProxies::class,
             AddCorrelationIdHeaderToResponse::class,
             TransformHttpExceptionResponses::class,
             CatchExceptionalResponses::class,
             ManageCookies::class,
             EvaluateWrappedResponseFactories::class,
+            // Validate Authentication Middleware Goes Here
             AttachRouteToRequest::class,
+            ApplyGlobalRateLimits::class,
             DispatchRouteMiddleware::class,
             DispatchRouteRequestHandler::class,
         ],

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhoneBurner\Pinch\Component\Http\Exception;
+namespace PhoneBurner\Pinch\Component\RateLimit;
 
 use DomainException;
 

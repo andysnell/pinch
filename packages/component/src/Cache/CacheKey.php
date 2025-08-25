@@ -36,6 +36,19 @@ readonly class CacheKey implements \Stringable
         return new self(...$key_parts);
     }
 
+    /**
+     * Helper method used to check if a value can be used as a key part
+     *
+     * @phpstan-assert-if-true \Stringable|\BackedEnum|string|int $value
+     */
+    public static function check(mixed $value): bool
+    {
+        return \is_string($value)
+            || \is_int($value)
+            || $value instanceof \Stringable
+            || $value instanceof \BackedEnum;
+    }
+
     #[\Override]
     public function __toString(): string
     {

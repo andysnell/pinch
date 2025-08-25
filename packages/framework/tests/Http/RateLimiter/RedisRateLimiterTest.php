@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Framework\Tests\Http\RateLimiter;
 
 use DateTimeImmutable;
-use PhoneBurner\Pinch\Component\Http\Domain\RateLimits;
 use PhoneBurner\Pinch\Component\Http\Event\RequestRateLimitExceeded;
 use PhoneBurner\Pinch\Component\Http\Event\RequestRateLimitUpdated;
-use PhoneBurner\Pinch\Framework\Http\RateLimiter\RedisRateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
+use PhoneBurner\Pinch\Framework\Http\RateLimiter\RedisRequestRateLimiter;
 use PhoneBurner\Pinch\Time\Clock\StaticClock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -29,24 +29,26 @@ final class RedisRateLimiterTest extends TestCase
         $this->event_dispatcher = $this->createMock(EventDispatcherInterface::class);
     }
 
-    private function createRateLimiter(string $key_prefix = 'rate_limit:', int $script_calls = 1): RedisRateLimiter
-    {
+    private function createRateLimiter(
+        string $key_prefix = 'rate_limit:',
+        int $script_calls = 1,
+    ): RedisRequestRateLimiter {
         // Mock script loading
         $this->redis->expects($this->exactly($script_calls))
             ->method('script')
             ->with('LOAD', $this->isString())
             ->willReturn('test_script_sha');
 
-        return new RedisRateLimiter($this->redis, $this->clock, $this->event_dispatcher, $key_prefix);
+        return new RedisRequestRateLimiter($this->redis, $this->clock, $this->event_dispatcher, $key_prefix);
     }
 
     #[Test]
     public function throttleAllowsWhenWithinLimits(): void
     {
-        $limits = new RateLimits(
+        $limits = new RequestRateLimits(
             id: 'test-user',
-            per_second: 10,
-            per_minute: 60,
+            second: 10,
+            minute: 60,
         );
 
         $this->event_dispatcher->expects($this->once())
@@ -82,10 +84,10 @@ final class RedisRateLimiterTest extends TestCase
     #[Test]
     public function throttleBlocksWhenLimitsExceeded(): void
     {
-        $limits = new RateLimits(
+        $limits = new RequestRateLimits(
             id: 'test-user',
-            per_second: 1,
-            per_minute: 5,
+            second: 1,
+            minute: 5,
         );
 
         $this->event_dispatcher->expects($this->once())
@@ -109,7 +111,7 @@ final class RedisRateLimiterTest extends TestCase
     #[Test]
     public function throttleUsesCustomKeyPrefix(): void
     {
-        $limits = new RateLimits(id: 'user-123');
+        $limits = new RequestRateLimits(id: 'user-123');
 
         $this->event_dispatcher->expects($this->once())
             ->method('dispatch')
@@ -133,7 +135,7 @@ final class RedisRateLimiterTest extends TestCase
     #[Test]
     public function throttleHandlesRedisFailureGracefully(): void
     {
-        $limits = new RateLimits(id: 'test-user');
+        $limits = new RequestRateLimits(id: 'test-user');
 
         $this->event_dispatcher->expects($this->once())
             ->method('dispatch')
@@ -156,7 +158,7 @@ final class RedisRateLimiterTest extends TestCase
     #[Test]
     public function throttleHandlesInvalidRedisResponse(): void
     {
-        $limits = new RateLimits(id: 'test-user');
+        $limits = new RequestRateLimits(id: 'test-user');
 
         $this->event_dispatcher->expects($this->once())
             ->method('dispatch')
@@ -176,7 +178,7 @@ final class RedisRateLimiterTest extends TestCase
     #[Test]
     public function throttleSetsCorrectResetTime(): void
     {
-        $limits = new RateLimits(id: 'test-user');
+        $limits = new RequestRateLimits(id: 'test-user');
 
         $this->event_dispatcher->expects($this->once())
             ->method('dispatch')

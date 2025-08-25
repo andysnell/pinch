@@ -6,10 +6,10 @@ namespace PhoneBurner\Pinch\Component\Tests\Http\Middleware;
 
 use DateTimeImmutable;
 use PhoneBurner\Pinch\Component\Http\Domain\HttpHeader;
-use PhoneBurner\Pinch\Component\Http\Domain\RateLimits;
 use PhoneBurner\Pinch\Component\Http\Middleware\ThrottleRequests;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimiter;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\RateLimitResult;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimiter;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimitResult;
+use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
 use PhoneBurner\Pinch\Component\Http\Response\Exceptional\TooManyRequestsResponse;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -20,14 +20,14 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final class ThrottleRequestsTest extends TestCase
 {
-    private RateLimiter&MockObject $rate_limiter;
+    private RequestRateLimiter&MockObject $rate_limiter;
     private ServerRequestInterface&MockObject $request;
     private RequestHandlerInterface&MockObject $handler;
     private ResponseInterface&MockObject $response;
 
     protected function setUp(): void
     {
-        $this->rate_limiter = $this->createMock(RateLimiter::class);
+        $this->rate_limiter = $this->createMock(RequestRateLimiter::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->handler = $this->createMock(RequestHandlerInterface::class);
         $this->response = $this->createMock(ResponseInterface::class);
@@ -36,14 +36,14 @@ final class ThrottleRequestsTest extends TestCase
     #[Test]
     public function processUsesExistingRateLimitsFromRequest(): void
     {
-        $rate_limits = new RateLimits(id: 'custom-limits', per_second: 5, per_minute: 100);
+        $rate_limits = new RequestRateLimits(id: 'custom-limits', second: 5, minute: 100);
 
         $this->request->expects($this->once())
             ->method('getAttribute')
-            ->with(RateLimits::class)
+            ->with(RequestRateLimits::class)
             ->willReturn($rate_limits);
 
-        $result = RateLimitResult::allowed(
+        $result = RequestRateLimitResult::allowed(
             remaining_per_second: 4,
             remaining_per_minute: 99,
             reset_time: new DateTimeImmutable('+1 minute'),
@@ -74,7 +74,7 @@ final class ThrottleRequestsTest extends TestCase
         $this->request->expects($this->exactly(2))
             ->method('getAttribute')
             ->willReturnCallback(function ($key): string|null {
-                if ($key === RateLimits::class) {
+                if ($key === RequestRateLimits::class) {
                     return null;
                 }
                 if ($key === 'ip_address') {
@@ -83,19 +83,19 @@ final class ThrottleRequestsTest extends TestCase
                 return null;
             });
 
-        $result = RateLimitResult::allowed(
+        $result = RequestRateLimitResult::allowed(
             remaining_per_second: 9,
             remaining_per_minute: 59,
             reset_time: new DateTimeImmutable('+1 minute'),
-            rate_limits: new RateLimits(id: 'ip:192.168.1.1', per_second: 10, per_minute: 60),
+            rate_limits: new RequestRateLimits(id: 'ip:192.168.1.1', second: 10, minute: 60),
         );
 
         $this->rate_limiter->expects($this->once())
             ->method('throttle')
-            ->with($this->callback(function (RateLimits $limits): bool {
+            ->with($this->callback(function (RequestRateLimits $limits): bool {
                 return $limits->id === 'ip:192.168.1.1'
-                    && $limits->per_second === 10
-                    && $limits->per_minute === 60;
+                    && $limits->second === 10
+                    && $limits->minute === 60;
             }))
             ->willReturn($result);
 
@@ -120,16 +120,16 @@ final class ThrottleRequestsTest extends TestCase
                 return null;
             });
 
-        $result = RateLimitResult::allowed(
+        $result = RequestRateLimitResult::allowed(
             remaining_per_second: 9,
             remaining_per_minute: 59,
             reset_time: new DateTimeImmutable('+1 minute'),
-            rate_limits: new RateLimits(id: 'ip:127.0.0.1', per_second: 10, per_minute: 60),
+            rate_limits: new RequestRateLimits(id: 'ip:127.0.0.1', second: 10, minute: 60),
         );
 
         $this->rate_limiter->expects($this->once())
             ->method('throttle')
-            ->with($this->callback(function (RateLimits $limits): bool {
+            ->with($this->callback(function (RequestRateLimits $limits): bool {
                 return $limits->id === 'ip:127.0.0.1';
             }))
             ->willReturn($result);
@@ -149,14 +149,14 @@ final class ThrottleRequestsTest extends TestCase
     #[Test]
     public function processReturnsTooManyRequestsResponseWhenBlocked(): void
     {
-        $rate_limits = new RateLimits(id: 'test-user');
+        $rate_limits = new RequestRateLimits(id: 'test-user');
 
         $this->request->expects($this->once())
             ->method('getAttribute')
-            ->with(RateLimits::class)
+            ->with(RequestRateLimits::class)
             ->willReturn($rate_limits);
 
-        $result = RateLimitResult::blocked(
+        $result = RequestRateLimitResult::blocked(
             reset_time: new DateTimeImmutable('@1642636860'), // +1 minute from timestamp
             rate_limits: $rate_limits,
         );
@@ -177,14 +177,14 @@ final class ThrottleRequestsTest extends TestCase
     #[Test]
     public function processAddsCorrectHeadersToSuccessfulResponse(): void
     {
-        $rate_limits = new RateLimits(id: 'test-user', per_second: 15, per_minute: 90);
+        $rate_limits = new RequestRateLimits(id: 'test-user', second: 15, minute: 90);
 
         $this->request->expects($this->once())
             ->method('getAttribute')
-            ->with(RateLimits::class)
+            ->with(RequestRateLimits::class)
             ->willReturn($rate_limits);
 
-        $result = RateLimitResult::allowed(
+        $result = RequestRateLimitResult::allowed(
             remaining_per_second: 14,
             remaining_per_minute: 89,
             reset_time: new DateTimeImmutable('@1642636860'),
@@ -216,7 +216,7 @@ final class ThrottleRequestsTest extends TestCase
         $this->request->expects($this->exactly(2))
             ->method('getAttribute')
             ->willReturnCallback(function ($key): string|null {
-                if ($key === RateLimits::class) {
+                if ($key === RequestRateLimits::class) {
                     return null;
                 }
                 if ($key === 'ip_address') {
@@ -225,17 +225,17 @@ final class ThrottleRequestsTest extends TestCase
                 return null;
             });
 
-        $result = RateLimitResult::allowed(
+        $result = RequestRateLimitResult::allowed(
             remaining_per_second: 4,
             remaining_per_minute: 29,
             reset_time: new DateTimeImmutable('+1 minute'),
-            rate_limits: new RateLimits(id: 'ip:1.2.3.4', per_second: 5, per_minute: 30),
+            rate_limits: new RequestRateLimits(id: 'ip:1.2.3.4', second: 5, minute: 30),
         );
 
         $this->rate_limiter->expects($this->once())
             ->method('throttle')
-            ->with($this->callback(function (RateLimits $limits): bool {
-                return $limits->per_second === 5 && $limits->per_minute === 30;
+            ->with($this->callback(function (RequestRateLimits $limits): bool {
+                return $limits->second === 5 && $limits->minute === 30;
             }))
             ->willReturn($result);
 
