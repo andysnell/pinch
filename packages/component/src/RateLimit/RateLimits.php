@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Component\RateLimit;
 
 use PhoneBurner\Pinch\Component\Cache\CacheKey;
-use PhoneBurner\Pinch\Component\Http\RateLimiter\InvalidRateLimits;
+use PhoneBurner\Pinch\Component\RateLimit\Exception\InvalidRateLimits;
 
 /**
  * Value object representing rate limiting configuration
@@ -21,12 +21,12 @@ final readonly class RateLimits
      * @param CacheKey|string $key Non-empty string identifier for the rate limit group
      * @param int|null $second Maximum requests allowed per second (positive integer or null for unlimited)
      * @param int|null $minute Maximum requests allowed per minute (positive integer or null for unlimited)
-     * @throws InvalidRateLimits When validation fails for any parameter
+     * @throws \PhoneBurner\Pinch\Component\RateLimit\Exception\InvalidRateLimits When validation fails for any parameter
      */
     public function __construct(
         CacheKey|string $key,
-        public int|null $second = 10,
-        public int|null $minute = 60,
+        public int|null $second = null,
+        public int|null $minute = null,
         public int|null $hour = null,
         public int|null $day = null,
     ) {

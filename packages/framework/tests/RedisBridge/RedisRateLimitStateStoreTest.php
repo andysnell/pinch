@@ -6,17 +6,18 @@ namespace PhoneBurner\Pinch\Framework\Tests\RedisBridge;
 
 use Carbon\CarbonImmutable;
 use PhoneBurner\Pinch\Component\Cache\CacheKey;
-use PhoneBurner\Pinch\Framework\RedisBridge\RedisRequestRateLimitStateStore;
+use PhoneBurner\Pinch\Component\RateLimit\RateLimitStateTimestamps;
+use PhoneBurner\Pinch\Framework\RedisBridge\RedisRateLimitStateStore;
 use PhoneBurner\Pinch\Time\Clock\Clock;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-final class RedisThrottlingStateStoreTest extends TestCase
+final class RedisRateLimitStateStoreTest extends TestCase
 {
     private \Redis&MockObject $redis;
     private Clock&MockObject $clock;
-    private RedisRequestRateLimitStateStore $store;
+    private RedisRateLimitStateStore $store;
 
     protected function setUp(): void
     {
@@ -24,7 +25,7 @@ final class RedisThrottlingStateStoreTest extends TestCase
 
         $this->redis = $this->createMock(\Redis::class);
         $this->clock = $this->createMock(Clock::class);
-        $this->store = new RedisRequestRateLimitStateStore($this->redis, $this->clock);
+        $this->store = new RedisRateLimitStateStore($this->redis, $this->clock);
     }
 
     #[Test]
@@ -45,10 +46,10 @@ final class RedisThrottlingStateStoreTest extends TestCase
         $this->redis->expects($matcher)
             ->method('incr')
             ->with(self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                1 => $arg === 'throttle.test_key.s.1756083947',
-                2 => $arg === 'throttle.test_key.m.1756083900',
-                3 => $arg === 'throttle.test_key.h.1756083600',
-                4 => $arg === 'throttle.test_key.d.1756080000',
+                1 => $arg === 'rate_limit.test_key.s.1756083947',
+                2 => $arg === 'rate_limit.test_key.m.1756083900',
+                3 => $arg === 'rate_limit.test_key.h.1756083600',
+                4 => $arg === 'rate_limit.test_key.d.1756080000',
                 default => false,
             }), 0)->willReturnSelf();
 
@@ -57,17 +58,17 @@ final class RedisThrottlingStateStoreTest extends TestCase
             ->method('expireAt')
             ->with(
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 'throttle.test_key.s.1756083947',
-                    2 => $arg === 'throttle.test_key.m.1756083900',
-                    3 => $arg === 'throttle.test_key.h.1756083600',
-                    4 => $arg === 'throttle.test_key.d.1756080000',
+                    1 => $arg === 'rate_limit.test_key.s.1756083947',
+                    2 => $arg === 'rate_limit.test_key.m.1756083900',
+                    3 => $arg === 'rate_limit.test_key.h.1756083600',
+                    4 => $arg === 'rate_limit.test_key.d.1756080000',
                     default => false,
                 }),
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 1756083948 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    2 => $arg === 1756083960 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    3 => $arg === 1756087200 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    4 => $arg === 1756166400 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
+                    1 => $arg === 1756083948 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    2 => $arg === 1756083960 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    3 => $arg === 1756087200 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    4 => $arg === 1756166400 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
                     default => false,
                 }),
                 'NX',
@@ -79,7 +80,7 @@ final class RedisThrottlingStateStoreTest extends TestCase
 
         $result = $this->store->get($key);
 
-        self::assertSame($datetime, $result->timestamp);
+        self::assertEquals(new RateLimitStateTimestamps($datetime), $result->timestamps);
         self::assertSame(0, $result->second);
         self::assertSame(0, $result->minute);
         self::assertSame(0, $result->hour);
@@ -104,10 +105,10 @@ final class RedisThrottlingStateStoreTest extends TestCase
         $this->redis->expects($matcher)
             ->method('incr')
             ->with(self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                1 => $arg === 'throttle.test_key.s.1756083947',
-                2 => $arg === 'throttle.test_key.m.1756083900',
-                3 => $arg === 'throttle.test_key.h.1756083600',
-                4 => $arg === 'throttle.test_key.d.1756080000',
+                1 => $arg === 'rate_limit.test_key.s.1756083947',
+                2 => $arg === 'rate_limit.test_key.m.1756083900',
+                3 => $arg === 'rate_limit.test_key.h.1756083600',
+                4 => $arg === 'rate_limit.test_key.d.1756080000',
                 default => false,
             }), 0)->willReturnSelf();
 
@@ -116,17 +117,17 @@ final class RedisThrottlingStateStoreTest extends TestCase
             ->method('expireAt')
             ->with(
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 'throttle.test_key.s.1756083947',
-                    2 => $arg === 'throttle.test_key.m.1756083900',
-                    3 => $arg === 'throttle.test_key.h.1756083600',
-                    4 => $arg === 'throttle.test_key.d.1756080000',
+                    1 => $arg === 'rate_limit.test_key.s.1756083947',
+                    2 => $arg === 'rate_limit.test_key.m.1756083900',
+                    3 => $arg === 'rate_limit.test_key.h.1756083600',
+                    4 => $arg === 'rate_limit.test_key.d.1756080000',
                     default => false,
                 }),
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 1756083948 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    2 => $arg === 1756083960 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    3 => $arg === 1756087200 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    4 => $arg === 1756166400 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
+                    1 => $arg === 1756083948 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    2 => $arg === 1756083960 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    3 => $arg === 1756087200 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    4 => $arg === 1756166400 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
                     default => false,
                 }),
                 'NX',
@@ -138,7 +139,7 @@ final class RedisThrottlingStateStoreTest extends TestCase
 
         $result = $this->store->get($cacheKey);
 
-        self::assertSame($datetime, $result->timestamp);
+        self::assertEquals(new RateLimitStateTimestamps($datetime), $result->timestamps);
         self::assertSame(5, $result->second);
         self::assertSame(10, $result->minute);
         self::assertSame(15, $result->hour);
@@ -164,10 +165,10 @@ final class RedisThrottlingStateStoreTest extends TestCase
         $this->redis->expects($matcher)
             ->method('incr')
             ->with(self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                1 => $arg === 'throttle.test_key.s.1756083947',
-                2 => $arg === 'throttle.test_key.m.1756083900',
-                3 => $arg === 'throttle.test_key.h.1756083600',
-                4 => $arg === 'throttle.test_key.d.1756080000',
+                1 => $arg === 'rate_limit.test_key.s.1756083947',
+                2 => $arg === 'rate_limit.test_key.m.1756083900',
+                3 => $arg === 'rate_limit.test_key.h.1756083600',
+                4 => $arg === 'rate_limit.test_key.d.1756080000',
                 default => false,
             }), 3)->willReturnSelf();
 
@@ -176,17 +177,17 @@ final class RedisThrottlingStateStoreTest extends TestCase
             ->method('expireAt')
             ->with(
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 'throttle.test_key.s.1756083947',
-                    2 => $arg === 'throttle.test_key.m.1756083900',
-                    3 => $arg === 'throttle.test_key.h.1756083600',
-                    4 => $arg === 'throttle.test_key.d.1756080000',
+                    1 => $arg === 'rate_limit.test_key.s.1756083947',
+                    2 => $arg === 'rate_limit.test_key.m.1756083900',
+                    3 => $arg === 'rate_limit.test_key.h.1756083600',
+                    4 => $arg === 'rate_limit.test_key.d.1756080000',
                     default => false,
                 }),
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 1756083948 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    2 => $arg === 1756083960 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    3 => $arg === 1756087200 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    4 => $arg === 1756166400 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
+                    1 => $arg === 1756083948 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    2 => $arg === 1756083960 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    3 => $arg === 1756087200 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    4 => $arg === 1756166400 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
                     default => false,
                 }),
                 'NX',
@@ -198,7 +199,7 @@ final class RedisThrottlingStateStoreTest extends TestCase
 
         $result = $this->store->set($key, $count);
 
-        self::assertSame($datetime, $result->timestamp);
+        self::assertEquals(new RateLimitStateTimestamps($datetime), $result->timestamps);
         self::assertSame(3, $result->second);
         self::assertSame(6, $result->minute);
         self::assertSame(9, $result->hour);
@@ -223,10 +224,10 @@ final class RedisThrottlingStateStoreTest extends TestCase
         $this->redis->expects($matcher)
             ->method('incr')
             ->with(self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                1 => $arg === 'throttle.test_key.s.1756083947',
-                2 => $arg === 'throttle.test_key.m.1756083900',
-                3 => $arg === 'throttle.test_key.h.1756083600',
-                4 => $arg === 'throttle.test_key.d.1756080000',
+                1 => $arg === 'rate_limit.test_key.s.1756083947',
+                2 => $arg === 'rate_limit.test_key.m.1756083900',
+                3 => $arg === 'rate_limit.test_key.h.1756083600',
+                4 => $arg === 'rate_limit.test_key.d.1756080000',
                 default => false,
             }), 1)->willReturnSelf();
 
@@ -235,17 +236,17 @@ final class RedisThrottlingStateStoreTest extends TestCase
             ->method('expireAt')
             ->with(
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 'throttle.test_key.s.1756083947',
-                    2 => $arg === 'throttle.test_key.m.1756083900',
-                    3 => $arg === 'throttle.test_key.h.1756083600',
-                    4 => $arg === 'throttle.test_key.d.1756080000',
+                    1 => $arg === 'rate_limit.test_key.s.1756083947',
+                    2 => $arg === 'rate_limit.test_key.m.1756083900',
+                    3 => $arg === 'rate_limit.test_key.h.1756083600',
+                    4 => $arg === 'rate_limit.test_key.d.1756080000',
                     default => false,
                 }),
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 1756083948 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    2 => $arg === 1756083960 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    3 => $arg === 1756087200 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    4 => $arg === 1756166400 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
+                    1 => $arg === 1756083948 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    2 => $arg === 1756083960 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    3 => $arg === 1756087200 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    4 => $arg === 1756166400 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
                     default => false,
                 }),
                 'NX',
@@ -281,10 +282,10 @@ final class RedisThrottlingStateStoreTest extends TestCase
         $this->redis->expects($matcher)
             ->method('incr')
             ->with(self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                1 => $arg === 'throttle.user.123.action.s.1756083947',
-                2 => $arg === 'throttle.user.123.action.m.1756083900',
-                3 => $arg === 'throttle.user.123.action.h.1756083600',
-                4 => $arg === 'throttle.user.123.action.d.1756080000',
+                1 => $arg === 'rate_limit.user.123.action.s.1756083947',
+                2 => $arg === 'rate_limit.user.123.action.m.1756083900',
+                3 => $arg === 'rate_limit.user.123.action.h.1756083600',
+                4 => $arg === 'rate_limit.user.123.action.d.1756080000',
                 default => false,
             }), 1)->willReturnSelf();
 
@@ -293,17 +294,17 @@ final class RedisThrottlingStateStoreTest extends TestCase
             ->method('expireAt')
             ->with(
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 'throttle.user.123.action.s.1756083947',
-                    2 => $arg === 'throttle.user.123.action.m.1756083900',
-                    3 => $arg === 'throttle.user.123.action.h.1756083600',
-                    4 => $arg === 'throttle.user.123.action.d.1756080000',
+                    1 => $arg === 'rate_limit.user.123.action.s.1756083947',
+                    2 => $arg === 'rate_limit.user.123.action.m.1756083900',
+                    3 => $arg === 'rate_limit.user.123.action.h.1756083600',
+                    4 => $arg === 'rate_limit.user.123.action.d.1756080000',
                     default => false,
                 }),
                 self::callback(static fn(mixed $arg): bool => match ($matcher->numberOfInvocations()) {
-                    1 => $arg === 1756083948 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    2 => $arg === 1756083960 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    3 => $arg === 1756087200 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
-                    4 => $arg === 1756166400 + RedisRequestRateLimitStateStore::DRIFT_ALLOWANCE,
+                    1 => $arg === 1756083948 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    2 => $arg === 1756083960 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    3 => $arg === 1756087200 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
+                    4 => $arg === 1756166400 + RedisRateLimitStateStore::CLOCK_DRIFT_ALLOWANCE,
                     default => false,
                 }),
                 'NX',

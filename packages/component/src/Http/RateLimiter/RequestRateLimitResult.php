@@ -6,6 +6,7 @@ namespace PhoneBurner\Pinch\Component\Http\RateLimiter;
 
 use DateTimeInterface;
 use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
+use PhoneBurner\Pinch\Component\RateLimit\RateLimitState;
 
 /**
  * Result of a request rate limit check. Not that our request rate limiting
@@ -21,8 +22,9 @@ final readonly class RequestRateLimitResult
         public int|null $remaining_per_second,
         public int|null $remaining_per_minute,
         public DateTimeInterface $reset_time,
-        public RequestRateLimits $rate_limits,
-    ) {
+        public RequestRateLimits $limits,
+    )
+    {
     }
 
     /**
@@ -33,13 +35,14 @@ final readonly class RequestRateLimitResult
         int|null $remaining_per_minute,
         DateTimeInterface $reset_time,
         RequestRateLimits $rate_limits,
-    ): self {
+    ): self
+    {
         return new self(
             allowed: true,
             remaining_per_second: $remaining_per_second,
             remaining_per_minute: $remaining_per_minute,
             reset_time: $reset_time,
-            rate_limits: $rate_limits,
+            limits: $rate_limits,
         );
     }
 
@@ -49,25 +52,45 @@ final readonly class RequestRateLimitResult
     public static function blocked(
         DateTimeInterface $reset_time,
         RequestRateLimits $rate_limits,
-    ): self {
+    ): self
+    {
         return new self(
             allowed: false,
             remaining_per_second: 0,
             remaining_per_minute: 0,
             reset_time: $reset_time,
-            rate_limits: $rate_limits,
+            limits: $rate_limits,
         );
     }
 
     public function policy(): string|null
     {
-        if()
-        \sprintf('q=%d;w=1, q=%d;w=60', $result->rate_limits->second, $result->rate_limits->minute)
+        $second_policy = $this->limits->second === null ? '' : \sprintf('per-second;q=%d;w=1', $this->limits->second);
+        $minute_policy = $this->limits->minute === null ? '' : \sprintf('per-minute;q=%d;w=60', $this->limits->minute);
+        return match (true) {
+            $second_policy && $minute_policy => \sprintf('%s,%s', $second_policy, $minute_policy),
+            $second_policy !== '' => $second_policy,
+            $minute_policy !== '' => $minute_policy,
+            default => null,
+        };
+    }
+
+    public function limit(): string|null
+    {
+        if ($this->limits->minute === null && $this->limits->second === null) {
+            return null;
+        }
+
+        if ($this->limits->second === null || $this->remaining_per_minute <= $this->remaining_per_second){
+            return \sprintf('"per-minute";r=%s,t=%s', $this->remaining_per_minute, $this->reset_time);
+        }
+
+        return \sprintf('"per-second";r=%s,t=%s', $this->remaining_per_second, $this->reset_time);
     }
 
     public function remaining(): int
     {
-        if($this->allowed === false){
+        if ($this->allowed === false) {
             return 0;
         }
     }

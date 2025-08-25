@@ -43,10 +43,10 @@ class ThrottleRequests implements MiddlewareInterface
         if (! $result->allowed) {
             return new TooManyRequestsResponse(
                 headers: [
-                    HttpHeader::RATELIMIT_POLICY => \sprintf('"second";q=%d;w=1, "minute";q=%d;w=60', $result->rate_limits->second, $result->rate_limits->minute),
+                    HttpHeader::RATELIMIT_POLICY => \sprintf('"second";q=%d;w=1, "minute";q=%d;w=60', $result->limits->second, $result->limits->minute),
                     HttpHeader::RATELIMIT => \sprintf(
                         'limit=%d, remaining=%d, reset=%d',
-                        $result->rate_limits->second,
+                        $result->limits->second,
                         $result->remaining_per_second,
                         $result->reset_time->getTimestamp(),
                     ),
@@ -59,10 +59,10 @@ class ThrottleRequests implements MiddlewareInterface
         $response = $handler->handle($request);
 
         return $response
-            ->withHeader(HttpHeader::RATELIMIT_POLICY, \sprintf('%d;w=1, %d;w=60', $result->rate_limits->second, $result->rate_limits->minute))
+            ->withHeader(HttpHeader::RATELIMIT_POLICY, \sprintf('%d;w=1, %d;w=60', $result->limits->second, $result->limits->minute))
             ->withHeader(HttpHeader::RATELIMIT, \sprintf(
                 'limit=%d, remaining=%d, reset=%d',
-                $result->rate_limits->second,
+                $result->limits->second,
                 $result->remaining_per_second,
                 $result->reset_time->getTimestamp(),
             ));

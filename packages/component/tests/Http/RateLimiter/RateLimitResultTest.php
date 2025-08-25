@@ -23,14 +23,14 @@ final class RateLimitResultTest extends TestCase
             remaining_per_second: 5,
             remaining_per_minute: 30,
             reset_time: $reset_time,
-            rate_limits: $rate_limits,
+            limits: $rate_limits,
         );
 
         self::assertTrue($result->allowed);
         self::assertSame(5, $result->remaining_per_second);
         self::assertSame(30, $result->remaining_per_minute);
         self::assertSame($reset_time, $result->reset_time);
-        self::assertSame($rate_limits, $result->rate_limits);
+        self::assertSame($rate_limits, $result->limits);
     }
 
     #[Test]
@@ -49,7 +49,7 @@ final class RateLimitResultTest extends TestCase
         self::assertTrue($result->allowed);
         self::assertSame(8, $result->remaining_per_second);
         self::assertSame(45, $result->remaining_per_minute);
-        self::assertSame($rate_limits, $result->rate_limits);
+        self::assertSame($rate_limits, $result->limits);
     }
 
     #[Test]
@@ -66,7 +66,7 @@ final class RateLimitResultTest extends TestCase
         self::assertFalse($result->allowed);
         self::assertSame(0, $result->remaining_per_second);
         self::assertSame(0, $result->remaining_per_minute);
-        self::assertSame($rate_limits, $result->rate_limits);
+        self::assertSame($rate_limits, $result->limits);
     }
 
     #[Test]

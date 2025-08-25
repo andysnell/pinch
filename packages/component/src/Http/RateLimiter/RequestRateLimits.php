@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Component\Http\RateLimiter;
 
 use PhoneBurner\Pinch\Component\Cache\CacheKey;
-use PhoneBurner\Pinch\Component\RateLimit\InvalidRateLimits;
+use PhoneBurner\Pinch\Component\RateLimit\Exception\InvalidRateLimits;
 
 /**
  * Value object representing rate limiting configuration

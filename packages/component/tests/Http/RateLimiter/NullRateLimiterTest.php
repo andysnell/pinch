@@ -39,7 +39,7 @@ final class NullRateLimiterTest extends TestCase
         self::assertTrue($result->allowed);
         self::assertSame(5, $result->remaining_per_second);
         self::assertSame(100, $result->remaining_per_minute);
-        self::assertSame($limits, $result->rate_limits);
+        self::assertSame($limits, $result->limits);
     }
 
     #[Test]
@@ -56,7 +56,7 @@ final class NullRateLimiterTest extends TestCase
         self::assertTrue($result->allowed);
         self::assertSame(10, $result->remaining_per_second);
         self::assertSame(60, $result->remaining_per_minute);
-        self::assertSame($limits, $result->rate_limits);
+        self::assertSame($limits, $result->limits);
     }
 
     #[Test]
