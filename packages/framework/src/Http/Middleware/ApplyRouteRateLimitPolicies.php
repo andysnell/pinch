@@ -49,12 +49,12 @@ class ApplyRouteRateLimitPolicies implements MiddlewareInterface
         $result = $this->rate_limiter->throttle($rate_limit_group, $rate_limits);
         if ($result->allowed) {
             return $handler->handle($request)
-                ->withAddedHeader(HttpHeader::RATELIMIT_POLICY, $result->policy())
+                ->withAddedHeader(HttpHeader::RATELIMIT_POLICY, $result->policies())
                 ->withAddedHeader(HttpHeader::RATELIMIT, $result->limit($datetime));
         }
 
         return new TooManyRequestsResponse(headers: [
-            HttpHeader::RATELIMIT_POLICY => $result->policy(),
+            HttpHeader::RATELIMIT_POLICY => $result->policies(),
             HttpHeader::RATELIMIT => $result->limit($datetime),
             HttpHeader::RETRY_AFTER => $result->retry($datetime),
         ]);

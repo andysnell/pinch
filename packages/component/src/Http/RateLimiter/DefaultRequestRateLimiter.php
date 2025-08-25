@@ -23,7 +23,7 @@ class DefaultRequestRateLimiter implements RequestRateLimiter
     {
         $now = $this->clock->now();
         if ($limits->second === null && $limits->minute === null) {
-            return new RequestRateLimitResult(
+            return new DefaultRequestRateLimitResult(
                 true,
                 null,
                 null,
@@ -43,10 +43,14 @@ class DefaultRequestRateLimiter implements RequestRateLimiter
            || ($state->second <= $limits->second && $limits->minute === null)
            || ($state->second <= $limits->second && $limits->minute <= null);
 
-        $result = new RequestRateLimitResult(
+        $result = new DefaultRequestRateLimitResult(
             allowed: true,
             remaining_per_second: \max(0, $limits->second - $state->second),
             remaining_per_minute: \max(0, $limits->minute - $state->minute),
-        )
+            reset_time: $now,
+            limits: $limits,
+        );
+
+        return $result;
     }
 }

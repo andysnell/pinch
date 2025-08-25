@@ -19,7 +19,7 @@ final readonly class NullRequestRateLimiter implements RequestRateLimiter
 
     public function throttle(RequestRateLimitGroup $group, RequestRateLimits $limits): RequestRateLimitResult
     {
-        $result = RequestRateLimitResult::allowed(
+        $result = DefaultRequestRateLimitResult::allowed(
             remaining_per_second: $limits->second,
             remaining_per_minute: $limits->minute,
             reset_time: $this->clock->now()->addMinutes(1),
