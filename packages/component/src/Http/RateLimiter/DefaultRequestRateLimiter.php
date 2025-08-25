@@ -22,7 +22,7 @@ class DefaultRequestRateLimiter implements RequestRateLimiter
     public function throttle(RequestRateLimitGroup $group, RequestRateLimits $limits): RequestRateLimitResult
     {
         $now = $this->clock->now();
-        if($limits->second === null && $limits->minute === null){
+        if ($limits->second === null && $limits->minute === null) {
             return new RequestRateLimitResult(
                 true,
                 null,
@@ -40,14 +40,13 @@ class DefaultRequestRateLimiter implements RequestRateLimiter
 
         $allowed = ($limits->second === null && $limits->minute === null)
            || ($limits->second === null && $state->minute <= $limits->minute)
-           ||  ($state->second <= $limits->second && $limits->minute === null)
+           || ($state->second <= $limits->second && $limits->minute === null)
            || ($state->second <= $limits->second && $limits->minute <= null);
 
         $result = new RequestRateLimitResult(
             allowed: true,
             remaining_per_second: \max(0, $limits->second - $state->second),
             remaining_per_minute: \max(0, $limits->minute - $state->minute),
-
         )
     }
 }

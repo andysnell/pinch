@@ -10,7 +10,7 @@ use PhoneBurner\Pinch\Framework\Http\Config\RoutingConfigStruct;
 use PhoneBurner\Pinch\Framework\Http\Config\SessionConfigStruct;
 use PhoneBurner\Pinch\Framework\Http\Cookie\Middleware\ManageCookies;
 use PhoneBurner\Pinch\Framework\Http\Middleware\AddCorrelationIdHeaderToResponse;
-use PhoneBurner\Pinch\Framework\Http\Middleware\ApplyGlobalRateLimits;
+use PhoneBurner\Pinch\Framework\Http\Middleware\ApplyGlobalRateLimitPolicies;
 use PhoneBurner\Pinch\Framework\Http\Middleware\CatchExceptionalResponses;
 use PhoneBurner\Pinch\Framework\Http\Middleware\EvaluateWrappedResponseFactories;
 use PhoneBurner\Pinch\Framework\Http\Middleware\TransformHttpExceptionResponses;
@@ -54,7 +54,7 @@ return [
             EvaluateWrappedResponseFactories::class,
             // Validate Authentication Middleware Goes Here
             AttachRouteToRequest::class,
-            ApplyGlobalRateLimits::class,
+            ApplyGlobalRateLimitPolicies::class,
             DispatchRouteMiddleware::class,
             DispatchRouteRequestHandler::class,
         ],

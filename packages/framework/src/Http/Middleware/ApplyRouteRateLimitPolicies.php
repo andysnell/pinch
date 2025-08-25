@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Framework\Http\Middleware;
 
+use PhoneBurner\Pinch\Component\Http\Domain\HttpHeader;
 use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimiter;
 use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimitGroup;
 use PhoneBurner\Pinch\Component\Http\RateLimiter\RequestRateLimits;
-use PhoneBurner\Pinch\Component\IpAddress\IpAddress;
+use PhoneBurner\Pinch\Component\Http\Response\Exceptional\TooManyRequestsResponse;
+use PhoneBurner\Pinch\Component\Http\Routing\Match\RouteMatch;
+use PhoneBurner\Pinch\Time\Clock\Clock;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -22,21 +25,17 @@ use Psr\Http\Server\RequestHandlerInterface;
  * as firehose endpoints that want to be as efficient as possible in handling the
  * request.
  */
-class ApplyGlobalRateLimits implements MiddlewareInterface
+class ApplyRouteRateLimitPolicies implements MiddlewareInterface
 {
-    public const array DEFAULT_RATE_LIMIT_GROUP_ATTRIBUTES = [
-        'ip' => IpAddress::class,
-    ];
-
     public function __construct(
+        private readonly Clock $clock,
         private readonly RequestRateLimiter $rate_limiter,
-        private readonly RequestRateLimits|null $default_rate_limit = null,
     ) {
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $rate_limits = $this->resolveRateLimits($request);
+        $rate_limits = $this->resolveRateLimitPolicies($request);
         if ($rate_limits === null) {
             return $handler->handle($request);
         }
@@ -46,23 +45,29 @@ class ApplyGlobalRateLimits implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        return $handler->handle($request);
+        $datetime = $this->clock->now();
+        $result = $this->rate_limiter->throttle($rate_limit_group, $rate_limits);
+        if ($result->allowed) {
+            return $handler->handle($request)
+                ->withAddedHeader(HttpHeader::RATELIMIT_POLICY, $result->policy())
+                ->withAddedHeader(HttpHeader::RATELIMIT, $result->limit($datetime));
+        }
+
+        return new TooManyRequestsResponse(headers: [
+            HttpHeader::RATELIMIT_POLICY => $result->policy(),
+            HttpHeader::RATELIMIT => $result->limit($datetime),
+            HttpHeader::RETRY_AFTER => $result->retry($datetime),
+        ]);
     }
 
-    private function resolveRateLimits(ServerRequestInterface $request): RequestRateLimits|null
+    private function resolveRateLimitPolicies(ServerRequestInterface $request): RequestRateLimits|null
     {
-        $rate_limits = $request->getAttribute(RequestRateLimits::class);
-        if ($rate_limits instanceof RequestRateLimits) {
+        $rate_limits = $request->getAttribute(RouteMatch::class)?->getAttributes()[RequestRateLimits::class] ?? null;
+        if ($rate_limits instanceof RequestRateLimits || $rate_limits === null) {
             return $rate_limits;
         }
 
-        if ($rate_limits !== null) {
-            throw new \LogicException(
-                \sprintf('Rate Limit Misconfiguration: got %s', \get_debug_type($rate_limits)),
-            );
-        }
-
-        return $this->default_rate_limit;
+        throw new \LogicException(\sprintf('Rate Limit Misconfiguration: got %s', \get_debug_type($rate_limits)));
     }
 
     private function resolveRateLimitGroup(ServerRequestInterface $request): RequestRateLimitGroup|null
