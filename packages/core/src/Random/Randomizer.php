@@ -47,6 +47,21 @@ class Randomizer
         };
     }
 
+    /**
+     * @param int<0,100>|null $weight the probability of returning true, or null for 50% chance
+     */
+    public function bool(int|null $weight = null): bool
+    {
+        if ($weight === null) {
+            return (bool)$this->int(0, 1);
+        }
+
+        $weight > 0 || throw new \UnexpectedValueException('weight must be greater than 0');
+        $weight <= 100 || throw new \UnexpectedValueException('weight must be less than or equal to 100');
+
+        return (bool)$this->int(0, 100) <= $weight;
+    }
+
     public function int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX): int
     {
         $min <= $max || throw new \UnexpectedValueException('min must be less than or equal to max');

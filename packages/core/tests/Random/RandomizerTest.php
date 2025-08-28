@@ -539,4 +539,76 @@ final class RandomizerTest extends TestCase
             new WeightedItem(StoplightState::Red, 0),
         );
     }
+
+    #[Test]
+    public function boolReturnsValidBoolean(): void
+    {
+        self::assertIsBool($this->randomizer->bool());
+        self::assertIsBool($this->randomizer->bool(null));
+    }
+
+    /**
+     * @param int<0,100> $weight
+     */
+    #[Test]
+    #[TestWith([1])]
+    #[TestWith([25])]
+    #[TestWith([50])]
+    #[TestWith([75])]
+    #[TestWith([100])]
+    public function boolReturnsValidBooleanWithWeight(int $weight): void
+    {
+        self::assertIsBool($this->randomizer->bool($weight));
+    }
+
+    #[Test]
+    public function boolWith100WeightAlwaysReturnsTrue(): void
+    {
+        for ($i = 0; $i < 100; ++$i) {
+            self::assertTrue($this->randomizer->bool(100));
+        }
+    }
+
+    #[Test]
+    public function boolWithNullWeightHasRoughly50PercentDistribution(): void
+    {
+        $true_count = 0;
+        $total_iterations = 10000;
+
+        for ($i = 0; $i < $total_iterations; ++$i) {
+            if ($this->randomizer->bool(null)) {
+                ++$true_count;
+            }
+        }
+
+        // With null weight (50% chance), we expect roughly 50% true results
+        $actual_percentage = $true_count / $total_iterations;
+        self::assertEqualsWithDelta(0.5, $actual_percentage, 0.05, 'Null weight should produce roughly 50% true results');
+    }
+
+    #[Test]
+    public function boolThrowsExceptionForZeroWeight(): void
+    {
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('weight must be greater than 0');
+        $this->randomizer->bool(0);
+    }
+
+    #[Test]
+    public function boolThrowsExceptionForNegativeWeight(): void
+    {
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('weight must be greater than 0');
+        /** @phpstan-ignore-next-line (intentional negative weight for testing) */
+        $this->randomizer->bool(-5);
+    }
+
+    #[Test]
+    public function boolThrowsExceptionForWeightGreaterThan100(): void
+    {
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('weight must be less than or equal to 100');
+        /** @phpstan-ignore-next-line (intentional weight greater than 100 for testing) */
+        $this->randomizer->bool(101);
+    }
 }
