@@ -258,4 +258,4 @@ prettier-%: | $(DOCKER_STAMP)
 ##------------------------------------------------------------------------------
 
 -include build/Makefile
--include ./local/Makefile
+-include .local/Makefile

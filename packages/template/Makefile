@@ -223,10 +223,15 @@ CI_PREFIX := $(if $(filter true,$(CI)),ci:,)
 lint phpcbf phpcs phpstan rector rector-dry-run: $(BUILD_STAMP)
 	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer run-script "$(CI_PREFIX)$@"
 
-.PHONY: phpunit phpunit-coverage test behat paratest paratest-coverage
-phpunit phpunit-coverage test behat paratest paratest-coverage: $(BUILD_STAMP)
+.PHONY: phpunit test behat paratest
+phpunit test behat paratest: $(BUILD_STAMP)
 	docker compose --progress=quiet up --detach
 	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=off php composer run-script "$(CI_PREFIX)$@"
+
+.PHONY: phpunit-coverage paratest-coverage
+phpunit-coverage paratest-coverage: $(BUILD_STAMP)
+	docker compose --progress=quiet up --detach
+	docker compose run --rm --user=$$(id -u):$$(id -g) -e XDEBUG_MODE=coverage php composer run-script "$(CI_PREFIX)$@"
 
 .NOTPARALLEL: ci
 .PHONY: ci
@@ -239,16 +244,16 @@ pre-ci preci: prettier-write rector phpcbf ci
 # Run the PHP development server to serve the HTML test coverage report on port 8000.
 .PHONY: serve-coverage
 serve-coverage: | build/phpunit
-	@docker compose run --rm --publish 8000:80 ghcr.io/phoneburner/pinch-php php -S 0.0.0.0:80 -t /app/build/phpunit
+	@docker run --rm --env-file "$${PWD}/.env" --user=$$(id -u):$$(id -g) --volume $${PWD}:/app --publish 8000:80 ghcr.io/phoneburner/pinch-php php -S 0.0.0.0:80 -t /app/build/phpunit
 
 ##------------------------------------------------------------------------------
 # Prettier Code Formatter for JSON, YAML, HTML, Markdown, and CSS Files
 # Example Usage: `make prettier-check`, `makeprettier-write`
 ##------------------------------------------------------------------------------
 
-.PHONY: prettier prettier-%
+.PHONY: prettier-%
 prettier-%: | $(DOCKER_STAMP)
-	$(docker-run) --volume $${PWD}:/app --user=$$(id -u):$$(id -g) ghcr.io/phoneburner/pinch-prettier --$* .
+	$(docker-run) --volume $${PWD}:/app ghcr.io/phoneburner/pinch-prettier --$* .
 
 ##------------------------------------------------------------------------------
 # Redocly OpenAPI Validation and Documentation Generation
@@ -274,4 +279,4 @@ resources/views/openapi.%: openapi.yaml redocly.yaml
 ##------------------------------------------------------------------------------
 
 -include build/Makefile
--include ./local/Makefile
+-include .local/Makefile
