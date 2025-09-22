@@ -25,7 +25,6 @@ class EnableHttpSession implements MiddlewareInterface
     {
         $session = $this->session_manager->start($request);
         $request = $request->withAttribute(SessionData::class, $session);
-//        $this->session_manager->session()->flash('thing', 'hello world');
         $response = $handler->handle($request);
         $this->session_manager->save();
 

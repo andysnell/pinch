@@ -45,6 +45,7 @@ use PhoneBurner\Pinch\Framework\Http\EventListener\WriteSerializedResponseToFile
 use PhoneBurner\Pinch\Framework\Http\MessageSignature\Rfc9421\HttpMessageSignatureFactory;
 use PhoneBurner\Pinch\Framework\Http\Middleware\AddCorrelationIdHeaderToResponse;
 use PhoneBurner\Pinch\Framework\Http\Middleware\CatchExceptionalResponses;
+use PhoneBurner\Pinch\Framework\Http\Middleware\RestrictToNonProductionEnvironments;
 use PhoneBurner\Pinch\Framework\Http\Middleware\TransformHttpExceptionResponses;
 use PhoneBurner\Pinch\Framework\Http\RateLimiter\RedisRateLimiter;
 use PhoneBurner\Pinch\Framework\Http\Request\RequestFactory;
@@ -62,6 +63,7 @@ use PhoneBurner\Pinch\Framework\Http\Routing\FastRouter;
 use PhoneBurner\Pinch\Framework\Http\Routing\Middleware\AttachRouteToRequest;
 use PhoneBurner\Pinch\Framework\Http\Routing\Middleware\DispatchRouteMiddleware;
 use PhoneBurner\Pinch\Framework\Http\Routing\Middleware\DispatchRouteRequestHandler;
+use PhoneBurner\Pinch\Framework\Http\Session\Middleware\EnableHttpSession;
 use PhoneBurner\Pinch\Framework\Http\Session\SessionHandlerServiceFactory;
 use PhoneBurner\Pinch\Framework\Http\Session\SessionManager;
 use PhoneBurner\Pinch\Time\Clock\Clock;
@@ -96,6 +98,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             DispatchRouteMiddleware::class,
             DispatchRouteRequestHandler::class,
             EmitterInterface::class,
+            EnableHttpSession::class,
             ErrorRequestHandler::class,
             FastRouteDispatcherFactory::class,
             FastRouteResultFactory::class,
@@ -119,6 +122,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             RequestHandlerInterface::class,
             RequestSerializer::class,
             ResponseSerializer::class,
+            RestrictToNonProductionEnvironments::class,
             Router::class,
             ServerRequestFactoryInterface::class,
             SessionHandler::class,
@@ -396,10 +400,25 @@ final class HttpServiceProvider implements DeferrableServiceProvider
         $app->set(PhpInfoRequestHandler::class, NewInstanceServiceFactory::singleton());
 
         $app->set(
+            EnableHttpSession::class,
+            static fn(App $app): EnableHttpSession => new EnableHttpSession(
+                $app->get(SessionManager::class),
+                $app->get(CookieJar::class),
+            ),
+        );
+
+        $app->set(
+            RestrictToNonProductionEnvironments::class,
+            static fn(App $app): RestrictToNonProductionEnvironments => new RestrictToNonProductionEnvironments(
+                $app->environment->stage,
+            ),
+        );
+
+        $app->set(
             OpenApiRequestHandler::class,
             static fn(App $app): OpenApiRequestHandler => new OpenApiRequestHandler(
                 path('/resources/views/openapi.json'),
-                path('/resources/views/openapi.json'),
+                path('/resources/views/openapi.html'),
                 null, // do not enable YAML by default
             ),
         );
