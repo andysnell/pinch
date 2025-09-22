@@ -16,6 +16,7 @@ use PhoneBurner\Pinch\Framework\Cache\CacheServiceProvider;
 use PhoneBurner\Pinch\Framework\Console\ConsoleServiceProvider;
 use PhoneBurner\Pinch\Framework\Database\DatabaseServiceProvider;
 use PhoneBurner\Pinch\Framework\EventDispatcher\EventDispatcherServiceProvider;
+use PhoneBurner\Pinch\Framework\EventSourcing\EventSourcingServiceProvider;
 use PhoneBurner\Pinch\Framework\HealthCheck\HealthCheckServiceProvider;
 use PhoneBurner\Pinch\Framework\Http\HttpServiceProvider;
 use PhoneBurner\Pinch\Framework\HttpClient\HttpClientServiceProvider;
@@ -40,6 +41,7 @@ class ServiceContainerFactory implements ServiceContainerFactoryContract
         ConsoleServiceProvider::class,
         DatabaseServiceProvider::class,
         EventDispatcherServiceProvider::class,
+        EventSourcingServiceProvider::class,
         HealthCheckServiceProvider::class,
         HttpServiceProvider::class,
         HttpClientServiceProvider::class,

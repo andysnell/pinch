@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Framework\Http;
 
+use Crell\AttributeUtils\ClassAnalyzer;
 use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
+use PhoneBurner\ApiHandler\HandlerFactory as HandlerFactoryContract;
+use PhoneBurner\ApiHandler\TransformableResponseFactory;
 use PhoneBurner\Pinch\Attribute\Usage\Internal;
 use PhoneBurner\Pinch\Component\App\App;
 use PhoneBurner\Pinch\Component\App\DeferrableServiceProvider;
@@ -36,6 +39,12 @@ use PhoneBurner\Pinch\Component\Http\Session\SessionHandler;
 use PhoneBurner\Pinch\Component\Http\Session\SessionManager as SessionManagerContract;
 use PhoneBurner\Pinch\Component\Http\Stream\StreamFactory;
 use PhoneBurner\Pinch\Component\Logging\LogTrace;
+use PhoneBurner\Pinch\Framework\Http\Api\Hal\HalMiddleware;
+use PhoneBurner\Pinch\Framework\Http\Api\Hal\NullEmbedder;
+use PhoneBurner\Pinch\Framework\Http\Api\Hal\RouteDefinitionSelfLinker;
+use PhoneBurner\Pinch\Framework\Http\Api\Handler\ApiResponseFactory;
+use PhoneBurner\Pinch\Framework\Http\Api\Handler\GenericResolver;
+use PhoneBurner\Pinch\Framework\Http\Api\Handler\HandlerFactory;
 use PhoneBurner\Pinch\Framework\Http\Config\HttpConfigStruct;
 use PhoneBurner\Pinch\Framework\Http\Cookie\CookieEncrypter;
 use PhoneBurner\Pinch\Framework\Http\Cookie\Middleware\ManageCookies;
@@ -103,6 +112,10 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             FastRouteDispatcherFactory::class,
             FastRouteResultFactory::class,
             FastRouter::class,
+            GenericResolver::class,
+            HalMiddleware::class,
+            HandlerFactory::class,
+            HandlerFactoryContract::class,
             HtmlResponseTransformerStrategy::class,
             HttpKernel::class,
             JsonResponseTransformerStrategy::class,
@@ -112,6 +125,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             ManageCookies::class,
             MiddlewareRequestHandlerFactory::class,
             NotFoundRequestHandler::class,
+            NullEmbedder::class,
             OpenApiRequestHandler::class,
             PhpInfoRequestHandler::class,
             RateLimiter::class,
@@ -124,6 +138,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             ResponseSerializer::class,
             RestrictToNonProductionEnvironments::class,
             Router::class,
+            RouteDefinitionSelfLinker::class,
             ServerRequestFactoryInterface::class,
             SessionHandler::class,
             SessionManager::class,
@@ -150,6 +165,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             StreamFactoryInterface::class => StreamFactory::class,
             ServerRequestFactoryInterface::class => RequestFactory::class,
             HttpMessageSignatureFactoryContract::class => HttpMessageSignatureFactory::class,
+            HandlerFactoryContract::class => HandlerFactory::class,
         ];
     }
 
@@ -420,6 +436,39 @@ final class HttpServiceProvider implements DeferrableServiceProvider
                 path('/resources/views/openapi.json'),
                 path('/resources/views/openapi.html'),
                 null, // do not enable YAML by default
+            ),
+        );
+
+        $app->set(
+            GenericResolver::class,
+            static fn(App $app): GenericResolver => new GenericResolver(
+                $app,
+                $app->get(Router::class),
+            ),
+        );
+
+        $app->set(
+            HalMiddleware::class,
+            static fn(App $app): HalMiddleware => new HalMiddleware($app),
+        );
+
+        $app->set(
+            HandlerFactory::class,
+            static fn(App $app): HandlerFactory => new HandlerFactory(
+                $app->services,
+                new TransformableResponseFactory(
+                    new ApiResponseFactory(),
+                ),
+            ),
+        );
+
+        $app->set(NullEmbedder::class, NewInstanceServiceFactory::singleton());
+
+        $app->set(
+            RouteDefinitionSelfLinker::class,
+            static fn(App $app): RouteDefinitionSelfLinker => new RouteDefinitionSelfLinker(
+                $app->get(DefinitionList::class),
+                $app->get(ClassAnalyzer::class),
             ),
         );
     }
