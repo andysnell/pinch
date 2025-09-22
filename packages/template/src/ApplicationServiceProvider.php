@@ -11,7 +11,7 @@ use PhoneBurner\Pinch\Component\Cache\Lock\LockFactory;
 use PhoneBurner\Pinch\Framework\App\Config\AppConfigStruct;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 
 /**
  * @codeCoverageIgnore
@@ -38,7 +38,7 @@ class ApplicationServiceProvider implements ServiceProvider
             static fn(App $app): ApplicationScheduleProvider => new ApplicationScheduleProvider(
                 $app->get(CacheItemPoolInterface::class),
                 $app->get(LockFactory::class),
-                $app->get(EventDispatcher::class),
+                $app->get(SymfonyEventDispatcherInterface::class),
                 $app->get(LoggerInterface::class),
             ),
         );

@@ -12,7 +12,7 @@ use PhoneBurner\Pinch\Time\Interval\TimeInterval;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\ProxyAdapter;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 use Symfony\Component\Lock\LockInterface;
 use Symfony\Component\Messenger\Message\RedispatchMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
@@ -39,7 +39,7 @@ class ApplicationScheduleProvider implements ScheduleProviderInterface
     public function __construct(
         private readonly CacheItemPoolInterface $cache,
         private readonly LockFactory $lock_factory,
-        private readonly EventDispatcher $dispatcher,
+        private readonly SymfonyEventDispatcherInterface $dispatcher,
         private readonly LoggerInterface $logger,
     ) {
     }
