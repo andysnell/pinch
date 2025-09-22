@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use PhoneBurner\Pinch\Array\Arrayable;
 use PhoneBurner\Pinch\Tests\Fixtures\IntBackedEnum;
 use PhoneBurner\Pinch\Tests\Fixtures\StoplightState;
+use PhoneBurner\Pinch\Tests\Fixtures\TestEnum;
 use PhoneBurner\Pinch\Time\Standards\AnsiSql;
 use PHPUnit\Framework\Attributes\CoversFunction;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -24,6 +25,7 @@ use function PhoneBurner\Pinch\Type\cast_nullable_nonempty_float;
 use function PhoneBurner\Pinch\Type\cast_nullable_nonempty_int;
 use function PhoneBurner\Pinch\Type\cast_nullable_nonempty_string;
 use function PhoneBurner\Pinch\Type\cast_nullable_string;
+use function PhoneBurner\Pinch\Type\cast_string;
 use function PhoneBurner\Pinch\Type\get_debug_value;
 use function PhoneBurner\Pinch\Type\is_accessible;
 use function PhoneBurner\Pinch\Type\is_arrayable;
@@ -110,7 +112,9 @@ use function PhoneBurner\Pinch\Type\narrow_string;
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_positive_int')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_resource')]
 #[CoversFunction('PhoneBurner\Pinch\Type\narrow_string')]
+#[CoversFunction('PhoneBurner\Pinch\Type\cast_string')]
 #[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_string')]
+#[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_nonempty_string')]
 #[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_int')]
 #[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_float')]
 #[CoversFunction('PhoneBurner\Pinch\Type\cast_nullable_bool')]
@@ -167,6 +171,8 @@ final class TypeFunctionsTest extends TestCase
         self::assertFalse(is_castable_to_string([]));
         self::assertFalse(is_castable_to_string(new \stdClass()));
         self::assertFalse(is_castable_to_string(\fopen('php://memory', 'r+b')));
+        self::assertFalse(is_castable_to_string(TestEnum::Bar));
+        self::assertFalse(is_castable_to_string(StoplightState::Green));
     }
 
     #[Test]
@@ -964,17 +970,52 @@ final class TypeFunctionsTest extends TestCase
 
     #[DataProvider('providesStringTestCases')]
     #[Test]
-    public function stringReturnsExpectedValue(mixed $input, string|null $expected): void
+    public function castStringReturnsExpectedValue(mixed $input, string|null $expected): void
     {
-        self::assertSame($expected, cast_nullable_string($input));
+        self::assertSame($expected, cast_string($input));
     }
 
     public static function providesStringTestCases(): \Generator
     {
         yield [0, '0'];
+        yield [0.0, '0.0'];
         yield [1, '1'];
         yield [-1, '-1'];
         yield [1.4433, '1.4433'];
+        yield [\M_PI, '3.1415926535898'];
+        yield [\INF, 'INF'];
+        yield [-\INF, '-INF'];
+        yield [\NAN, 'NAN'];
+        yield [\PHP_INT_MAX, (string)\PHP_INT_MAX];
+        yield ['432', '432'];
+        yield ["hello, world", "hello, world"];
+        yield ['0', '0'];
+        yield [true, '1'];
+        yield [false, ''];
+        yield [null, ''];
+        yield [IntBackedEnum::Bar, '2'];
+        yield [StoplightState::Red, 'red'];
+        yield [TestEnum::Bar, 'bar'];
+    }
+
+    #[DataProvider('providesNullableStringTestCases')]
+    #[Test]
+    public function castNullableStringReturnsExpectedValue(mixed $input, string|null $expected): void
+    {
+        self::assertSame($expected, cast_nullable_string($input));
+    }
+
+    public static function providesNullableStringTestCases(): \Generator
+    {
+        yield [0, '0'];
+        yield [0.0, '0.0'];
+        yield [1, '1'];
+        yield [-1, '-1'];
+        yield [1.4433, '1.4433'];
+        yield [\M_PI, '3.1415926535898'];
+        yield [\INF, 'INF'];
+        yield [-\INF, '-INF'];
+        yield [\NAN, 'NAN'];
         yield [\PHP_INT_MAX, (string)\PHP_INT_MAX];
         yield ['432', '432'];
         yield ["hello, world", "hello, world"];
@@ -984,11 +1025,12 @@ final class TypeFunctionsTest extends TestCase
         yield [null, null];
         yield [IntBackedEnum::Bar, '2'];
         yield [StoplightState::Red, 'red'];
+        yield [TestEnum::Bar, 'bar'];
     }
 
     #[DataProvider('providesBooleanTestCases')]
     #[Test]
-    public function booleanReturnsExpectedValue(mixed $input, bool|null $expected): void
+    public function castNullableBoolReturnsExpectedValue(mixed $input, bool|null $expected): void
     {
         self::assertSame($expected, cast_nullable_bool($input));
     }
@@ -1169,8 +1211,8 @@ final class TypeFunctionsTest extends TestCase
 
     public static function providesNonemptyStringTestCases(): \Generator
     {
-        yield [0, null];
-        yield [0.0, null];
+        yield [0, '0'];
+        yield [0.0, '0.0'];
         yield [1, '1'];
         yield [-1, '-1'];
         yield [1.4433, '1.4433'];
@@ -1178,7 +1220,7 @@ final class TypeFunctionsTest extends TestCase
         yield [\PHP_INT_MIN, (string)\PHP_INT_MIN];
         yield ['432', '432'];
         yield ["hello, world", "hello, world"];
-        yield ['0', null];
+        yield ['0', '0'];
         yield ['0.0', '0.0'];
         yield [true, '1'];
         yield [false, null];

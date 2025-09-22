@@ -9,6 +9,20 @@ use Carbon\Exceptions\Exception as CarbonException;
 use PhoneBurner\Pinch\Array\Arrayable;
 use PhoneBurner\Pinch\Time\Standards\AnsiSql;
 
+function get_debug_value(mixed $value): string
+{
+    $type = \get_debug_type($value);
+    return match ($type) {
+        'null' => 'null',
+        'bool' => $value ? '(bool)true' : '(bool)false',
+        'int' => '(int)' . $value,
+        'float' => '(float)' . $value,
+        'string' => '(string)' . $value,
+        'array' => \print_r($value, true),
+        default => $type,
+    };
+}
+
 /**
  * @phpstan-assert-if-true \Stringable|string $value
  */
@@ -18,11 +32,15 @@ function is_stringable(mixed $value): bool
 }
 
 /**
+ * Note that while our `cast_string()` and related functions will cast enums to
+ * their value or name, depending on if the enum is backed, this function returns
+ * false for enums, to be consistent with the native PHP cast behavior.
+ *
  * @phpstan-assert-if-true \Stringable|scalar|null $value
  */
 function is_castable_to_string(mixed $value): bool
 {
-    return \is_string($value) || \is_scalar($value) || $value === null || $value instanceof \Stringable;
+    return \is_scalar($value) || $value === null || $value instanceof \Stringable;
 }
 
 /**
@@ -146,20 +164,6 @@ function is_nonempty_string(mixed $value): bool
     return \is_string($value) && $value !== '';
 }
 
-function get_debug_value(mixed $value): string
-{
-    $type = \get_debug_type($value);
-    return match ($type) {
-        'null' => 'null',
-        'bool' => $value ? '(bool)true' : '(bool)false',
-        'int' => '(int)' . $value,
-        'float' => '(float)' . $value,
-        'string' => '(string)' . $value,
-        'array' => \print_r($value, true),
-        default => $type,
-    };
-}
-
 /**
  * Type Narrowing Functions
  *
@@ -270,16 +274,6 @@ function narrow_string(mixed $value): string
     );
 }
 
-function cast_string(mixed $value): string
-{
-    return match (true) {
-        \is_string($value) => $value,
-        $value === null, \is_scalar($value), $value instanceof \Stringable => (string)$value,
-        $value instanceof \BackedEnum => (string)$value->value,
-        default => throw new \InvalidArgumentException('Invalid type for string cast: ' . \get_debug_type($value)),
-    };
-}
-
 /**
  * @phpstan-assert string|null $value
  */
@@ -292,19 +286,6 @@ function narrow_nullable_string(mixed $value): string|null
     return \is_string($value) ? $value : throw new \InvalidArgumentException(
         \sprintf('Expected a string, but got %s', get_debug_value($value)),
     );
-}
-
-/**
- * @return ($value is null ? null : string)
- */
-function cast_nullable_string(mixed $value): string|null
-{
-    return match (true) {
-        \is_string($value), $value === null => $value,
-        \is_scalar($value), $value instanceof \Stringable => (string)$value,
-        $value instanceof \BackedEnum => (string)$value->value,
-        default => throw new \InvalidArgumentException('Invalid type for string cast: ' . \get_debug_type($value)),
-    };
 }
 
 /**
@@ -334,14 +315,6 @@ function narrow_nullable_nonempty_string(mixed $value): string|null
 }
 
 /**
- * @return non-empty-string|null
- */
-function cast_nullable_nonempty_string(mixed $value): string|null
-{
-    return cast_nullable_string($value) ?: null;
-}
-
-/**
  * @phpstan-assert int $value
  */
 function narrow_int(mixed $value): int
@@ -363,27 +336,6 @@ function narrow_nullable_int(mixed $value): int|null
     return \is_int($value) ? $value : throw new \InvalidArgumentException(
         \sprintf('Expected an int, but got %s', get_debug_value($value)),
     );
-}
-
-/**
- * @return ($value is null ? null : int)
- */
-function cast_nullable_int(mixed $value): int|null
-{
-    return match (true) {
-        \is_int($value), $value === null => $value,
-        \is_scalar($value) => (int)$value,
-        $value instanceof \BackedEnum => (int)$value->value,
-        default => throw new \InvalidArgumentException('Invalid type for integer cast: ' . \get_debug_type($value)),
-    };
-}
-
-/**
- * @return int<min,-1>|int<1,max>|null
- */
-function cast_nullable_nonempty_int(mixed $value): int|null
-{
-    return cast_nullable_int($value) ?: null;
 }
 
 /**
@@ -437,24 +389,6 @@ function narrow_nullable_float(mixed $value): float|null
 }
 
 /**
- * @return ($value is null ? null : float)
- */
-function cast_nullable_float(mixed $value): float|null
-{
-    return match (true) {
-        \is_float($value), $value === null => $value,
-        \is_scalar($value) => (float)$value,
-        $value instanceof \BackedEnum => (float)$value->value,
-        default => throw new \InvalidArgumentException('Invalid type for float cast: ' . \get_debug_type($value)),
-    };
-}
-
-function cast_nullable_nonempty_float(mixed $value): float|null
-{
-    return cast_nullable_float($value) ?: null;
-}
-
-/**
  * @phpstan-assert bool $value
  */
 function narrow_bool(mixed $value): bool
@@ -476,22 +410,6 @@ function narrow_nullable_bool(mixed $value): bool|null
     return \is_bool($value) ? $value : throw new \InvalidArgumentException(
         \sprintf('Expected a bool, but got %s', get_debug_value($value)),
     );
-}
-
-/**
- * @return ($value is null ? null : bool)
- */
-function cast_nullable_bool(mixed $value): bool|null
-{
-    return $value !== null ? (bool)$value : null;
-}
-
-/**
- * @return ($value is false|null ? null : true)
- */
-function cast_nullable_nonempty_bool(mixed $value): bool|null
-{
-    return $value ? true : null;
 }
 
 /**
@@ -518,15 +436,6 @@ function narrow_nullable_array(mixed $value): array|null
     return \is_array($value) ? $value : throw new \InvalidArgumentException(
         \sprintf('Expected an array, but got %s', get_debug_value($value)),
     );
-}
-
-/**
- * @phpstan-assert array<array-key, mixed>|null $value
- * @return non-empty-array<array-key, mixed>|null
- */
-function cast_nullable_nonempty_array(mixed $value): array|null
-{
-    return narrow_nullable_array($value) ?: null;
 }
 
 /**
@@ -629,6 +538,128 @@ function narrow_nullable_resource(mixed $value): mixed
     return \is_resource($value) ? $value : throw new \InvalidArgumentException(
         \sprintf('Expected a resource, but got %s', get_debug_value($value)),
     );
+}
+
+/**
+ * PHP has some funky behavior with type juggling values into string, and this function
+ * may deviate from the native PHP behavior, please see the casting notes below.
+ *
+ * Casting Notes:
+ * - Warning: floats may lose precision when converted to strings, but 123.1234 is cast to "123.1234"
+ * - The float 0.0 is cast to "0.0", not "0", as in the native PHP behavior, to be consistent with passing "O.0" as the value
+ * - Otherwise, "integer" floats like 12.0 cast to "12", as they are internally type-juggled before cast to strings
+ * - Special floats like \INF and \NAN are internally juggled and become "INF" and "NAN"
+ * - The values true and false are internally juggled and become "1" and "", respectively.
+ * - Backed enums return their value, non-backed enums return their name
+ * - Anything not a string, scalar, or enum will throw an \InvalidArgumentException
+ */
+function cast_string(mixed $value): string
+{
+    return match (true) {
+        $value === null => '',
+        \is_string($value) => $value,
+        \is_scalar($value) => $value === 0.0 ? '0.0' : (string)$value,
+        $value instanceof \Stringable => (string)$value,
+        $value instanceof \BackedEnum => (string)$value->value,
+        $value instanceof \UnitEnum => $value->name,
+        default => throw new \InvalidArgumentException('Invalid type for string cast: ' . \get_debug_type($value)),
+    };
+}
+
+/**
+ * Casting Notes:
+ *  - null values will return null
+ *  - boolean values will be cast to "1" or ""
+ *  - See `cast_string()` for notes on casting other values
+ *
+ * @return ($value is null ? null : string)
+ */
+function cast_nullable_string(mixed $value): string|null
+{
+    return $value !== null ? cast_string($value) : null;
+}
+
+/**
+ * IMPORTANT: This function only considers "" to be an empty string. The value
+ * "0" is not considered an empty string, unlike the native PHP behavior. This is
+ * intentional because in a type-safe application, the value "0" is likely to be
+ * meaningful. For example, when parsing request parameters, there _should_ be
+ * a difference between a parameter with the value "0" and one with "" or null.
+ *
+ * Casting Notes:
+ *  - See `cast_nullable_string()` for notes on casting
+ *  - The value `false` is cast null
+ *
+ * @return non-empty-string|null
+ */
+function cast_nullable_nonempty_string(mixed $value): string|null
+{
+    $value = cast_nullable_string($value);
+    return $value !== '' ? $value : null;
+}
+
+/**
+ * @return ($value is null ? null : bool)
+ */
+function cast_nullable_bool(mixed $value): bool|null
+{
+    return $value !== null ? (bool)$value : null;
+}
+
+/**
+ * @return ($value is false|null ? null : true)
+ */
+function cast_nullable_nonempty_bool(mixed $value): bool|null
+{
+    return $value ? true : null;
+}
+
+/**
+ * @return ($value is null ? null : int)
+ */
+function cast_nullable_int(mixed $value): int|null
+{
+    return match (true) {
+        \is_int($value), $value === null => $value,
+        \is_scalar($value) => (int)$value,
+        $value instanceof \BackedEnum => (int)$value->value,
+        default => throw new \InvalidArgumentException('Invalid type for integer cast: ' . \get_debug_type($value)),
+    };
+}
+
+/**
+ * @return int<min,-1>|int<1,max>|null
+ */
+function cast_nullable_nonempty_int(mixed $value): int|null
+{
+    return cast_nullable_int($value) ?: null;
+}
+
+/**
+ * @return ($value is null ? null : float)
+ */
+function cast_nullable_float(mixed $value): float|null
+{
+    return match (true) {
+        \is_float($value), $value === null => $value,
+        \is_scalar($value) => (float)$value,
+        $value instanceof \BackedEnum => (float)$value->value,
+        default => throw new \InvalidArgumentException('Invalid type for float cast: ' . \get_debug_type($value)),
+    };
+}
+
+function cast_nullable_nonempty_float(mixed $value): float|null
+{
+    return cast_nullable_float($value) ?: null;
+}
+
+/**
+ * @phpstan-assert array<array-key, mixed>|null $value
+ * @return non-empty-array<array-key, mixed>|null
+ */
+function cast_nullable_nonempty_array(mixed $value): array|null
+{
+    return narrow_nullable_array($value) ?: null;
 }
 
 function cast_nullable_datetime(mixed $value): CarbonImmutable|null
