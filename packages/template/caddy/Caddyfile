@@ -3,9 +3,15 @@
 		output stderr
 		format json
 	}
+
+	servers default {
+		trusted_proxies static private_ranges
+		trusted_proxies_strict
+	}
 }
 
 :80 {
+
 	log default
 	root * /app/public
 	encode zstd gzip
