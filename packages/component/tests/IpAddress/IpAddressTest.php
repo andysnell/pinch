@@ -27,6 +27,8 @@ final class IpAddressTest extends TestCase
         self::assertSame($address->value, (string)$sut);
         self::assertSame($address->value, $sut?->value);
         self::assertSame($address->type, $sut->type);
+        self::assertSame($address->is_private, $sut->is_private);
+        self::assertSame($address->is_reserved, $sut->is_reserved);
         self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
@@ -41,6 +43,8 @@ final class IpAddressTest extends TestCase
         self::assertSame($address->value, (string)$sut);
         self::assertSame($address->value, $sut?->value);
         self::assertSame($address->type, $sut->type);
+        self::assertSame($address->is_private, $sut->is_private);
+        self::assertSame($address->is_reserved, $sut->is_reserved);
         self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
@@ -55,6 +59,8 @@ final class IpAddressTest extends TestCase
         self::assertSame($address->value, (string)$sut);
         self::assertSame($address->value, $sut?->value);
         self::assertSame($address->type, $sut->type);
+        self::assertSame($address->is_private, $sut->is_private);
+        self::assertSame($address->is_reserved, $sut->is_reserved);
         self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
@@ -73,6 +79,8 @@ final class IpAddressTest extends TestCase
         self::assertSame($address->value, (string)$sut);
         self::assertSame($address->value, $sut->value);
         self::assertSame($address->type, $sut->type);
+        self::assertSame($address->is_private, $sut->is_private);
+        self::assertSame($address->is_reserved, $sut->is_reserved);
         self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
@@ -93,6 +101,8 @@ final class IpAddressTest extends TestCase
         self::assertSame($address->value, (string)$sut);
         self::assertSame($address->value, $sut->value);
         self::assertSame($address->type, $sut->type);
+        self::assertSame($address->is_private, $sut->is_private);
+        self::assertSame($address->is_reserved, $sut->is_reserved);
         self::assertEquals(\unserialize(\serialize($sut)), $sut);
     }
 
@@ -133,34 +143,36 @@ final class IpAddressTest extends TestCase
 
     public static function provideValidAddresses(): Generator
     {
-        foreach (
-            [
-            ['106.112.47.159', IpAddressType::IPv4],
-            ['15.146.108.213', IpAddressType::IPv4],
-            ['187.73.69.189', IpAddressType::IPv4],
-            ['74.240.149.252', IpAddressType::IPv4],
-            ['109.247.203.56', IpAddressType::IPv4],
-            ['8.165.230.95', IpAddressType::IPv4],
-            ['35.104.24.140', IpAddressType::IPv4],
-            ['191.178.203.40', IpAddressType::IPv4],
-            ['178.245.90.92', IpAddressType::IPv4],
-            ['2.52.178.30', IpAddressType::IPv4],
-            ['0d65:08ca:fadf:10d3:8a3c:3efa:422d:0df7', IpAddressType::IPv6],
-            ['94a9:fbc4:4883:5be2:31d3:642f:b9c3:93dc', IpAddressType::IPv6],
-            ['cfe1:bb61:368b:f6a3:251f:502d:5a12:24b9', IpAddressType::IPv6],
-            ['fefa:8895:88fc:085b:77b0:7ca8:b096:3680', IpAddressType::IPv6],
-            ['4814:d98e:8a2a:791d:2c4d:65f8:659b:6ad5', IpAddressType::IPv6],
-            ['68ab:8fbb:8264:3cf4:8a01:0c49:4b30:2b6b', IpAddressType::IPv6],
-            ['3e2c:0c16:fce3:d292:0404:3bce:1b6a:f43e', IpAddressType::IPv6],
-            ['0f57:1e3f:b0b9:f8b4:4fd2:05ae:baf2:352c', IpAddressType::IPv6],
-            ['93b4:ca80:1611:a65b:b643:b9aa:faff:357b', IpAddressType::IPv6],
-            ['9a9e:6857:7f05:f213:1391:2093:c1f7:2d92', IpAddressType::IPv6],
-            ['::', IpAddressType::IPv6],
-            ['::0', IpAddressType::IPv6],
-            ] as [$address, $type]
-        ) {
-            yield $address => [new IpAddressTestStruct($address, $type)];
-        }
+        yield [new IpAddressTestStruct('127.0.0.1', IpAddressType::IPv4, false, true)];
+        yield [new IpAddressTestStruct('0.0.0.0', IpAddressType::IPv4, false, true)];
+        yield [new IpAddressTestStruct('172.16.17.32', IpAddressType::IPv4, true, false)];
+        yield [new IpAddressTestStruct('10.0.0.0', IpAddressType::IPv4, true, false)];
+        yield [new IpAddressTestStruct('172.16.58.3', IpAddressType::IPv4, true, false)];
+        yield [new IpAddressTestStruct('192.168.3.11', IpAddressType::IPv4, true, false)];
+        yield [new IpAddressTestStruct('106.112.47.159', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('15.146.108.213', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('187.73.69.189', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('74.240.149.252', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('109.247.203.56', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('8.165.230.95', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('35.104.24.140', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('191.178.203.40', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('178.245.90.92', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('2.52.178.30', IpAddressType::IPv4, false, false)];
+        yield [new IpAddressTestStruct('0d65:08ca:fadf:10d3:8a3c:3efa:422d:0df7', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('94a9:fbc4:4883:5be2:31d3:642f:b9c3:93dc', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('cfe1:bb61:368b:f6a3:251f:502d:5a12:24b9', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('fefa:8895:88fc:085b:77b0:7ca8:b096:3680', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('fcfa:8895:88fc:085b:77b0:7ca8:b096:3680', IpAddressType::IPv6, true, false)];
+        yield [new IpAddressTestStruct('fdfa:8895:88fc:085b:77b0:7ca8:b096:3680', IpAddressType::IPv6, true, false)];
+        yield [new IpAddressTestStruct('4814:d98e:8a2a:791d:2c4d:65f8:659b:6ad5', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('68ab:8fbb:8264:3cf4:8a01:0c49:4b30:2b6b', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('3e2c:0c16:fce3:d292:0404:3bce:1b6a:f43e', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('0f57:1e3f:b0b9:f8b4:4fd2:05ae:baf2:352c', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('93b4:ca80:1611:a65b:b643:b9aa:faff:357b', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('9a9e:6857:7f05:f213:1391:2093:c1f7:2d92', IpAddressType::IPv6, false, false)];
+        yield [new IpAddressTestStruct('::', IpAddressType::IPv6, false, true)];
+        yield [new IpAddressTestStruct('::0', IpAddressType::IPv6, false, true)];
     }
 
     public static function provideInvalidAddresses(): Generator

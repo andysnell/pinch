@@ -11,6 +11,8 @@ final readonly class IpAddressTestStruct
     public function __construct(
         public string $value,
         public IpAddressType $type,
+        public bool $is_private,
+        public bool $is_reserved,
     ) {
     }
 }
