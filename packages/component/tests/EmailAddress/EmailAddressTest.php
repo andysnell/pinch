@@ -51,9 +51,43 @@ final class EmailAddressTest extends TestCase
     }
 
     #[Test]
+    public function instanceReturnsEmailAddressFromAddressAlone(): void
+    {
+        $email = EmailAddress::instance(self::VALID_EMAIL);
+        self::assertSame(self::VALID_EMAIL, $email->address);
+        self::assertSame('', $email->name);
+        self::assertSame(self::VALID_EMAIL, (string)$email);
+        self::assertSame(self::VALID_EMAIL, $email->jsonSerialize());
+
+        $serialized = \serialize($email);
+        self::assertEquals($email, \unserialize($serialized));
+    }
+
+    #[Test]
+    public function instanceReturnsEmailAddressFromFullAddress(): void
+    {
+        $email = EmailAddress::instance(self::VALID_FULL);
+        self::assertSame(self::VALID_EMAIL, $email->address);
+        self::assertSame(self::VALID_NAME, $email->name);
+        self::assertSame(self::VALID_FULL, (string)$email);
+        self::assertSame(self::VALID_FULL, $email->jsonSerialize());
+
+        $serialized = \serialize($email);
+        self::assertEquals($email, \unserialize($serialized));
+    }
+
+    #[Test]
+    public function instanceReturnsSelf(): void
+    {
+        $email = new EmailAddress(self::VALID_EMAIL, self::VALID_NAME);
+        self::assertSame($email, EmailAddress::instance($email));
+    }
+
+    #[Test]
     public function parseReturnsEmailAddressFromAddressAlone(): void
     {
         $email = EmailAddress::parse(self::VALID_EMAIL);
+        self::assertInstanceOf(EmailAddress::class, $email);
         self::assertSame(self::VALID_EMAIL, $email->address);
         self::assertSame('', $email->name);
         self::assertSame(self::VALID_EMAIL, (string)$email);
@@ -67,6 +101,7 @@ final class EmailAddressTest extends TestCase
     public function parseReturnsEmailAddressFromFullAddress(): void
     {
         $email = EmailAddress::parse(self::VALID_FULL);
+        self::assertInstanceOf(EmailAddress::class, $email);
         self::assertSame(self::VALID_EMAIL, $email->address);
         self::assertSame(self::VALID_NAME, $email->name);
         self::assertSame(self::VALID_FULL, (string)$email);
@@ -93,5 +128,16 @@ final class EmailAddressTest extends TestCase
         $this->expectException(InvalidEmailAddress::class);
 
         new EmailAddress($invalid_email);
+    }
+
+    #[TestWith([null])]
+    #[TestWith([''])]
+    #[TestWith(['john'])]
+    #[TestWith(['john@'])]
+    #[TestWith(['john@phoneburner'])]
+    #[Test]
+    public function parseInvalidEmailResultsInNull(mixed $invalid_email): void
+    {
+        self::assertNull(EmailAddress::parse($invalid_email));
     }
 }

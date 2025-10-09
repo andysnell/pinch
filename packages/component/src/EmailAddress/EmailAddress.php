@@ -24,7 +24,7 @@ readonly class EmailAddress implements PhpSerializable, \JsonSerializable, \Stri
         \filter_var($address, \FILTER_VALIDATE_EMAIL) ?: throw new InvalidEmailAddress($address);
     }
 
-    public static function parse(self|string $address): self
+    public static function instance(self|string $address): self
     {
         if ($address instanceof self) {
             return $address;
@@ -44,6 +44,15 @@ readonly class EmailAddress implements PhpSerializable, \JsonSerializable, \Stri
         );
     }
 
+    public static function parse(mixed $address): self|null
+    {
+        try {
+            return $address ? self::instance($address) : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     #[\Override]
     public function __serialize(): array
     {
@@ -53,7 +62,7 @@ readonly class EmailAddress implements PhpSerializable, \JsonSerializable, \Stri
     #[\Override]
     public function __unserialize(array $data): void
     {
-        $email = self::parse($data['email_address']);
+        $email = self::instance($data['email_address']);
         $this->address = $email->address;
         $this->name = $email->name;
     }
