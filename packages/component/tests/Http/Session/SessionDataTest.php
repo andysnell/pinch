@@ -175,9 +175,7 @@ final class SessionDataTest extends TestCase
         // Verify the internal structure is correct
         $reflected_session = new \ReflectionObject($unserialized);
         $csrf_token_prop = $reflected_session->getProperty('csrf_token');
-        $csrf_token_prop->setAccessible(true);
         $old_flash_data_prop = $reflected_session->getProperty('old_flash_data');
-        $old_flash_data_prop->setAccessible(true);
 
         self::assertInstanceOf(CsrfToken::class, $csrf_token_prop->getValue($unserialized));
         self::assertIsArray($old_flash_data_prop->getValue($unserialized));

@@ -214,7 +214,7 @@ bash: | $(DOCKER_STAMP)
 .PHONY: shell psysh
 shell psysh: $(BUILD_STAMP)
 	docker compose up --detach
-	$(docker-php) pinch shell
+	$(docker-php) packages/template/bin/pinch shell
 
 CI_PREFIX := $(if $(filter true,$(CI)),ci:,)
 

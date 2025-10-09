@@ -80,7 +80,7 @@ enum CanadianProvince: string implements RegionAware
             return null;
         }
 
-        static $map = (static function () {
+        static $map = (static function (): array {
             $map = [];
             foreach (self::cases() as $province) {
                 $map[$province->value] = $province;

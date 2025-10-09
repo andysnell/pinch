@@ -157,7 +157,7 @@ final class RandomizerTest extends TestCase
 
         // Specific checks for open/closed boundaries if min=max (though Randomizer might handle this)
         if ($min === $max) {
-            if ($boundary === IntervalBoundary::OpenOpen || $boundary === IntervalBoundary::OpenClosed || $boundary === IntervalBoundary::ClosedOpen) {
+            if (\in_array($boundary, [IntervalBoundary::OpenOpen, IntervalBoundary::OpenClosed, IntervalBoundary::ClosedOpen], true)) {
                 // It's impossible to satisfy open boundaries if min==max, expect error? PHP Randomizer seems to allow it though.
                  self::fail('Test case with open boundary and min==max might be invalid or requires specific expectation');
             } else { // ClosedClosed

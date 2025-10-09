@@ -25,7 +25,7 @@ use Redis;
 #[Experimental]
 final readonly class RedisRateLimiter implements RateLimiter
 {
-    private readonly string $script_sha;
+    private string $script_sha;
 
     public function __construct(
         private Redis $redis,

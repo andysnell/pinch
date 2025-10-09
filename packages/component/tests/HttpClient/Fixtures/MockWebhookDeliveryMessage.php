@@ -14,7 +14,7 @@ use Ramsey\Uuid\UuidInterface;
  */
 final readonly class MockWebhookDeliveryMessage implements WebhookDeliveryMessage
 {
-    public readonly UuidInterface $webhook_id;
+    public UuidInterface $webhook_id;
 
     public function __construct(
         public WebhookConfiguration $configuration = new MockWebhookConfiguration(),

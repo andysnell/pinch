@@ -51,7 +51,7 @@ class CommandsMustBeRegisteredRule implements Rule
 
     public function getRegisteredCommands(): array
     {
-        static $registered_commands = (static function () {
+        static $registered_commands = (static function (): array {
             $configuration = include APP_ROOT . '/config/console.php';
             $application_commands = $configuration['console']['commands'] ?? [];
             return [...$application_commands, ...ConsoleServiceProvider::FRAMEWORK_COMMANDS];

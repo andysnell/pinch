@@ -259,7 +259,7 @@ enum UnitedStatesState: string implements RegionAware
             return null;
         }
 
-        static $map = (static function () {
+        static $map = (static function (): array {
             $map = [];
             foreach (self::cases() as $state) {
                 $map[$state->value] = $state;

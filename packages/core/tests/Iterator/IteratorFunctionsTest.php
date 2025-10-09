@@ -194,6 +194,7 @@ final class IteratorFunctionsTest extends TestCase
     #[Test]
     public function iterAnyValueReturnsFalseWithEmptyIterable(): void
     {
+        /** @phpstan-ignore greater.invalid (intentional defect for testing) */
         $result = iter_any_value(fn($value): bool => $value > 0, []);
         self::assertFalse($result);
     }

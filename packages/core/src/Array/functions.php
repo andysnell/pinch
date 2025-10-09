@@ -83,13 +83,7 @@ function array_has(string $key, array|\ArrayAccess $array): bool
  */
 function array_has_any(array $paths, array|\ArrayAccess $array): bool
 {
-    foreach ($paths as $path) {
-        if (array_has($path, $array)) {
-            return true;
-        }
-    }
-
-    return false;
+    return array_any($paths, fn($path): bool => array_has($path, $array));
 }
 
 /**
@@ -104,13 +98,7 @@ function array_has_any(array $paths, array|\ArrayAccess $array): bool
  */
 function array_has_all(array $paths, array|\ArrayAccess $array): bool
 {
-    foreach ($paths as $path) {
-        if (! array_has($path, $array)) {
-            return false;
-        }
-    }
-
-    return true;
+    return array_all($paths, fn($path): bool => array_has($path, $array));
 }
 
 /**

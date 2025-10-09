@@ -16,9 +16,9 @@
   "require": {
     "php": "^8.4",
     "phpstan/extension-installer": "^1.4.3",
-    "phpstan/phpstan": "^2.1.19",
+    "phpstan/phpstan": "^2.1.30",
     "phpstan/phpstan-deprecation-rules": "^2.0.3",
-    "phpstan/phpstan-doctrine": "^2.0.4",
+    "phpstan/phpstan-doctrine": "^2.0.10",
     "phpstan/phpstan-phpunit": "^2.0.7",
     "spaze/phpstan-disallowed-calls": "^4.6.0"
   },
@@ -31,7 +31,7 @@
     "phoneburner/pinch-core": "^0.0.35",
     "phoneburner/pinch-framework": "^0.0.35",
     "php-parallel-lint/php-parallel-lint": "^1.4",
-    "phpunit/phpunit": "^12.2.7"
+    "phpunit/phpunit": "^12.4.0"
   },
   "autoload": {
     "psr-4": {

@@ -241,6 +241,7 @@ final class DateTimeImmutableRangeTest extends TestCase
         $dates = \iterator_to_array($period);
 
         if ($expect_start_included) {
+            /** @phpstan-ignore offsetAccess.notFound */
             self::assertEquals($start, $dates[\array_key_first($dates)]);
         } elseif ($dates !== []) {
             self::assertNotEquals($start, $dates[\array_key_first($dates)]);

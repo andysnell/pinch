@@ -357,12 +357,7 @@ final class WebhookDeliveryMessageHandlerTest extends TestCase
             ->method('sign')
             ->with(self::callback(function (RequestInterface $request) use ($extra_headers): bool {
                 $headers = $request->getHeaders();
-                foreach ($extra_headers as $key => $value) {
-                    if (! isset($headers[$key]) || $headers[$key][0] !== $value) {
-                        return false;
-                    }
-                }
-                return true;
+                return \array_all($extra_headers, fn($value, $key): bool => isset($headers[$key]) && $headers[$key][0] === $value);
             }))
             ->willReturn($signed_request);
 
