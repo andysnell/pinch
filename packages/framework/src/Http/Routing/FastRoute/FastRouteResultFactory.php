@@ -18,19 +18,15 @@ class FastRouteResultFactory
 {
     public function make(FastRouteMatch $match): RouterResult
     {
-        if ($match->getStatus() === Dispatcher::METHOD_NOT_ALLOWED) {
-            return MethodNotAllowed::make(...\array_map(HttpMethod::instance(...), $match->getMethods()));
-        }
-
-        if ($match->getStatus() === Dispatcher::FOUND) {
-            return RouteFound::make(
-                \unserialize($match->getRouteData(), [
-                    'allowed_classes' => true,
-                ]),
-                $match->getPathVars(),
-            );
-        }
-
-        return RouteNotFound::make();
+        return match ($match->getStatus()) {
+            Dispatcher::METHOD_NOT_ALLOWED => new MethodNotAllowed(
+                ...\array_map(HttpMethod::instance(...), $match->getMethods()),
+            ),
+            Dispatcher::FOUND => new RouteFound(
+                definition: \unserialize($match->getRouteData(), ['allowed_classes' => true]),
+                path_parameters: $match->getPathVars(),
+            ),
+            default => new RouteNotFound(),
+        };
     }
 }

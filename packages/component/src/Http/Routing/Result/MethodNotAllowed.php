@@ -20,7 +20,7 @@ final readonly class MethodNotAllowed implements RouterResult
         return new self(...$methods);
     }
 
-    private function __construct(HttpMethod ...$methods)
+    public function __construct(HttpMethod ...$methods)
     {
         $this->methods = $methods;
     }

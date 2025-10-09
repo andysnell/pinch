@@ -14,10 +14,6 @@ final readonly class RouteNotFound implements RouterResult
         return new self();
     }
 
-    private function __construct()
-    {
-    }
-
     #[\Override]
     public function isFound(): bool
     {
