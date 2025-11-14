@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Time\Domain;
 
+use PhoneBurner\Pinch\Attribute\UnitName;
 use PhoneBurner\Pinch\Attribute\Usage\Internal;
+use PhoneBurner\Pinch\Time\Attribute\TimeUnitMetadata;
 
 /**
  * Note: we're following the example of the ISO 8601 standard and treating
@@ -26,15 +28,44 @@ use PhoneBurner\Pinch\Attribute\Usage\Internal;
 #[Internal]
 enum TimeUnit
 {
+    #[TimeUnitMetadata(fixed_length: false, symbol: 'y')]
+    #[UnitName('year')]
     case Year;
+
+    #[TimeUnitMetadata(fixed_length: false, symbol: 'mo')]
+    #[UnitName('month')]
     case Month;
+
+    #[TimeUnitMetadata(fixed_length: false, symbol: 'wk')]
+    #[UnitName('week')]
     case Week;
+
+    #[TimeUnitMetadata(fixed_length: true, symbol: 'd')]
+    #[UnitName('day')]
     case Day;
+
+    #[TimeUnitMetadata(fixed_length: true, symbol: 'hr')]
+    #[UnitName('hour')]
     case Hour;
+
+    #[TimeUnitMetadata(fixed_length: true, symbol: 'min')]
+    #[UnitName('minute')]
     case Minute;
+
+    #[TimeUnitMetadata(fixed_length: true, symbol: 's')]
+    #[UnitName('second')]
     case Second;
+
+    #[TimeUnitMetadata(fixed_length: true, symbol: 'ms')]
+    #[UnitName('millisecond')]
     case Millisecond;
+
+    #[TimeUnitMetadata(fixed_length: true, symbol: 'μs')]
+    #[UnitName('microsecond')]
     case Microsecond;
+
+    #[TimeUnitMetadata(fixed_length: true, symbol: 'ns')]
+    #[UnitName('nanosecond')]
     case Nanosecond;
 
     public function isFixedLengthUnit(): bool

@@ -14,6 +14,12 @@ use PhoneBurner\Pinch\Time\Interval\NullableDateTimeRange;
  */
 interface DateTimeRange extends NullableDateTimeRange, Range
 {
+    // phpcs:ignore
+    public \DateTimeImmutable $start { get; }
+
+    // phpcs:ignore
+    public \DateTimeImmutable $end { get; }
+
     public function min(): \DateTimeImmutable;
 
     public function max(): \DateTimeImmutable;

@@ -13,7 +13,10 @@ use PhoneBurner\Pinch\Component\App\App;
 use PhoneBurner\Pinch\Component\App\DeferrableServiceProvider;
 use PhoneBurner\Pinch\Component\Cache\Psr6\CacheItemPoolFactory as CacheItemPoolFactoryContract;
 use PhoneBurner\Pinch\Framework\Cache\CacheItemPoolFactory;
+use PhoneBurner\Pinch\Framework\Database\Config\AmpqConfigStruct;
 use PhoneBurner\Pinch\Framework\Database\Config\DatabaseConfigStruct;
+use PhoneBurner\Pinch\Framework\Database\Config\DoctrineConfigStruct;
+use PhoneBurner\Pinch\Framework\Database\Config\RedisConfigStruct;
 use PhoneBurner\Pinch\Framework\Database\Doctrine\ConnectionFactory;
 use PhoneBurner\Pinch\Framework\Database\Doctrine\ConnectionProvider;
 use PhoneBurner\Pinch\Framework\Database\Doctrine\Orm\EntityManagerFactory;
@@ -33,17 +36,20 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
     public static function provides(): array
     {
         return [
-            \Redis::class,
-            RedisManager::class,
+            AmpqConfigStruct::class,
+            CachingRedisManager::class,
+            Connection::class,
+            ConnectionFactory::class,
+            ConnectionProvider::class,
+            DoctrineConfigStruct::class,
             DoctrineConnectionProvider::class,
             DoctrineEntityManagerProvider::class,
-            CachingRedisManager::class,
-            ConnectionProvider::class,
-            ConnectionFactory::class,
-            Connection::class,
-            EntityManagerProvider::class,
             EntityManagerFactory::class,
             EntityManagerInterface::class,
+            EntityManagerProvider::class,
+            RedisConfigStruct::class,
+            RedisManager::class,
+            \Redis::class,
         ];
     }
 
@@ -56,6 +62,14 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
         ];
     }
 
+    /**
+     * @param App $app
+     * @return void
+     * public readonly AmpqConfigStruct|null $ampq = null,
+     * public readonly RedisConfigStruct|null $redis = null,
+     * public readonly DoctrineConfigStruct|null $doctrine = null,
+     */
+
     #[\Override]
     public static function register(App $app): void
     {
@@ -65,19 +79,30 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
             static fn(App $app): \Redis => $app->get(RedisManager::class)->connect(),
         );
 
+       $app->set(
+           AmpqConfigStruct::class,
+           static fn(App $app): AmpqConfigStruct => $app->get(DatabaseConfigStruct::class)->ampq ?? new AmpqConfigStruct(),
+       );
+
+        $app->set(
+            RedisConfigStruct::class,
+            static fn(App $app): RedisConfigStruct => $app->get(DatabaseConfigStruct::class)->redis ?? new RedisConfigStruct(),
+        );
+
+        $app->set(
+            DoctrineConfigStruct::class,
+            static fn(App $app): DoctrineConfigStruct => $app->get(DatabaseConfigStruct::class)->doctrine ?? new DoctrineConfigStruct(),
+        );
+
         $app->ghost(CachingRedisManager::class, static fn(CachingRedisManager $ghost): null => $ghost->__construct(
-            $app->get(DatabaseConfigStruct::class)->redis ?? throw new \LogicException(
-                'Redis configuration not found',
-            ),
+            $app->get(RedisConfigStruct::class),
         ));
 
         $app->set(ConnectionProvider::class, new ConnectionProvider($app));
 
         $app->ghost(ConnectionFactory::class, static fn(ConnectionFactory $ghost): null => $ghost->__construct(
             $app->environment,
-            $app->get(DatabaseConfigStruct::class)->doctrine ?? throw new \LogicException(
-                'Doctrine configuration not found',
-            ),
+            $app->get(DoctrineConfigStruct::class),
             $app->get(CacheItemPoolFactoryContract::class),
             $app->get(LoggerInterface::class),
         ));
@@ -92,7 +117,7 @@ final class DatabaseServiceProvider implements DeferrableServiceProvider
         $app->ghost(EntityManagerFactory::class, static fn(EntityManagerFactory $ghost): null => $ghost->__construct(
             $app->services,
             $app->environment,
-            $app->config->get('database.doctrine'),
+            $app->get(DoctrineConfigStruct::class),
             $app->get(DoctrineConnectionProvider::class),
             $app->get(CacheItemPoolFactory::class),
         ));

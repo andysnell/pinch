@@ -7,17 +7,15 @@ namespace PhoneBurner\Pinch\Time\Clock;
 use Carbon\CarbonImmutable;
 use PhoneBurner\Pinch\Time\Domain\TimeUnit;
 
+use function PhoneBurner\Pinch\Time\parse_carbon;
+
 final readonly class StaticClock implements Clock
 {
     private CarbonImmutable $now;
 
-    public function __construct(\DateTimeInterface|string|null $now = new CarbonImmutable())
+    public function __construct(\DateTimeInterface|string|int|float $now = new CarbonImmutable())
     {
-        $this->now = match (true) {
-            $now instanceof CarbonImmutable => $now,
-            $now instanceof \DateTimeInterface => CarbonImmutable::instance($now),
-            default => new CarbonImmutable($now),
-        };
+        $this->now = parse_carbon($now) ?? new CarbonImmutable();
     }
 
     #[\Override]
