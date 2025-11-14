@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Time\Interval;
 
+use Carbon\CarbonImmutable;
+use Carbon\CarbonPeriod;
 use Random\IntervalBoundary;
 
-use function PhoneBurner\Pinch\Time\parse_datetime;
+use function PhoneBurner\Pinch\Time\parse_carbon;
 use function PhoneBurner\Pinch\Type\get_debug_value;
 
 /**
- * @implements DateTimeRange<\DateTimeImmutable>
+ * @implements DateTimeRange<CarbonImmutable>
  */
-final class DateTimeImmutableRange implements DateTimeRange
+final class CarbonImmutableRange implements DateTimeRange
 {
-    public \DateTimeImmutable $start;
+    public CarbonImmutable $start;
 
-    public \DateTimeImmutable $end;
+    public CarbonImmutable $end;
 
     /**
      * @param IntervalBoundary $boundary default includes both endpoints in interval
@@ -24,13 +26,13 @@ final class DateTimeImmutableRange implements DateTimeRange
     public function __construct(
         \DateTimeInterface|string|int|float $start,
         \DateTimeInterface|string|int|float $end,
-        public readonly IntervalBoundary $boundary = IntervalBoundary::ClosedClosed,
+        public IntervalBoundary $boundary = IntervalBoundary::ClosedClosed,
     ) {
-        $this->start = parse_datetime($start) ?? throw new \UnexpectedValueException(
+        $this->start = parse_carbon($start) ?? throw new \UnexpectedValueException(
             'invalid start date: ' . get_debug_value($start),
         );
 
-        $this->end = parse_datetime($end) ?? throw new \UnexpectedValueException(
+        $this->end = parse_carbon($end) ?? throw new \UnexpectedValueException(
             'invalid end date: ' . get_debug_value($end),
         );
 
@@ -39,20 +41,17 @@ final class DateTimeImmutableRange implements DateTimeRange
         }
     }
 
-    public function min(): \DateTimeImmutable
+    public function min(): CarbonImmutable
     {
         return $this->start;
     }
 
-    public function max(): \DateTimeImmutable
+    public function max(): CarbonImmutable
     {
         return $this->end;
     }
 
-    /**
-     * @return \DatePeriod<\DateTimeImmutable,\DateTimeImmutable, null>
-     */
-    public function period(\DateInterval $interval = new TimeInterval(days: 1)): \DatePeriod
+    public function period(\DateInterval $interval = new TimeInterval(days: 1)): CarbonPeriod
     {
         $options = 0;
 
@@ -66,7 +65,7 @@ final class DateTimeImmutableRange implements DateTimeRange
             $options |= \DatePeriod::EXCLUDE_START_DATE;
         }
 
-        return new \DatePeriod(
+        return new CarbonPeriod(
             start: $this->start,
             interval: $interval,
             end: $this->end,

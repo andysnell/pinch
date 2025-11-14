@@ -9,6 +9,8 @@ use PhoneBurner\Pinch\Array\Arrayable;
 use PhoneBurner\Pinch\Tests\Fixtures\IntBackedEnum;
 use PhoneBurner\Pinch\Tests\Fixtures\StoplightState;
 use PhoneBurner\Pinch\Tests\Fixtures\TestEnum;
+use PhoneBurner\Pinch\Time\Interval\DateTimeImmutableRange;
+use PhoneBurner\Pinch\Time\Interval\DateTimeRange;
 use PhoneBurner\Pinch\Time\Standards\AnsiSql;
 use PHPUnit\Framework\Attributes\CoversFunction;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -1054,7 +1056,7 @@ final class TypeFunctionsTest extends TestCase
 
     #[DataProvider('providesDatetimeTestCases')]
     #[Test]
-    public function datetimeReturnsExpectedValue(mixed $input, CarbonImmutable|null $expected): void
+    public function datetimeReturnsExpectedAbsoluteValue(mixed $input, CarbonImmutable|null $expected): void
     {
         $datetime = cast_nullable_datetime($input);
         if ($expected instanceof CarbonImmutable) {
@@ -1084,6 +1086,39 @@ final class TypeFunctionsTest extends TestCase
         yield [new \DateTime('2025-02-03 19:19:31'), $datetime];
         yield [1738610371, $datetime];
     }
+
+    #[Test]
+    #[DataProvider('providesRelativeDatetimeCastTestCases')]
+    public function datetimeReturnsExpectedRelativeValue(string $input, DateTimeRange $range): void
+    {
+        $datetime = cast_nullable_datetime('yesterday');
+        self::assertInstanceOf(CarbonImmutable::class, $datetime);;
+        self::assertGreaterThanOrEqual($range->start, $datetime);
+        self::assertLessThanOrEqual($range->end, $datetime);
+    }
+
+    public static function providesRelativeDatetimeCastTestCases(): \Generator
+    {
+        $yesterday = CarbonImmutable::yesterday();
+        yield ['yesterday', new DateTimeImmutableRange($yesterday, $yesterday->addMinute())];
+    }
+
+    #[Test]
+    #[DataProvider('providesInvalidTypesForDatetimeCastTestCases')]
+    public function castNullableDatetimeReturnsExpectedValue(mixed $value): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        cast_nullable_datetime($value);
+    }
+
+    public static function providesInvalidTypesForDatetimeCastTestCases(): \Generator
+    {
+        yield 'array' => [[]];
+        yield 'true' => [true];
+        yield 'false' => [false];
+        yield 'stdclass' => [new \stdClass()];
+    }
+
 
     #[Test]
     public function integerThrowsInvalidArgumentExceptionForInvalidType(): void

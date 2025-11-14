@@ -4,16 +4,30 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Memory\Unit;
 
+use PhoneBurner\Pinch\Attribute\UnitName;
 use function PhoneBurner\Pinch\Math\int_floor;
 
 enum BinaryMemoryUnit: int
 {
+    #[UnitName('byte')]
     case Byte = self::BASE ** 0;
+
+    #[UnitName('kibibyte')]
     case Kibibyte = self::BASE ** 1;
+
+    #[UnitName('mebibyte')]
     case Mebibyte = self::BASE ** 2;
+
+    #[UnitName('gibibyte')]
     case Gibibyte = self::BASE ** 3;
+
+    #[UnitName('tebibyte')]
     case Tebibyte = self::BASE ** 4;
+
+    #[UnitName('pebibyte')]
     case Pebibyte = self::BASE ** 5;
+
+    #[UnitName('exbibyte')]
     case Exbibyte = self::BASE ** 6;
 
     public const int BASE = 2 ** 10;

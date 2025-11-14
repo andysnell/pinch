@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Carbon\Exceptions\Exception as CarbonException;
 use PhoneBurner\Pinch\Array\Arrayable;
 use PhoneBurner\Pinch\Time\Standards\AnsiSql;
+use PhoneBurner\Pinch\Time\TimeZone\Tz;
 
 function get_debug_value(mixed $value): string
 {
@@ -662,17 +663,50 @@ function cast_nullable_nonempty_array(mixed $value): array|null
     return narrow_nullable_array($value) ?: null;
 }
 
+/**
+ * Try to cast the argument to `CarbonImmutable|null`, depending on the type and
+ * value of the input. Passing values with types that cannot be cast will result
+ * in an \InvalidArgumentException.
+ *
+ * Notes:
+ *  casting keeps the original timezone as the input value.
+ * - If already a `CarbonImmutable` instance, the same instance is returned
+ * - `DateTimeInterface` and string values with a timezone component keep the original timezone
+ * - Integers and floats are treated as unix timestamps, and will always be in UTC
+ * - If the value is a `DateTimeInterface` instance, it will be cast to a `CarbonImmutable` instance
+ * - String values are parsed as per CarbonImmutable/DateTimeImmutable constructor logic
+ * - String values without a timezone component will be parsed as UTC
+ *
+ * @phpstan-assert \DateTimeInterface|string|int|float|null $value
+ */
 function cast_nullable_datetime(mixed $value): CarbonImmutable|null
 {
     try {
-        return match (true) {
-            $value instanceof CarbonImmutable, $value === null => $value,
-            $value === AnsiSql::NULL_DATETIME, $value === '' => null,
-            $value instanceof \DateTimeInterface, \is_string($value) => CarbonImmutable::make($value),
-            \is_int($value) => CarbonImmutable::createFromTimestamp($value),
+        return $value instanceof CarbonImmutable ? $value : match (\gettype($value)) {
+            'NULL' => null,
+            'object' => $value instanceof \DateTimeInterface
+                ? CarbonImmutable::instance($value)
+                : throw new \InvalidArgumentException('Invalid type for datetime cast: ' . \get_debug_type($value)),
+            'integer', 'double' => CarbonImmutable::createFromTimestampUTC($value),
+            'string' => match ($value) {
+                '0000-00-00 00:00:00', '' => null,
+                default => new CarbonImmutable($value),
+            },
             default => throw new \InvalidArgumentException('Invalid type for datetime cast: ' . \get_debug_type($value)),
         };
-    } catch (CarbonException) {
+    } catch (\DateException | CarbonException) {
         return null;
     }
+}
+
+/**
+ * Has the same behavior as `cast_nullable_datetime()`, but will explicitly set
+ * the timezone of the resolved instance. This is most useful for parsing
+ * timestamps (which would always be in UTC) into a specific timezone.
+ *
+ * @phpstan-assert \DateTimeInterface|string|int|float|null $value
+ */
+function cast_nullable_datetime_tz(mixed $value, \DateTimeZone|Tz $timezone = Tz::Utc): CarbonImmutable|null
+{
+    return cast_nullable_datetime($value)?->setTimezone($timezone instanceof Tz ? $timezone->timezone() : $timezone);
 }

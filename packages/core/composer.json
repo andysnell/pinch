@@ -38,6 +38,7 @@
   },
   "autoload": {
     "files": [
+      "src/Time/constants.php",
       "src/functions.php",
       "src/Array/functions.php",
       "src/Attribute/functions.php",
@@ -45,7 +46,7 @@
       "src/Iterator/functions.php",
       "src/Math/functions.php",
       "src/String/functions.php",
-      "src/Time/constants.php",
+      "src/Time/functions.php",
       "src/Type/functions.php"
     ],
     "psr-4": {

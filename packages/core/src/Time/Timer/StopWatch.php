@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Time\Timer;
 
+use PhoneBurner\Pinch\Time\Clock\HighResolutionTimer;
+use PhoneBurner\Pinch\Time\Clock\SystemHighResolutionTimer;
 use PhoneBurner\Pinch\Time\Timer\ElapsedTime;
 
-class StopWatch
+final class StopWatch
 {
-    private readonly int $start;
+    public private(set) int $start;
 
-    private function __construct()
-    {
-        $this->start = \hrtime(true);
+    public function __construct(
+        private readonly HighResolutionTimer $timer = new SystemHighResolutionTimer(),
+    ) {
+        $this->start = $timer->now();
     }
 
     public static function start(): self
@@ -22,6 +25,6 @@ class StopWatch
 
     public function elapsed(): ElapsedTime
     {
-        return new ElapsedTime(\hrtime(true) - $this->start);
+        return new ElapsedTime($this->timer->now() - $this->start);
     }
 }

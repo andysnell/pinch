@@ -16,7 +16,7 @@ class SystemClock implements Clock
     #[\Override]
     public function now(): CarbonImmutable
     {
-        return CarbonImmutable::now();
+        return new CarbonImmutable();
     }
 
     /**
