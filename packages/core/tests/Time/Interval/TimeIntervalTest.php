@@ -687,4 +687,17 @@ final class TimeIntervalTest extends TestCase
 
         self::assertSame(777777, $sum->microseconds);
     }
+
+    #[Test]
+    public function zeroAndMinAreMemoizedInCalculations(): void
+    {
+        $a = TimeInterval::zero();
+        $b = TimeInterval::min();
+
+        self::assertSame($a, $b);
+        self::assertSame(TimeInterval::zero(), $a);
+        self::assertSame(TimeInterval::min(), $b);
+        self::assertSame(0, $a->microseconds);
+        self::assertSame(0, $b->microseconds);
+    }
 }

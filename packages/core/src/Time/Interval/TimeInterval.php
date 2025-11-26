@@ -53,6 +53,12 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
     // phpcs:enable
 
     // phpcs:disable
+    public int|float $total_milliseconds {
+        get => $this->microseconds / MICROSECONDS_IN_MILLISECOND;
+    }
+    // phpcs:enable
+
+    // phpcs:disable
     public int $hours {
         get => \intdiv($this->microseconds, MICROSECONDS_IN_HOUR);
     }
@@ -67,6 +73,12 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
     // phpcs:disable
     public int $seconds {
         get => \intdiv($this->microseconds, MICROSECONDS_IN_SECOND);
+    }
+    // phpcs:enable
+
+    // phpcs:disable
+    public int $milliseconds {
+        get => \intdiv($this->microseconds, MICROSECONDS_IN_MILLISECOND);
     }
     // phpcs:enable
 
@@ -151,22 +163,33 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
 
     public function add(parent $interval): self
     {
-        return self::plus(microseconds: self::instance($interval)->microseconds);
+        return $this->plus(microseconds: self::instance($interval)->microseconds);
     }
 
     public function sub(parent $interval): self
     {
-        return self::minus(microseconds: self::instance($interval)->microseconds);
+        return $this->minus(microseconds: self::instance($interval)->microseconds);
     }
 
     public static function max(): self
     {
-        return new self(microseconds: \PHP_INT_MAX);
+        static $max = new self(microseconds: \PHP_INT_MAX);
+        return $max;
     }
 
     public static function min(): self
     {
-        return new self();
+        return self::zero();
+    }
+
+    /**
+     * Both a "zero" and a "min" method are defined for the purpose of symmetry and
+     * cognitive clarity in the different ways this class can be used.
+     */
+    public static function zero(): self
+    {
+        static $zero = new self(microseconds: 0);
+        return $zero;
     }
 
     public function create(
