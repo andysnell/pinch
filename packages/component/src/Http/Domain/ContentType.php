@@ -69,6 +69,8 @@ final class ContentType
     public const string YAML = 'application/yaml';
     public const string ICS = 'text/calendar';
     public const string EVENT_STREAM = 'text/event-stream';
+    public const string WEBP = 'image/webp';
+    public const string AVIF = 'image/avif';
 
     private const array EXTENSION_MAP = [
         'php' => self::PHP,
@@ -157,6 +159,8 @@ final class ContentType
         'obj' => self::OCTET_STREAM,
         'pkg' => self::OCTET_STREAM,
         'so' => self::OCTET_STREAM,
+        'avif' => self::AVIF,
+        'webp' => self::WEBP,
     ];
 
     public static function lookup(string $extension): string|null
