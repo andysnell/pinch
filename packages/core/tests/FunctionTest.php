@@ -14,6 +14,7 @@ use PHPUnit\Framework\TestCase;
 use function PhoneBurner\Pinch\compose;
 use function PhoneBurner\Pinch\func_fwd;
 use function PhoneBurner\Pinch\ghost;
+use function PhoneBurner\Pinch\is_not_null;
 use function PhoneBurner\Pinch\noop;
 use function PhoneBurner\Pinch\not;
 use function PhoneBurner\Pinch\nullify;
@@ -72,6 +73,27 @@ final class FunctionTest extends TestCase
         yield 'zero float returns zero float' => [0.0, 0.0];
         yield 'object returns same object' => [$object, $object];
     }
+
+    #[Test]
+    #[DataProvider('isNotNullDataProvider')]
+    public function isNotNullReturnsExpectedValue(mixed $input): void
+    {
+        self::assertSame(! \is_null($input), is_not_null($input));
+    }
+
+    public static function isNotNullDataProvider(): \Generator
+    {
+        yield 'false returns null' => [false];
+        yield 'null returns null' => [null];
+        yield 'string returns string' => ['value'];
+        yield 'integer returns integer' => [123];
+        yield 'empty array returns empty array' => [[]];
+        yield 'zero returns zero' => [0];
+        yield 'empty string returns empty string' => [''];
+        yield 'zero float returns zero float' => [0.0];
+        yield 'object returns same object' => [new \stdClass()];
+    }
+
 
     /**
      * @param array<mixed> $args

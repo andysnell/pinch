@@ -79,6 +79,18 @@ function nullify(mixed $value): mixed
 }
 
 /**
+ * Returns true if the value is not null. Basically, this is only useful as a
+ * first-class callable replacement for `fn(): bool => $value !== null`, so we
+ * do not need to redeclare the closure every time we want to use it.
+ *
+ * @phpstan-assert-if-true !null $value
+ */
+function is_not_null(mixed $value): bool
+{
+    return $value !== null;
+}
+
+/**
  * @template T
  * @param callable(): T $callback
  * @return T
