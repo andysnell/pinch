@@ -25,6 +25,8 @@ use function PhoneBurner\Pinch\Array\array_has_all;
 use function PhoneBurner\Pinch\Array\array_has_any;
 use function PhoneBurner\Pinch\Array\array_is_sorted;
 use function PhoneBurner\Pinch\Array\array_last;
+use function PhoneBurner\Pinch\Array\array_map_find;
+use function PhoneBurner\Pinch\Array\array_map_find_with_key;
 use function PhoneBurner\Pinch\Array\array_map_with_key;
 use function PhoneBurner\Pinch\Array\array_value;
 use function PhoneBurner\Pinch\Array\array_wrap;
@@ -39,6 +41,8 @@ use function PhoneBurner\Pinch\Array\array_wrap;
 #[CoversFunction('PhoneBurner\Pinch\Array\array_has_any')]
 #[CoversFunction('PhoneBurner\Pinch\Array\array_last')]
 #[CoversFunction('PhoneBurner\Pinch\Array\array_map_with_key')]
+#[CoversFunction('PhoneBurner\Pinch\Array\array_map_find')]
+#[CoversFunction('PhoneBurner\Pinch\Array\array_map_find_with_key')]
 #[CoversFunction('PhoneBurner\Pinch\Array\array_value')]
 #[CoversFunction('PhoneBurner\Pinch\Array\array_wrap')]
 #[CoversFunction('PhoneBurner\Pinch\Array\array_any_key')]
@@ -560,5 +564,57 @@ final class ArrayFunctionsTest extends TestCase
         $callback = fn(string $key): bool => $key === 'key2';
 
         self::assertTrue(array_any_key($generator(), $callback));
+    }
+
+    #[Test]
+    public function arrayMapFindReturnsExpected(): void
+    {
+        $array = ['a', 'b', 'c', 'd'];
+
+        self::assertSame('aaa', array_map_find(static fn(string $value): string|null => match ($value) {
+            'a' => 'aaa',
+            'b' => throw new \RuntimeException('Should not be called!'),
+            default => null,
+        }, $array));
+
+        self::assertSame('bbb', array_map_find(static fn(string $value): string|null => match ($value) {
+            'b' => 'bbb',
+            'c' => throw new \RuntimeException('Should not be called!'),
+            default => null,
+        }, $array));
+
+        self::assertSame('ccc', array_map_find(static fn(string $value): string|null => match ($value) {
+            'c' => 'ccc',
+            'd' => throw new \RuntimeException('Should not be called!'),
+            default => null,
+        }, $array));
+
+        self::assertNull(array_map_find(static fn(string $value): string|null => null, $array));
+    }
+
+    #[Test]
+    public function arrayMapFindWithKeyReturnsExpected(): void
+    {
+        $array = ['a' => 'x', 'b' => 'x', 'c' => 'y', 'd' => 'z'];
+
+        self::assertSame('aaa', array_map_find_with_key(static fn(string $v, int|string $k): string|null => match ([$k, $v]) {
+            ['a', 'x'] => 'aaa',
+            ['b', 'x'] => throw new \RuntimeException('Should not be called!'),
+            default => null,
+        }, $array));
+
+        self::assertSame('bbb', array_map_find_with_key(static fn(string $v, int|string|null $k = null): string|null => match ([$k, $v]) {
+            ['b', 'x'] => 'bbb',
+            ['c', 'y'] => throw new \RuntimeException('Should not be called!'),
+            default => null,
+        }, $array));
+
+        self::assertSame('ccc', array_map_find_with_key(static fn(string $v, int|string $k): string|null => match ([$k, $v]) {
+            ['c', 'y'] => 'ccc',
+            ['d', 'z'] => throw new \RuntimeException('Should not be called!'),
+            default => null,
+        }, $array));
+
+        self::assertNull(array_map_find_with_key(static fn(string $value): string|null => null, $array));
     }
 }

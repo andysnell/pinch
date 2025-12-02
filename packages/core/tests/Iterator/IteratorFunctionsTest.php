@@ -18,6 +18,7 @@ use function PhoneBurner\Pinch\Iterator\iter_first;
 use function PhoneBurner\Pinch\Iterator\iter_generate;
 use function PhoneBurner\Pinch\Iterator\iter_last;
 use function PhoneBurner\Pinch\Iterator\iter_map;
+use function PhoneBurner\Pinch\Iterator\iter_map_find;
 
 #[CoversFunction('PhoneBurner\Pinch\Iterator\iter_amap')]
 #[CoversFunction('PhoneBurner\Pinch\Iterator\iter_any_key')]
@@ -28,6 +29,7 @@ use function PhoneBurner\Pinch\Iterator\iter_map;
 #[CoversFunction('PhoneBurner\Pinch\Iterator\iter_generate')]
 #[CoversFunction('PhoneBurner\Pinch\Iterator\iter_last')]
 #[CoversFunction('PhoneBurner\Pinch\Iterator\iter_map')]
+#[CoversFunction('PhoneBurner\Pinch\Iterator\iter_map_find')]
 final class IteratorFunctionsTest extends TestCase
 {
     #[Test]
@@ -383,5 +385,31 @@ final class IteratorFunctionsTest extends TestCase
 
         self::assertTrue($result);
         self::assertSame(['a', 'b'], $called); // Should stop at 'b'
+    }
+
+    #[Test]
+    public function iterMapFindReturnsExpected(): void
+    {
+        $iterator = new \ArrayIterator(['a', 'b', 'c', 'd']);
+
+        self::assertSame('aaa', iter_map_find(static fn(string $value): string|null => match ($value) {
+            'a' => 'aaa',
+            'b' => throw new \RuntimeException('Should not be called!'),
+            default => null,
+        }, $iterator));
+
+        self::assertSame('bbb', iter_map_find(static fn(string $value): string|null => match ($value) {
+            'b' => 'bbb',
+            'c' => throw new \RuntimeException('Should not be called!'),
+            default => null,
+        }, $iterator));
+
+        self::assertSame('ccc', iter_map_find(static fn(string $value): string|null => match ($value) {
+            'c' => 'ccc',
+            'd' => throw new \RuntimeException('Should not be called!'),
+            default => null,
+        }, $iterator));
+
+        self::assertNull(iter_map_find(static fn(string $value): string|null => null, $iterator));
     }
 }

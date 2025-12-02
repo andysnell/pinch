@@ -204,6 +204,51 @@ function array_map_with_key(callable $callback, iterable $iterable): array
     return $result;
 }
 
+/**
+ * Iterates over the array, mapping the callback using the value, returning the
+ * first result that is not null. (Short circuiting evaluating the callback over
+ * the entire array). If no non-null value is found, null is returned.
+ *
+ * @template TValue
+ * @template TReturn
+ * @param callable(TValue):(TReturn|null) $callback
+ * @param array<TValue> $array
+ * @return TReturn|null
+ */
+function array_map_find(callable $callback, array $array): mixed
+{
+    foreach ($array as $value) {
+        $value = $callback($value);
+        if ($value !== null) {
+            return $value;
+        }
+    }
+    return null;
+}
+
+/**
+ * Iterates over the array, mapping the callback using the value, returning the
+ * first result that is not null. (Short circuiting evaluating the callback over
+ * the entire array). If no non-null value is found, null is returned.
+ *
+ * @template TKey of array-key
+ * @template TValue
+ * @template TReturn
+ * @param callable(TValue, TKey):(TReturn|null) $callback
+ * @param array<TKey, TValue> $array
+ * @return TReturn|null
+ */
+function array_map_find_with_key(callable $callback, array $array): mixed
+{
+    foreach ($array as $key => $value) {
+        $value = $callback($value, $key);
+        if ($value !== null) {
+            return $value;
+        }
+    }
+    return null;
+}
+
 function array_is_sorted(array $array, Order $order = Order::Ascending): bool
 {
     if (\count($array) < 2) {

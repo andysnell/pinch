@@ -80,6 +80,28 @@ function iter_map(callable $callback, iterable $iter): \Generator
 }
 
 /**
+ * Iterates, mapping the callback using the value, returning the
+ * first result that is not null. (Short circuiting evaluating the callback over
+ * the entire array). If no non-null value is found, null is returned.
+ *
+ * @template TValue
+ * @template TReturn
+ * @param callable(TValue):(TReturn|null) $callback
+ * @param iterable<TValue> $iter
+ * @return TReturn|null
+ */
+function iter_map_find(callable $callback, iterable $iter): mixed
+{
+    foreach ($iter as $value) {
+        $value = $callback($value);
+        if ($value !== null) {
+            return $value;
+        }
+    }
+    return null;
+}
+
+/**
  * Maps an iterable to an array via a callback
  *
  * @template T
