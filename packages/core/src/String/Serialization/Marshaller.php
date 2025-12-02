@@ -76,7 +76,7 @@ class Marshaller
         bool $use_encoding_prefix = false,
         bool $use_compression = false,
         Bytes $compression_threshold_bytes = new Bytes(self::COMPRESSION_THRESHOLD_BYTES),
-        Serializer $serializer = Serializer::Igbinary,
+        Serializer $serializer = Serializer::Php,
     ): string {
         \is_resource($value) && throw new SerializationFailure('cannot serialize resource');
 
