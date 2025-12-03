@@ -111,17 +111,15 @@ final class CanadianProvinceTest extends TestCase
         yield ['B.C.', CanadianProvince::BC];
     }
 
-    public static function invalidParsableValuesDataProvider(): \Generator
+    public static function invalidParsableValuesDataProvider(): \Iterator
     {
-        yield from [
-            [null],
-            [''],
-            ['Invalid State'],
-            ['XX'],
-            [123],
-            [new \stdClass()],
-            [SubdivisionCode::US_AK],
-            ["Ohio"],
-        ];
+        yield [null];
+        yield [''];
+        yield ['Invalid State'];
+        yield ['XX'];
+        yield [123];
+        yield [new \stdClass()];
+        yield [SubdivisionCode::US_AK];
+        yield ["Ohio"];
     }
 }

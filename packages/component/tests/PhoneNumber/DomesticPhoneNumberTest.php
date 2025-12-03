@@ -200,45 +200,32 @@ final class DomesticPhoneNumberTest extends TestCase
         yield ["(314)-555-1234 ext.", 314];
     }
 
-    /**
-     * @return \Generator<array{string}>
-     */
-    public static function e164StringDataProvider(): \Generator
+    public static function e164StringDataProvider(): \Iterator
     {
-        yield from [
-            ['+13145551234'],
-            ['3145551234'],
-            ['13145551234'],
-            ['1-314-555-1234'],
-            ["3145551234\n"],
-            ["13145551234\n"],
-            ["(314) 555-1234"],
-            ["(314)-555-1234"],
-            ["(314)-555-1234 ext."],
-        ];
+        yield ['+13145551234'];
+        yield ['3145551234'];
+        yield ['13145551234'];
+        yield ['1-314-555-1234'];
+        yield ["3145551234\n"];
+        yield ["13145551234\n"];
+        yield ["(314) 555-1234"];
+        yield ["(314)-555-1234"];
+        yield ["(314)-555-1234 ext."];
     }
 
-    /**
-     * @return \Generator<array{string, string}>
-     */
-    public static function e164DataProvider(): \Generator
+    public static function e164DataProvider(): \Iterator
     {
-        yield from [
-            ['3145551234', '+13145551234'],
-            ['13145551234', '+13145551234'],
-            ['1-314-555-1234', '+13145551234'],
-            ["3145551234\n", '+13145551234'],
-            ["13145551234\n", '+13145551234'],
-            ["(314) 555-1234", '+13145551234'],
-            ["(314)-555-1234", '+13145551234'],
-            ["(314)-555-1234 ext.", '+13145551234'],
-        ];
+        yield ['3145551234', '+13145551234'];
+        yield ['13145551234', '+13145551234'];
+        yield ['1-314-555-1234', '+13145551234'];
+        yield ["3145551234\n", '+13145551234'];
+        yield ["13145551234\n", '+13145551234'];
+        yield ["(314) 555-1234", '+13145551234'];
+        yield ["(314)-555-1234", '+13145551234'];
+        yield ["(314)-555-1234 ext.", '+13145551234'];
     }
 
-    /**
-     * @return \Generator<array{string, array<string,string>}>
-     */
-    public static function formatDataProvider(): \Generator
+    public static function formatDataProvider(): \Iterator
     {
         $formatted = [
             'national' => '(314) 555-1234',
@@ -247,34 +234,26 @@ final class DomesticPhoneNumberTest extends TestCase
             'international' => '+1 314-555-1234',
             'rfc3966' => 'tel:+1-314-555-1234',
         ];
-
-        yield from [
-            ['3145551234', $formatted],
-            ['13145551234', $formatted],
-            ['1-314-555-1234 ', $formatted],
-            ["3145551234\n", $formatted],
-            ["13145551234\n", $formatted],
-            ["(314) 555-1234 ", $formatted],
-            ["(314)-555-1234", $formatted],
-            ["(314)-555-1234 ext.", $formatted],
-        ];
+        yield ['3145551234', $formatted];
+        yield ['13145551234', $formatted];
+        yield ['1-314-555-1234 ', $formatted];
+        yield ["3145551234\n", $formatted];
+        yield ["13145551234\n", $formatted];
+        yield ["(314) 555-1234 ", $formatted];
+        yield ["(314)-555-1234", $formatted];
+        yield ["(314)-555-1234 ext.", $formatted];
     }
 
-    /**
-     * @return \Generator<array{string}>
-     */
-    public static function invalidPhoneDataProvider(): \Generator
+    public static function invalidPhoneDataProvider(): \Iterator
     {
-        yield from [
-            ['invalid'],
-            ['0'],
-            ['314AAA1234'],
-            ['013145551234'],
-            ['131455512345'],
-            ['1234567890'],
-            ['1234567890'],
-            ['3140551234'],
-            ['3140551234'],
-        ];
+        yield ['invalid'];
+        yield ['0'];
+        yield ['314AAA1234'];
+        yield ['013145551234'];
+        yield ['131455512345'];
+        yield ['1234567890'];
+        yield ['1234567890'];
+        yield ['3140551234'];
+        yield ['3140551234'];
     }
 }
