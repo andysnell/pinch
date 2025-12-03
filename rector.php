@@ -17,7 +17,6 @@ use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitSelfCallRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
 use Rector\PHPUnit\CodeQuality\Rector\MethodCall\WithCallbackIdenticalToStandaloneAssertsRector;
 use Rector\TypeDeclaration\Rector\Class_\TypedPropertyFromCreateMockAssignRector;
-use Rector\TypeDeclaration\Rector\ClassMethod\AddParamStringTypeFromSprintfUseRector;
 
 return RectorConfig::configure()
     ->withImportNames(importShortClasses: false)
@@ -71,7 +70,6 @@ return RectorConfig::configure()
         NewlineBetweenClassLikeStmtsRector::class,
         PreferPHPUnitSelfCallRector::class,
         WithCallbackIdenticalToStandaloneAssertsRector::class,
-        AddParamStringTypeFromSprintfUseRector::class,
 
         // Allow explicit usage of null where default value is null in tests
         RemoveNullArgOnNullDefaultParamRector::class => [

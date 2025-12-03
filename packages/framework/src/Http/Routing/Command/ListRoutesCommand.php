@@ -57,7 +57,7 @@ class ListRoutesCommand extends Command
         parent::__construct(self::NAME);
         $this->setDescription(self::DESCRIPTION);
 
-        $callback = static fn($string): string => \sprintf('<fg=yellow>"%s"</>', $string);
+        $callback = static fn(string $string): string => \sprintf('<fg=yellow>"%s"</>', $string);
 
         $this->addOption('format', null, InputOption::VALUE_REQUIRED, \sprintf(<<<'EOF'
             Output Format for Routes Data (%s)
