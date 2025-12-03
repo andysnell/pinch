@@ -86,7 +86,7 @@ class AppendOnlyCacheAdapter implements AppendOnlyCache, CacheInterface, CacheIt
 
         $value = $callback();
         if ($value !== null) {
-            $this->set($key, $value, null) || throw new CacheWriteFailed('set: ' . $key);
+            $this->set($key, $value) || throw new CacheWriteFailed('set: ' . $key);
         }
 
         return $value;

@@ -434,8 +434,7 @@ final class HttpServiceProvider implements DeferrableServiceProvider
             OpenApiRequestHandler::class,
             static fn(App $app): OpenApiRequestHandler => new OpenApiRequestHandler(
                 path('/resources/views/openapi.json'),
-                path('/resources/views/openapi.html'),
-                null, // do not enable YAML by default
+                path('/resources/views/openapi.html'), // do not enable YAML by default
             ),
         );
 

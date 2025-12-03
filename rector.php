@@ -71,9 +71,14 @@ return RectorConfig::configure()
         NewlineBetweenClassLikeStmtsRector::class,
         PreferPHPUnitSelfCallRector::class,
         WithCallbackIdenticalToStandaloneAssertsRector::class,
-        RemoveNullArgOnNullDefaultParamRector::class,
         AddParamStringTypeFromSprintfUseRector::class,
-        RemoveNullArgOnNullDefaultParamRector::class,
+
+        // Allow explicit usage of null where default value is null in tests
+        RemoveNullArgOnNullDefaultParamRector::class => [
+            __DIR__ . '/packages/core/tests',
+            __DIR__ . '/packages/component/tests',
+            __DIR__ . '/packages/framework/tests',
+        ],
 
         // Exclude test fixtures which may contain intentional nonconformant code
         __DIR__ . '/packages/core/tests/Fixtures',
