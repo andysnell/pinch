@@ -15,7 +15,6 @@ use Rector\DeadCode\Rector\MethodCall\RemoveNullArgOnNullDefaultParamRector;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitSelfCallRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
-use Rector\TypeDeclaration\Rector\Class_\TypedPropertyFromCreateMockAssignRector;
 
 return RectorConfig::configure()
     ->withImportNames(importShortClasses: false)
@@ -34,7 +33,7 @@ return RectorConfig::configure()
         __DIR__ . '/packages/template/rector.php',
     ])
     ->withRootFiles() // must be called after `withPaths()`
-    ->withPhpSets(php84: true)
+    ->withPhpSets(php85: true)
     ->withAttributesSets(all: true)
     ->withPreparedSets(
         deadCode: true,
@@ -62,13 +61,10 @@ return RectorConfig::configure()
         NewlineBeforeNewAssignSetRector::class,
         CatchExceptionNameMatchingTypeRector::class,
 
-        // Temporarily disabled due to buggy upstream implementation
-        TypedPropertyFromCreateMockAssignRector::class,
-
-        // Temporarily disabled:
+        // Temporarily disabled due to weirdness with phpcs + newer syntax
         NewlineBetweenClassLikeStmtsRector::class,
 
-        // Allow explicit usage of null where default value is null in tests
+        // Allow explicit usage of null as argument to parameters with a null default in in tests
         RemoveNullArgOnNullDefaultParamRector::class => [
             __DIR__ . '/packages/core/tests',
             __DIR__ . '/packages/component/tests',

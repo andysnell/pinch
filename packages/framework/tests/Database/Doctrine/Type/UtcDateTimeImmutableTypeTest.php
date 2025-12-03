@@ -11,13 +11,14 @@ use PhoneBurner\Pinch\Framework\Database\Doctrine\Type\UtcDateTimeImmutableType;
 use PhoneBurner\Pinch\Time\Standards\AnsiSql;
 use PhoneBurner\Pinch\Time\TimeZone\Tz;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 final class UtcDateTimeImmutableTypeTest extends TestCase
 {
     private UtcDateTimeImmutableType $type;
 
-    private AbstractPlatform $platform;
+    private AbstractPlatform&MockObject $platform;
 
     protected function setUp(): void
     {

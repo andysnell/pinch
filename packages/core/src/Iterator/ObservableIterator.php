@@ -43,13 +43,13 @@ class ObservableIterator extends IteratorIterator implements \SplSubject
     #[\Override]
     public function attach(\SplObserver $observer): void
     {
-        $this->observers->attach($observer);
+        $this->observers->offsetSet($observer);
     }
 
     #[\Override]
     public function detach(\SplObserver $observer): void
     {
-        $this->observers->detach($observer);
+        $this->observers->offsetUnset($observer);
     }
 
     #[\Override]
