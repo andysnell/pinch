@@ -35,7 +35,7 @@ final class StaticFileRequestHandler implements RequestHandlerInterface
 
         return new StreamResponse($stream, headers: [
             HttpHeader::CONTENT_TYPE => $file->content_type,
-            HttpHeader::CONTENT_LENGTH => $stream->getSize() ?? 0,
+            HttpHeader::CONTENT_LENGTH => (string)($stream->getSize() ?? 0),
             HttpHeader::CONTENT_DISPOSITION => $route_attributes[HttpHeader::CONTENT_DISPOSITION] ?? 'inline',
         ]);
     }

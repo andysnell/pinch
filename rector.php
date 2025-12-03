@@ -7,13 +7,18 @@ use Rector\CodeQuality\Rector\Expression\InlineIfToExplicitIfRector;
 use Rector\CodeQuality\Rector\Identical\FlipTypeControlToUseExclusiveTypeRector;
 use Rector\CodeQuality\Rector\If_\ExplicitBoolCompareRector;
 use Rector\CodingStyle\Rector\Catch_\CatchExceptionNameMatchingTypeRector;
+use Rector\CodingStyle\Rector\ClassLike\NewlineBetweenClassLikeStmtsRector;
 use Rector\CodingStyle\Rector\ClassMethod\NewlineBeforeNewAssignSetRector;
 use Rector\CodingStyle\Rector\Stmt\NewlineAfterStatementRector;
 use Rector\Config\RectorConfig;
+use Rector\DeadCode\Rector\MethodCall\RemoveNullArgOnNullDefaultParamRector;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitSelfCallRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
+use Rector\PHPUnit\CodeQuality\Rector\Class_\YieldDataProviderRector;
+use Rector\PHPUnit\CodeQuality\Rector\MethodCall\WithCallbackIdenticalToStandaloneAssertsRector;
 use Rector\TypeDeclaration\Rector\Class_\TypedPropertyFromCreateMockAssignRector;
+use Rector\TypeDeclaration\Rector\ClassMethod\AddParamStringTypeFromSprintfUseRector;
 
 return RectorConfig::configure()
     ->withImportNames(importShortClasses: false)
@@ -62,6 +67,15 @@ return RectorConfig::configure()
 
         // Temporarily disabled due to buggy upstream implementation
         TypedPropertyFromCreateMockAssignRector::class,
+
+        // Temporarily disabled:
+        NewlineBetweenClassLikeStmtsRector::class,
+        PreferPHPUnitSelfCallRector::class,
+        WithCallbackIdenticalToStandaloneAssertsRector::class,
+        RemoveNullArgOnNullDefaultParamRector::class,
+        AddParamStringTypeFromSprintfUseRector::class,
+        RemoveNullArgOnNullDefaultParamRector::class,
+        YieldDataProviderRector::class,
 
         // Exclude test fixtures which may contain intentional nonconformant code
         __DIR__ . '/packages/core/tests/Fixtures',

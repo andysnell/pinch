@@ -145,7 +145,7 @@ final class ReflectTest extends TestCase
 
         foreach ($class_or_objects as $key => $class_or_object) {
             foreach ($interfaces as $name => $interface) {
-                /** @phpstan-ignore generator.valueType */
+                /** @phpstan-ignore generator.valueType, argument.type */
                 yield $key . $name => [$class_or_object, $interface];
             }
         }
@@ -167,9 +167,6 @@ final class ReflectTest extends TestCase
         self::assertSame($expected, Reflect::implements(Mirror::class, $interface));
     }
 
-    /**
-     * @param object|class-string $class
-     */
     #[DataProvider('providesInvalidClassOrObjectTestCases')]
     #[Test]
     public function implementReturnsFalseIfPassedInvalidClassOrObject(mixed $class): void

@@ -59,7 +59,7 @@ class AttachRouteToRequest implements MiddlewareInterface
         $headers = [
             HttpHeader::ALLOW => $allowed_methods,
             HttpHeader::ACCESS_CONTROL_ALLOW_HEADERS => $allowed_headers,
-            HttpHeader::ACCESS_CONTROL_MAX_AGE => SECONDS_IN_DAY,
+            HttpHeader::ACCESS_CONTROL_MAX_AGE => (string)SECONDS_IN_DAY,
             HttpHeader::ACCESS_CONTROL_ALLOW_METHODS => $allowed_methods,
         ];
 

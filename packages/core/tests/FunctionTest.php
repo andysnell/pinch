@@ -138,7 +138,7 @@ final class FunctionTest extends TestCase
     #[Test]
     public function fwdReturnsCallableThatCallsMethodOnObjectWithMultipleArgs(): void
     {
-        $arr = \array_map(static fn(int $i): object => self::makeMockObject($i), [0, 1, 2, 3]);
+        $arr = \array_map(self::makeMockObject(...), [0, 1, 2, 3]);
 
         self::assertSame([
             0,

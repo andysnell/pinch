@@ -24,7 +24,7 @@ class GenericHttpExceptionResponse extends ResponseException implements HttpExce
 
     /**
      * @param array<string, mixed> $additional
-     * @param array<string, string|array<string>> $headers
+     * @param array<non-empty-string, string|array<string>> $headers
      */
     public function __construct(
         int|null $status_code = null,

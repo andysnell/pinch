@@ -58,7 +58,7 @@ class OpenApiRequestHandler implements RequestHandlerInterface
 
         return new StreamResponse($stream, headers: [
             HttpHeader::CONTENT_TYPE => $content_type,
-            HttpHeader::CONTENT_LENGTH => $stream->getSize() ?? 0,
+            HttpHeader::CONTENT_LENGTH => (string)($stream->getSize() ?? 0),
         ]);
     }
 }

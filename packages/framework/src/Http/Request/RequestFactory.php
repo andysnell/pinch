@@ -23,7 +23,7 @@ class RequestFactory implements RequestFactoryContract
     }
 
     /**
-     * @param array<string, string|array<string>> $headers
+     * @param array<non-empty-string, string|array<string>> $headers
      */
     public function createRequest(
         HttpMethod|string $method,
@@ -35,6 +35,7 @@ class RequestFactory implements RequestFactoryContract
     }
 
     /**
+     * @param array<non-empty-string, string|array<string>> $headers
      * @param array<mixed> $serverParams
      */
     public function createServerRequest(

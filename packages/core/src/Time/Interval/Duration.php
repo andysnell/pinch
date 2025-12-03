@@ -41,7 +41,7 @@ final readonly class Duration implements \Stringable
     ) {
         $checksum = \array_reduce(
             self::UNITS,
-            function ($carry, $unit): int {
+            function (int $carry, string $unit): int {
                 $this->$unit >= 0 || throw new \UnexpectedValueException($unit . ' must be greater than or equal to 0');
                 return $carry + $this->$unit;
             },
