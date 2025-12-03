@@ -15,7 +15,6 @@ use Rector\DeadCode\Rector\MethodCall\RemoveNullArgOnNullDefaultParamRector;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitSelfCallRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
-use Rector\PHPUnit\CodeQuality\Rector\Class_\YieldDataProviderRector;
 use Rector\PHPUnit\CodeQuality\Rector\MethodCall\WithCallbackIdenticalToStandaloneAssertsRector;
 use Rector\TypeDeclaration\Rector\Class_\TypedPropertyFromCreateMockAssignRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddParamStringTypeFromSprintfUseRector;
@@ -75,7 +74,6 @@ return RectorConfig::configure()
         RemoveNullArgOnNullDefaultParamRector::class,
         AddParamStringTypeFromSprintfUseRector::class,
         RemoveNullArgOnNullDefaultParamRector::class,
-        YieldDataProviderRector::class,
 
         // Exclude test fixtures which may contain intentional nonconformant code
         __DIR__ . '/packages/core/tests/Fixtures',
