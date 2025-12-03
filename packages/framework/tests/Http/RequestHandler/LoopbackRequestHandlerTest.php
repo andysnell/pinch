@@ -33,8 +33,9 @@ final class LoopbackRequestHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->once())
             ->method('dispatch')
             ->with($this->callback(function ($event): bool {
-                return $event instanceof LoopbackRequestHandled
-                    && $event->request === $this->server_request;
+                $this->assertInstanceOf(LoopbackRequestHandled::class, $event);
+                $this->assertSame($this->server_request, $event->request);
+                return true;
             }));
 
         new LoopbackRequestHandler($this->event_dispatcher)->handle($this->server_request);
@@ -86,7 +87,9 @@ final class LoopbackRequestHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->once())
             ->method('dispatch')
             ->with($this->callback(function ($event) use ($request): bool {
-                return $event instanceof LoopbackRequestHandled && $event->request === $request;
+                $this->assertInstanceOf(LoopbackRequestHandled::class, $event);
+                $this->assertSame($request, $event->request);
+                return true;
             }));
 
         $handler = new LoopbackRequestHandler($this->event_dispatcher);

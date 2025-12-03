@@ -120,7 +120,8 @@ final class RedisRateLimiterTest extends TestCase
             ->with(
                 'test_script_sha',
                 $this->callback(function ($args): bool {
-                    return $args[0] === 'custom:user-123';
+                    $this->assertSame('custom:user-123', $args[0]);
+                    return true;
                 }),
                 1,
             )

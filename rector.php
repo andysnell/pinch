@@ -15,7 +15,6 @@ use Rector\DeadCode\Rector\MethodCall\RemoveNullArgOnNullDefaultParamRector;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitSelfCallRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
-use Rector\PHPUnit\CodeQuality\Rector\MethodCall\WithCallbackIdenticalToStandaloneAssertsRector;
 use Rector\TypeDeclaration\Rector\Class_\TypedPropertyFromCreateMockAssignRector;
 
 return RectorConfig::configure()
@@ -69,7 +68,6 @@ return RectorConfig::configure()
         // Temporarily disabled:
         NewlineBetweenClassLikeStmtsRector::class,
         PreferPHPUnitSelfCallRector::class,
-        WithCallbackIdenticalToStandaloneAssertsRector::class,
 
         // Allow explicit usage of null where default value is null in tests
         RemoveNullArgOnNullDefaultParamRector::class => [
