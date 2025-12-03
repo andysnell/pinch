@@ -16,7 +16,7 @@ interface HttpExceptionResponse extends Throwable, ResponseInterface
     public function getStatusDetail(): string;
 
     /**
-     * @return array<string, array<string>>
+     * @return array<non-empty-string, array<string>>
      */
     public function getHeaders(): array;
 

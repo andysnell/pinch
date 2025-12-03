@@ -15,7 +15,7 @@ class StreamResponse extends Response
      * Creates a stream response from a string body or stream, in contrast to the
      * constructor which accepts a stream, stream identifier string, or resource.
      *
-     * @param array<string, string|array<string>> $headers
+     * @param array<non-empty-string, string|array<string>> $headers
      */
     public static function make(string|StreamInterface $stream, int $status = HttpStatus::OK, array $headers = []): self
     {

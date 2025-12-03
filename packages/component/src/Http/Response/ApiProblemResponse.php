@@ -14,7 +14,7 @@ class ApiProblemResponse extends JsonResponse
 {
     /**
      * @param iterable<string, mixed> $additional
-     * @param array<string, string|array<string>> $headers
+     * @param array<non-empty-string, string|array<string>> $headers
      */
     public function __construct(
         int $status = HttpStatus::BAD_REQUEST,

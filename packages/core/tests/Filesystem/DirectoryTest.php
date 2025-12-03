@@ -47,7 +47,7 @@ final class DirectoryTest extends TestCase
             $files[] = $file;
         }
 
-        $file_basenames = \array_map('basename', $files);
+        $file_basenames = \array_map(\basename(...), $files);
 
         self::assertContains('test.txt', $file_basenames);
         self::assertContains('root-file.txt', $file_basenames);

@@ -15,7 +15,7 @@ use Psr\Http\Message\StreamInterface;
 interface RequestFactory extends RequestFactoryInterface, ServerRequestFactoryInterface
 {
     /**
-     * @param array<string, string|array<string>> $headers
+     * @param array<non-empty-string, string|array<string>> $headers
      */
     public function createRequest(
         HttpMethod|string $method,
@@ -26,7 +26,7 @@ interface RequestFactory extends RequestFactoryInterface, ServerRequestFactoryIn
 
     /**
      * @param array<mixed> $serverParams
-     * @param array<string, string|array<string>> $headers
+     * @param array<non-empty-string, string|array<string>> $headers
      * @param array<string, mixed> $query
      * @param array<string, string> $cookies
      * @param array<string, mixed> $files

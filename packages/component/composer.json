@@ -22,7 +22,6 @@
     "ext-gmp": "*",
     "ext-iconv": "*",
     "ext-igbinary": "*",
-    "ext-intl": "*",
     "ext-json": "*",
     "ext-mbstring": "*",
     "ext-random": "*",

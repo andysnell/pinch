@@ -17,7 +17,7 @@ use Psr\Http\Message\UriInterface;
 class DefaultRequestFactory implements RequestFactory
 {
     /**
-     * @param array<string, string|array<string>> $headers
+     * @param array<non-empty-string, string|array<string>> $headers
      */
     public function createRequest(
         HttpMethod|string $method,
@@ -34,6 +34,7 @@ class DefaultRequestFactory implements RequestFactory
     }
 
     /**
+     * @param array<non-empty-string, string|array<string>> $headers
      * @param array<mixed> $serverParams
      */
     public function createServerRequest(
@@ -70,7 +71,7 @@ class DefaultRequestFactory implements RequestFactory
     }
 
     /**
-     * @param array<string, string|array<string>> $headers
+     * @param array<non-empty-string, string|array<string>> $headers
      * @param array<string, mixed> $server
      * @param array<string, mixed> $query
      * @param array<string, string> $cookies
