@@ -67,7 +67,6 @@ return RectorConfig::configure()
 
         // Temporarily disabled:
         NewlineBetweenClassLikeStmtsRector::class,
-        PreferPHPUnitSelfCallRector::class,
 
         // Allow explicit usage of null where default value is null in tests
         RemoveNullArgOnNullDefaultParamRector::class => [

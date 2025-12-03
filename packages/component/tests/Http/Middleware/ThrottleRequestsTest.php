@@ -93,9 +93,9 @@ final class ThrottleRequestsTest extends TestCase
         $this->rate_limiter->expects($this->once())
             ->method('throttle')
             ->willReturnCallback(function (RateLimits $limits) use ($result): RateLimitResult {
-                $this->assertSame('ip:192.168.1.1', $limits->id);
-                $this->assertSame(10, $limits->per_second);
-                $this->assertSame(60, $limits->per_minute);
+                self::assertSame('ip:192.168.1.1', $limits->id);
+                self::assertSame(10, $limits->per_second);
+                self::assertSame(60, $limits->per_minute);
                 return $result;
             });
 
@@ -130,7 +130,7 @@ final class ThrottleRequestsTest extends TestCase
         $this->rate_limiter->expects($this->once())
             ->method('throttle')
             ->willReturnCallback(function (RateLimits $limits) use ($result): RateLimitResult {
-                $this->assertSame('ip:127.0.0.1', $limits->id);
+                self::assertSame('ip:127.0.0.1', $limits->id);
                 return $result;
             });
 
@@ -235,8 +235,8 @@ final class ThrottleRequestsTest extends TestCase
         $this->rate_limiter->expects($this->once())
             ->method('throttle')
             ->willReturnCallback(function (RateLimits $limits) use ($result): RateLimitResult {
-                $this->assertSame(5, $limits->per_second);
-                $this->assertSame(30, $limits->per_minute);
+                self::assertSame(5, $limits->per_second);
+                self::assertSame(30, $limits->per_minute);
                 return $result;
             });
 
