@@ -33,8 +33,8 @@ final class LoopbackRequestHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->once())
             ->method('dispatch')
             ->with($this->callback(function ($event): bool {
-                $this->assertInstanceOf(LoopbackRequestHandled::class, $event);
-                $this->assertSame($this->server_request, $event->request);
+                self::assertInstanceOf(LoopbackRequestHandled::class, $event);
+                self::assertSame($this->server_request, $event->request);
                 return true;
             }));
 
@@ -87,8 +87,8 @@ final class LoopbackRequestHandlerTest extends TestCase
         $this->event_dispatcher->expects($this->once())
             ->method('dispatch')
             ->with($this->callback(function ($event) use ($request): bool {
-                $this->assertInstanceOf(LoopbackRequestHandled::class, $event);
-                $this->assertSame($request, $event->request);
+                self::assertInstanceOf(LoopbackRequestHandled::class, $event);
+                self::assertSame($request, $event->request);
                 return true;
             }));
 
