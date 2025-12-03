@@ -14,13 +14,14 @@ use PhoneBurner\Pinch\Container\ParameterOverride\OverrideCollection;
 use PhoneBurner\Pinch\Tests\Fixtures\MethodFixture;
 use PhoneBurner\Pinch\Tests\Fixtures\StringWrapper;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 final class ReflectionMethodAutoResolverTest extends TestCase
 {
     private ReflectionMethodAutoResolver $resolver;
-    private ContainerInterface $container;
+    private ContainerInterface&MockObject $container;
 
     protected function setUp(): void
     {

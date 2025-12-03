@@ -13,6 +13,7 @@ use PhoneBurner\Pinch\Component\Http\Event\MiddlewareProcessingStarted;
 use PhoneBurner\Pinch\Component\Http\Middleware\MiddlewareStack;
 use PhoneBurner\Pinch\Component\Http\Middleware\TerminableMiddleware;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,7 +26,7 @@ final class MiddlewareStackTest extends TestCase
 
     private Response $fallback_response;
 
-    private RequestHandlerInterface $fallback_handler;
+    private RequestHandlerInterface&MockObject $fallback_handler;
 
     protected function setUp(): void
     {
