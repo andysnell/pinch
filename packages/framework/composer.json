@@ -15,7 +15,6 @@
   "type": "library",
   "require": {
     "php": "^8.4",
-    "ext-amqp": "*",
     "ext-bcmath": "*",
     "ext-ctype": "*",
     "ext-curl": "*",
