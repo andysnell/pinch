@@ -11,7 +11,7 @@ use PhoneBurner\Pinch\Framework\Database\Config\DoctrineConnectionConfigStruct;
 use PhoneBurner\Pinch\Framework\Database\Config\DoctrineEntityManagerConfigStruct;
 use PhoneBurner\Pinch\Framework\Database\Config\DoctrineMigrationsConfigStruct;
 use PhoneBurner\Pinch\Framework\Database\Config\RedisConfigStruct;
-use PhoneBurner\Pinch\Framework\Database\Config\RedisConnectionConfigStruct;
+use PhoneBurner\Pinch\Framework\Database\Redis\Config\Connection\RedisStandaloneConnectionConfigStruct;
 
 use function PhoneBurner\Pinch\Framework\env;
 use function PhoneBurner\Pinch\Framework\path;
@@ -30,12 +30,11 @@ return [
         ),
         redis: new RedisConfigStruct(
             connections: [
-                'default' => new RedisConnectionConfigStruct(
+                'default' => new RedisStandaloneConnectionConfigStruct(
                     host: (string)env('PINCH_REDIS_HOST', 'redis'),
                     port: (int)env('PINCH_REDIS_PORT', 6379),
                 ),
             ],
-            timeout: 5,
         ),
         doctrine: new DoctrineConfigStruct(
             connections: [

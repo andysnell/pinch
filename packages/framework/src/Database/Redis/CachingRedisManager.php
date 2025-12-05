@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhoneBurner\Pinch\Framework\Database\Redis;
 
 use PhoneBurner\Pinch\Framework\Database\Config\RedisConfigStruct;
-use PhoneBurner\Pinch\Framework\Database\Config\RedisConnectionConfigStruct;
+use PhoneBurner\Pinch\Framework\Database\Redis\Config\RedisConnectionConfigStruct;
 use PhoneBurner\Pinch\Framework\Database\Redis\Exception\RedisConnectionFailure;
 use Redis;
 use RedisException;
