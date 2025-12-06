@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\Configuration\ContextToggle;
 
-use PhoneBurner\Pinch\Component\Configuration\Context;
 use PhoneBurner\Pinch\Component\Configuration\ContextToggle;
 
 /**
@@ -13,6 +12,8 @@ use PhoneBurner\Pinch\Component\Configuration\ContextToggle;
  */
 final readonly class NullableArrayContextToggle implements ContextToggle
 {
+    use TogglesWithoutFallbackBehavior;
+
     /**
      * @param array<mixed>|null $http
      * @param array<mixed>|null $cli
@@ -23,17 +24,5 @@ final readonly class NullableArrayContextToggle implements ContextToggle
         public array|null $cli = null,
         public array|null $test = null,
     ) {
-    }
-
-    /**
-     * @return array<mixed>|null
-     */
-    public function __invoke(Context $context): array|null
-    {
-        return match ($context) {
-            Context::Http => $this->http,
-            Context::Cli => $this->cli,
-            Context::Test => $this->test,
-        };
     }
 }

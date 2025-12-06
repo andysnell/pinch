@@ -23,7 +23,8 @@ interface Environment extends ContainerInterface
     // phpcs:ignore
     public string $root { get; }
 
-    public function hostname(): string;
+    // phpcs:ignore
+    public string $hostname { get; }
 
     public function server(
         string $key,
@@ -38,6 +39,4 @@ interface Environment extends ContainerInterface
         mixed $development = null,
         mixed $staging = null,
     ): \UnitEnum|string|int|float|bool|null;
-
-    public function match(mixed $production, mixed $development = null, mixed $staging = null): mixed;
 }

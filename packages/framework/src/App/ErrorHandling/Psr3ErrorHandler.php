@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Framework\App\ErrorHandling;
 
+use PhoneBurner\Pinch\Component\Logging\BufferLogger;
 use PhoneBurner\Pinch\Component\Logging\LogLevel;
+use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -17,30 +19,33 @@ use Psr\Log\LoggerInterface;
  * - E_COMPILE_WARNING
  * - E_PARSE
  * - E_ERROR
+ *
+ * Additionally, the \E_RECOVERABLE_ERROR level is effectively unused as the only
+ * place it can be triggered is when an error occurs when casting an internal class
+ * object to a bool.
  */
-class Psr3ErrorHandler implements ErrorHandler
+class Psr3ErrorHandler implements ErrorHandler, LoggerAwareInterface
 {
     private const array LEVEL_MAP = [
-        \E_RECOVERABLE_ERROR => LogLevel::Critical,
-        \E_USER_ERROR => LogLevel::Error,
-        \E_WARNING => LogLevel::Warning,
-        \E_USER_WARNING => LogLevel::Warning,
-        \E_NOTICE => LogLevel::Notice,
-        \E_USER_NOTICE => LogLevel::Notice,
-        \E_DEPRECATED => LogLevel::Debug,
-        \E_USER_DEPRECATED => LogLevel::Debug,
+        \E_USER_ERROR => ['E_USER_ERROR', LogLevel::Error],
+        \E_WARNING => ['E_WARNING', LogLevel::Warning],
+        \E_USER_WARNING => ['E_USER_WARNING', LogLevel::Warning],
+        \E_NOTICE => ['E_NOTICE', LogLevel::Notice],
+        \E_USER_NOTICE => ['E_USER_NOTICE', LogLevel::Notice],
+        \E_DEPRECATED => ['E_DEPRECATED', LogLevel::Debug],
+        \E_USER_DEPRECATED => ['E_USER_DEPRECATED', LogLevel::Debug],
     ];
 
-    private const array NAME_MAP = [
-        \E_RECOVERABLE_ERROR => 'Recoverable Error',
-        \E_USER_ERROR => 'User Error',
-        \E_WARNING => 'Warning',
-        \E_USER_WARNING => 'User Warning',
-        \E_NOTICE => 'Notice',
-        \E_USER_NOTICE => 'User Notice',
-        \E_DEPRECATED => 'Deprecated',
-        \E_USER_DEPRECATED => 'User Deprecated',
-    ];
+    // phpcs:disable
+    public \Closure|ErrorHandler|null $previous {
+        set(ErrorHandler|callable|null $handler) {
+            $this->previous = match (true) {
+                $handler instanceof ErrorHandler, $handler === null => $handler,
+                default => $handler(...),
+            };
+        }
+    }
+    // phpcs:enable
 
     /**
      * @param ErrorHandler|bool $return one of the following:
@@ -49,18 +54,25 @@ class Psr3ErrorHandler implements ErrorHandler
      *  - ErrorHandler: call and return the wrapped error handler's return value
      */
     public function __construct(
-        private readonly LoggerInterface $logger,
-        private readonly ErrorHandler|bool $return = false,
+        private LoggerInterface $logger = new BufferLogger(),
+        public readonly bool $bypass_standard_handler = false,
     ) {
     }
 
     public function __invoke(int $level, string $message, string $file, int $line): bool
     {
-        $this->logger->log(
-            (self::LEVEL_MAP[$level] ?? LogLevel::Error)->value,
-            \sprintf('Unhandled %s: %s in %s:%s', self::NAME_MAP[$level] ?? 'Error', $message, $file, $line),
-        );
+        [$name, $log_level] = self::LEVEL_MAP[$level] ?? ['UNKNOWN ERROR', LogLevel::Critical];
+        $this->logger->log($log_level->value, \sprintf('Unhandled %s: %s in %s:%s', $name, $message, $file, $line));
+        return $this->previous ? ($this->previous)($level, $message, $file, $line) : $this->bypass_standard_handler;
+    }
 
-        return \is_bool($this->return) ? $this->return : ($this->return)($level, $message, $file, $line);
+    public function setLogger(LoggerInterface $logger): void
+    {
+        // Write any buffered log entries to the new logger
+        if ($this->logger instanceof BufferLogger) {
+            $this->logger->copy($logger);
+        }
+
+        $this->logger = $logger;
     }
 }

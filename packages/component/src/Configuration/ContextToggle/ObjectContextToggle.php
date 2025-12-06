@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Component\Configuration\ContextToggle;
 
-use PhoneBurner\Pinch\Component\Configuration\Context;
 use PhoneBurner\Pinch\Component\Configuration\ContextToggle;
 
 /**
@@ -13,6 +12,8 @@ use PhoneBurner\Pinch\Component\Configuration\ContextToggle;
  */
 final readonly class ObjectContextToggle implements ContextToggle
 {
+    use TogglesWithoutFallbackBehavior;
+
     /**
      * @param T $http
      * @param T $cli
@@ -23,17 +24,5 @@ final readonly class ObjectContextToggle implements ContextToggle
         public object $cli,
         public object $test,
     ) {
-    }
-
-    /**
-     * @return T
-     */
-    public function __invoke(Context $context): object
-    {
-        return match ($context) {
-            Context::Http => $this->http,
-            Context::Cli => $this->cli,
-            Context::Test => $this->test,
-        };
     }
 }

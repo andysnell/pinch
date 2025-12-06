@@ -26,7 +26,7 @@ final class ConfigurationFactoryTest extends TestCase
         $this->config_dir = new \SplFileInfo($this->root_dir->getPathname() . '/config');
         \mkdir($this->config_dir->getPathname(), 0777, true);
 
-        $this->cache_file = new \SplFileInfo($this->root_dir->getPathname() . '/storage/bootstrap/config.cache.php');
+        $this->cache_file = new \SplFileInfo($this->root_dir->getPathname() . '/storage/bootstrap/config.test.cache.php');
         \mkdir(\dirname($this->cache_file->getPathname()), 0777, true);
 
         $this->environment = new MockEnvironment($this->root_dir->getPathname(), env: ['PINCH_ENABLE_CONFIG_CACHE' => 'true']);

@@ -22,7 +22,7 @@ final class EnvironmentTest extends TestCase
         $env = [];
         $sut = new Environment(Context::Test, BuildStage::Production, $root, $server, $env);
         self::assertSame($root, $sut->root);
-        self::assertSame(\gethostname(), $sut->hostname());
+        self::assertSame(\gethostname(), $sut->hostname);
         self::assertSame(BuildStage::Production, $sut->server('some-enum'));
         self::assertSame(BuildStage::Production, $sut->get('some-enum'));
     }

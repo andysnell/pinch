@@ -29,7 +29,7 @@ class EnvironmentProcessor implements ProcessorInterface
     public function __invoke(LogRecord $record): LogRecord
     {
         $record->extra['php'] ??= \PHP_VERSION;
-        $record->extra['hostname'] ??= ($this->hostname ??= $this->environment->hostname());
+        $record->extra['hostname'] ??= ($this->hostname ??= $this->environment->hostname);
         $record->extra['context'] ??= $this->environment->context->name;
         $record->extra['build_stage'] ??= $this->environment->stage->value;
 

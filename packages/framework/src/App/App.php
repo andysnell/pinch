@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Framework\App;
 
+use Monolog\Logger;
 use PhoneBurner\Pinch\Component\App\App as AppContract;
 use PhoneBurner\Pinch\Component\App\Event\ApplicationBootstrap;
 use PhoneBurner\Pinch\Component\App\Event\ApplicationTeardown;
@@ -13,15 +14,20 @@ use PhoneBurner\Pinch\Component\App\ServiceFactory\GhostServiceFactory;
 use PhoneBurner\Pinch\Component\App\ServiceFactory\ProxyServiceFactory;
 use PhoneBurner\Pinch\Component\Configuration\Configuration;
 use PhoneBurner\Pinch\Component\Configuration\ConfigurationFactory as ConfigurationFactoryContract;
+use PhoneBurner\Pinch\Component\Configuration\Context;
 use PhoneBurner\Pinch\Component\Configuration\Environment as EnvironmentContract;
 use PhoneBurner\Pinch\Container\ParameterOverride\OverrideCollection;
 use PhoneBurner\Pinch\Framework\App\ErrorHandling\ErrorHandler;
 use PhoneBurner\Pinch\Framework\App\ErrorHandling\ExceptionHandler;
+use PhoneBurner\Pinch\Framework\App\ErrorHandling\HandlerStruct;
 use PhoneBurner\Pinch\Framework\App\ErrorHandling\NullErrorHandler;
 use PhoneBurner\Pinch\Framework\App\ErrorHandling\NullExceptionHandler;
+use PhoneBurner\Pinch\Framework\App\ErrorHandling\Psr3ErrorHandler;
+use PhoneBurner\Pinch\Framework\App\ErrorHandling\Psr3ExceptionHandler;
 use PhoneBurner\Pinch\Framework\Configuration\ConfigurationFactory;
 use PhoneBurner\Pinch\Framework\Container\ServiceContainerFactory;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\LoggerAwareInterface;
 
 /**
  * This is the main application class. It is a container that holds context,
@@ -52,15 +58,18 @@ final class App implements AppContract
     }
 
     /**
+     * Note that we use the `#[\SensitiveParameter]` attribute here to prevent the
+     * accidental logging of sensitive information, such as database credentials.
+     *
      * @param null|callable(self):(mixed|void) $callback An optional callback
      * executed at the very start of the setup process, allowing you to
      * modify the application instance before it is fully set up, e.g., before
      * we start asking the container for services or dispatching events.
- */
+     */
     public static function bootstrap(
-        EnvironmentContract $environment,
-        ConfigurationFactoryContract|Configuration|null $config = null,
-        ServiceContainerFactoryContract|ServiceContainer|null $services = null,
+        #[\SensitiveParameter] EnvironmentContract $environment,
+        #[\SensitiveParameter] ConfigurationFactoryContract|Configuration|null $config = null,
+        #[\SensitiveParameter] ServiceContainerFactoryContract|ServiceContainer|null $services = null,
         callable|null $callback = null,
     ): self {
         self::booted() && throw new \RuntimeException('Application has already been bootstrapped.');
@@ -82,18 +91,6 @@ final class App implements AppContract
     {
         if ($callback !== null) {
             $callback($this);
-        }
-
-        // set error handler
-        $error_handler = $this->services->get(ErrorHandler::class);
-        if (! $error_handler instanceof NullErrorHandler) {
-            \set_error_handler($error_handler);
-        }
-
-        // set exception handler
-        $exception_handler = $this->services->get(ExceptionHandler::class);
-        if (! $exception_handler instanceof NullExceptionHandler) {
-            \set_exception_handler($exception_handler);
         }
 
         // dispatch bootstrap event
@@ -157,10 +154,12 @@ final class App implements AppContract
      * may use functions like path() or env() which may be dependent on the App instance.
      */
     private function __construct(
-        public readonly EnvironmentContract $environment,
-        ConfigurationFactoryContract|Configuration|null $config = null,
-        ServiceContainerFactoryContract|ServiceContainer|null $services = null,
+        #[\SensitiveParameter] public readonly EnvironmentContract $environment,
+        #[\SensitiveParameter] ConfigurationFactoryContract|Configuration|null $config = null,
+        #[\SensitiveParameter] ServiceContainerFactoryContract|ServiceContainer|null $services = null,
     ) {
+        $bootstrap_handlers = $this->setupBootstrapErrorHandling($environment->context);
+
         $this->config = match (true) {
             $config === null => new ConfigurationFactory()->make($environment),
             $config instanceof ConfigurationFactoryContract => $config->make($environment),
@@ -172,7 +171,63 @@ final class App implements AppContract
             $services instanceof ServiceContainerFactoryContract => $services->make($this),
             default => $services,
         };
+
+        $this->setupContainerErrorHandling($environment->context, $bootstrap_handlers);
     }
+
+    private function setupBootstrapErrorHandling(Context $context): HandlerStruct
+    {
+        // PHPUnit doesn't like when we mess with its error/handling reporting settings
+        if ($context === Context::Test) {
+            return new HandlerStruct();
+        }
+
+        $bootstrap_error_handler = new Psr3ErrorHandler();
+        $previous_error_handler = \set_error_handler($bootstrap_error_handler);
+        $bootstrap_error_handler->previous = $previous_error_handler;
+
+        $bootstrap_exception_handler = new Psr3ExceptionHandler();
+        $previous_exception_handler = \set_exception_handler($bootstrap_exception_handler);
+        $bootstrap_exception_handler->previous = $previous_exception_handler;
+
+        return new HandlerStruct($bootstrap_error_handler, $bootstrap_exception_handler);
+    }
+
+    private function setupContainerErrorHandling(Context $context, HandlerStruct $bootstrap_handlers): HandlerStruct
+    {
+        // The bootstrap error and exception handler are initialized with a buffering logger
+        // instance; replacing it with the actual logger using setLogger() drains and logs
+        // any buffered events. Note that we cannot guarantee that these are *still* the
+        // active handlers at this point.
+        $logger = $this->services->get(Logger::class);
+        if ($bootstrap_handlers->error instanceof LoggerAwareInterface) {
+            $bootstrap_handlers->error->setLogger($logger);
+        }
+
+        if ($bootstrap_handlers->exception instanceof LoggerAwareInterface) {
+            $bootstrap_handlers->exception->setLogger($logger);
+        }
+
+        // PHPUnit doesn't like when we mess with its error/handling reporting settings
+        if ($context === Context::Test) {
+            return new HandlerStruct();
+        }
+
+        $container_error_handler = $this->services->has(ErrorHandler::class)
+            ? $this->services->get(ErrorHandler::class)
+            : \set_error_handler(null);
+
+        \set_error_handler($container_error_handler);
+
+        $container_exception_handler = $this->services->has(ExceptionHandler::class)
+            ? $this->services->get(ExceptionHandler::class)
+            : \set_exception_handler(null);
+
+        \set_exception_handler($container_exception_handler);
+
+        return new HandlerStruct($container_error_handler, $container_exception_handler);
+    }
+
 
     public function has(\Stringable|string $id, bool $strict = false): bool
     {

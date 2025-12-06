@@ -17,6 +17,7 @@ use PhoneBurner\Pinch\Container\Exception\CircularDependency;
 use PhoneBurner\Pinch\Container\Exception\InvalidServiceProvider;
 use PhoneBurner\Pinch\Container\Exception\NotFound;
 use PhoneBurner\Pinch\Container\Exception\ResolutionFailure;
+use PhoneBurner\Pinch\Container\Exception\ServiceProviderAlreadyRegistered;
 use PhoneBurner\Pinch\Container\InvokingContainer\HasInvokingContainerBehavior;
 use PhoneBurner\Pinch\Container\InvokingContainer\ReflectionMethodAutoResolver;
 use PhoneBurner\Pinch\Container\ParameterOverride\OverrideCollection;
@@ -29,6 +30,11 @@ use function PhoneBurner\Pinch\Type\is_class_string;
 class ServiceContainerAdapter implements ServiceContainer
 {
     use HasInvokingContainerBehavior;
+
+    /**
+     * @var array<class-string<ServiceProvider>, class-string<ServiceProvider>>
+     */
+    private array $registered_providers = [];
 
     /**
      * @var array<class-string<DeferrableServiceProvider>, list<class-string>>
@@ -60,7 +66,7 @@ class ServiceContainerAdapter implements ServiceContainer
     private readonly \Closure $auto_resolver_callback;
 
     public function __construct(
-        private readonly App $app,
+        #[\SensitiveParameter] private readonly App $app,
         private LoggerInterface $logger = new BufferLogger(),
     ) {
         $this->auto_resolver_callback = new ReflectionMethodAutoResolver($this)(...);
@@ -116,40 +122,30 @@ class ServiceContainerAdapter implements ServiceContainer
             throw new \InvalidArgumentException('ServiceContainer may contain only objects and object factories');
         }
 
-        // We need to handle deferred services that are being set directly, and
+        // We need to handle deferred services that are being set directly and
         // ensure that all the other services deferred in that provider will be registered
         if (isset($this->deferred[$id])) {
             $this->register($this->deferred[$id]);
+            \assert(! isset($this->deferred[$id]));
         }
 
         // clear out any existing definitions and resolved values for the id;
         unset($this->resolved[$id], $this->factories[$id]);
 
         // set the value based on the type with special handling for null
-        if ($value instanceof ServiceFactory) {
-            $this->factories[$id] = $value;
-            return;
-        }
-
-        if ($value instanceof \Closure) {
-            $this->factories[$id] = new CallableServiceFactory($value);
-            return;
-        }
-
-        if ($value instanceof $id) {
-            $this->resolved[$id] = $value;
-            return;
-        }
-
-        throw new \UnexpectedValueException(
-            \sprintf('Expected ServiceFactory, Closure or Instance of %s, got: %s', $id, \get_debug_type($value)),
-        );
+        match (true) {
+            $value instanceof \Closure => $this->factories[$id] = new CallableServiceFactory($value),
+            $value instanceof ServiceFactory => $this->factories[$id] = $value,
+            $value instanceof $id => $this->resolved[$id] = $value,
+            default => throw new \UnexpectedValueException(
+                \sprintf('Expected ServiceFactory, Closure or Instance of %s, got: %s', $id, \get_debug_type($value)),
+            ),
+        };
     }
 
     public function unset(\Stringable|string $id): void
     {
-        $id = (string)$id;
-        unset($this->resolved[$id], $this->factories[$id]);
+        unset($this->resolved[(string)$id], $this->factories[(string)$id]);
     }
 
     /**
@@ -180,15 +176,30 @@ class ServiceContainerAdapter implements ServiceContainer
      */
     public function register(ServiceProvider|string $service_provider): null
     {
+        // since service providers must be static, we want to just use the class name
+        $service_provider = \is_object($service_provider) ? $service_provider::class : $service_provider;
         if (! \is_a($service_provider, ServiceProvider::class, true)) {
             throw new InvalidServiceProvider($service_provider);
         }
 
-        // since service providers must be static, we want to just use the class name
-        $service_provider = \is_object($service_provider) ? $service_provider::class : $service_provider;
+        // Ensure that the service provider hasn't already been registered'
+        if (isset($this->registered_providers[$service_provider])) {
+            throw new ServiceProviderAlreadyRegistered($service_provider);
+        }
 
-        // Remove deferred services from the list so we don't accidentally re-register them
-        if (\array_key_exists($service_provider, $this->deferred_providers)) {
+        // Handle deferrable service providers
+        if (\is_a($service_provider, DeferrableServiceProvider::class, true)) {
+            // If the service provider hasn't been deferred yet, defer registration
+            if (! isset($this->deferred_providers[$service_provider])) {
+                foreach ($service_provider::provides() as $id) {
+                    $this->deferred_providers[$service_provider][] = $id;
+                    $this->deferred[$id] = $service_provider;
+                }
+                return null;
+            }
+
+            // Otherwise, we need to actually register the deferred service provider
+            // Remove deferred services from the list so we don't accidentally re-register them
             foreach ($this->deferred_providers[$service_provider] as $id) {
                 unset($this->deferred[$id]);
             }
@@ -200,27 +211,8 @@ class ServiceContainerAdapter implements ServiceContainer
             $this->set($abstract, new BindingServiceFactory($concrete));
         }
 
+        $this->registered_providers[$service_provider] = $service_provider;
         $service_provider::register($this->app);
-
-        return null;
-    }
-
-    /**
-     * @param DeferrableServiceProvider|class-string<ServiceProvider> $service_provider
-     */
-    public function defer(DeferrableServiceProvider|string $service_provider): null
-    {
-        if (! \is_a($service_provider, DeferrableServiceProvider::class, true)) {
-            throw new InvalidServiceProvider($service_provider);
-        }
-
-        // since service providers must be static, we want to just use the class name
-        $service_provider = \is_object($service_provider) ? $service_provider::class : $service_provider;
-        foreach ($service_provider::provides() as $id) {
-            $this->deferred_providers[$service_provider][] = $id;
-            $this->deferred[$id] = $service_provider;
-        }
-
         return null;
     }
 

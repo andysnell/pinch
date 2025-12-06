@@ -15,15 +15,15 @@ interface ConfigurationFactory
 {
     public const string DEFAULT_CONFIG_PATH = '/config';
 
-    public const string DEFAULT_CACHE_FILE = '/storage/bootstrap/config.cache.php';
+    public const string DEFAULT_CACHE_FILE_TEMPLATE = '/storage/bootstrap/config.%s.cache.php';
 
     /**
      * @param string $config_dir_path relative to the root defined in $environment
-     * @param string $cache_file_path relative to the root defined in $environment
+     * @param string $cache_file_path_template relative to the root defined in $environment with %s replaced by the context name
      */
     public function make(
         Environment $environment,
         string $config_dir_path = self::DEFAULT_CONFIG_PATH,
-        string $cache_file_path = self::DEFAULT_CACHE_FILE,
+        string $cache_file_path_template = self::DEFAULT_CACHE_FILE_TEMPLATE,
     ): Configuration;
 }

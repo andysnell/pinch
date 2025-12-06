@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace PhoneBurner\Pinch\Framework;
 
+use PhoneBurner\Pinch\Component\Configuration\Context;
 use PhoneBurner\Pinch\Framework\App\App;
 
 use function PhoneBurner\Pinch\Type\narrow_nonempty_string;
 
 use const PhoneBurner\Pinch\Framework\APP_ROOT;
-
-function app(): App
-{
-    return App::instance();
-}
 
 /**
  * Get an environment variable allowing for default.
@@ -38,6 +34,17 @@ function stage(
     return App::instance()->environment->match($production, $development, $staging);
 }
 
+function context(
+    mixed $http = null,
+    mixed $cli = null,
+    mixed $test = null,
+): mixed {
+    return match (App::instance()->environment->context) {
+        Context::Http => $http,
+        Context::Cli => $cli ?? $http,
+        Context::Test => $test ?? $cli ?? $http,
+    };
+}
 /**
  * Get the full path relative to the application root
  *

@@ -28,18 +28,18 @@ class ConfigurationFactory implements ConfigurationFactoryContract
 
     /**
      * @param string $config_dir_path relative to the root defined in $environment
-     * @param string $cache_file_path relative to the root defined in $environment
+     * @param string $cache_file_path_template relative to the root defined in $environment with %s replaced by the context name
      */
     public function make(
         Environment $environment,
         string $config_dir_path = ConfigurationFactoryContract::DEFAULT_CONFIG_PATH,
-        string $cache_file_path = ConfigurationFactoryContract::DEFAULT_CACHE_FILE,
+        string $cache_file_path_template = ConfigurationFactoryContract::DEFAULT_CACHE_FILE_TEMPLATE,
     ): ImmutableConfiguration {
         $factory = $this;
         return ghost(static fn(ImmutableConfiguration $ghost): null => $ghost->__construct($factory->load(
             (bool)$environment->env('PINCH_ENABLE_CONFIG_CACHE', true, false),
             $environment->root . $config_dir_path,
-            $environment->root . $cache_file_path,
+            $environment->root . \sprintf($cache_file_path_template, \strtolower($environment->context->name)),
         )));
     }
 
@@ -50,7 +50,7 @@ class ConfigurationFactory implements ConfigurationFactoryContract
     private function load(
         bool $cache_enabled,
         string $config_dir_path = ConfigurationFactoryContract::DEFAULT_CONFIG_PATH,
-        string $cache_file_path = ConfigurationFactoryContract::DEFAULT_CACHE_FILE,
+        string $cache_file_path = ConfigurationFactoryContract::DEFAULT_CACHE_FILE_TEMPLATE,
     ): array {
         $cached = $cache_enabled ? self::cached($cache_file_path) : null;
         if ($cached !== null) {

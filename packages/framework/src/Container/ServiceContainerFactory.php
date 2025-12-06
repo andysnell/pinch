@@ -27,8 +27,6 @@ use PhoneBurner\Pinch\Framework\Notifier\NotifierServiceProvider;
 use PhoneBurner\Pinch\Framework\Scheduler\SchedulerServiceProvider;
 use PhoneBurner\Pinch\Framework\Storage\StorageServiceProvider;
 
-use function PhoneBurner\Pinch\ghost;
-
 #[Internal]
 class ServiceContainerFactory implements ServiceContainerFactoryContract
 {
@@ -53,27 +51,17 @@ class ServiceContainerFactory implements ServiceContainerFactoryContract
         StorageServiceProvider::class,
     ];
 
-    public function make(AppContract $app): ServiceContainer
-    {
-        return ghost(static function (ServiceContainerAdapter $ghost) use ($app): void {
-            $ghost->__construct($app);
-            // Register the service providers in the order they are defined in the
-            // framework an application, binding, deferring, and registering services.
-            $deferral_enabled = (bool)$app->config->get('container.enable_deferred_service_registration');
-            foreach ([...self::FRAMEWORK_PROVIDERS, ...$app->config->get('container.service_providers') ?: []] as $provider) {
-                match (true) {
-                    $deferral_enabled && self::deferrable($provider) => $ghost->defer($provider),
-                    default => $ghost->register($provider),
-                };
-            }
-        });
-    }
-
     /**
-     * @phpstan-assert-if-true class-string<DeferrableServiceProvider>|DeferrableServiceProvider $provider
+     * Initialize the service container and register the service providers in the
+     * order they are defined in the framework and application. (Handling of deferrable
+     * service providers has been moved into the ServiceContainerAdapter.)
      */
-    private static function deferrable(object|string $provider): bool
+    public function make(#[\SensitiveParameter] AppContract $app): ServiceContainer
     {
-        return \is_a($provider, DeferrableServiceProvider::class, true);
+        $service_container = new ServiceContainerAdapter($app);
+        foreach ([...self::FRAMEWORK_PROVIDERS, ...$app->config->get('container.service_providers') ?: []] as $provider) {
+            $service_container->register($provider);
+        }
+        return $service_container;
     }
 }

@@ -72,7 +72,7 @@ final class ServiceContainerAdapterTest extends TestCase
             }
         };
 
-        $this->container->defer($provider);
+        $this->container->register($provider);
         self::assertTrue($this->container->has(LoggerInterface::class));
     }
 
@@ -147,7 +147,7 @@ final class ServiceContainerAdapterTest extends TestCase
         $mock_app = new MockApp($this->container, Context::Test, $environment, $config);
 
         $this->container = new ServiceContainerAdapter($mock_app);
-        $this->container->defer($provider);
+        $this->container->register($provider);
         $this->container->set(LoggerInterface::class, $service);
 
         $resolved = $this->container->get(LoggerInterface::class);
@@ -252,16 +252,8 @@ final class ServiceContainerAdapterTest extends TestCase
             }
         };
 
-        $this->container->defer($provider);
+        $this->container->register($provider);
         self::assertTrue($this->container->has(LoggerInterface::class));
-    }
-
-    #[Test]
-    public function deferThrowsForInvalidProvider(): void
-    {
-        $this->expectException(InvalidServiceProvider::class);
-        /** @phpstan-ignore argument.type (intentional error) */
-        $this->container->defer(\stdClass::class);
     }
 
     #[Test]

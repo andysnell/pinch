@@ -7,6 +7,8 @@ namespace PhoneBurner\Pinch\Type;
 use Carbon\CarbonImmutable;
 use Carbon\Exceptions\Exception as CarbonException;
 use PhoneBurner\Pinch\Array\Arrayable;
+use PhoneBurner\Pinch\Math\Interval\NullableNumericRange;
+use PhoneBurner\Pinch\String\RegExp;
 use PhoneBurner\Pinch\Time\Standards\AnsiSql;
 
 function get_debug_value(mixed $value): string
@@ -675,4 +677,88 @@ function cast_nullable_datetime(mixed $value): CarbonImmutable|null
     } catch (CarbonException) {
         return null;
     }
+}
+
+/**
+ * Returns true for true, "1", 1 (including binary, octal, and hexadecimal notations),
+ * 1.0, "true", "on", and "yes". Returns false for false, "0", 0 (including binary,
+ * octal and hexadecimal notations), 0.0, "false", "off", "no", and "". String
+ * values are compared case-insensitively.
+ */
+function filter_bool(mixed $value): bool|null
+{
+    return \filter_var($value, \FILTER_VALIDATE_BOOLEAN, \FILTER_NULL_ON_FAILURE);
+}
+
+/**
+ * Note, this function handles trimming whitespace from the beginning and end of strings if passed a string.
+ */
+function filter_int(mixed $value): int|null
+{
+    return \filter_var($value, \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE);
+}
+
+/**
+ * @param NullableNumericRange<int|float> $range
+ */
+function filter_int_in_range(mixed $value, NullableNumericRange $range): int|null
+{
+    $filtered = \filter_var($value, \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE);
+    return $filtered && $range->contains($filtered) ? $filtered : null;
+}
+
+function filter_float(mixed $value): float|null
+{
+    return \filter_var($value, \FILTER_VALIDATE_FLOAT, \FILTER_NULL_ON_FAILURE);
+}
+
+/**
+ * We cannot just pass the possibly null min/max values to the filter_var function,
+ * as they will be juggled to 0 internally.
+ *
+ * @param NullableNumericRange<int|float> $range
+ */
+function filter_float_in_range(mixed $value, NullableNumericRange $range): float|null
+{
+    $filtered = \filter_var($value, \FILTER_VALIDATE_FLOAT, \FILTER_NULL_ON_FAILURE);
+    return $filtered && $range->contains($filtered) ? $filtered : null;
+}
+
+function filter_numeric(mixed $value): float|int|null
+{
+    return match (true) {
+        \is_int($value), \is_float($value) => $value,
+        default => filter_int($value) ?? filter_float($value),
+    };
+}
+
+/**
+ * @param mixed $value
+ * @return string|int|float|bool|null
+ */
+function filter_ini(mixed $value): string|int|float|bool|null
+{
+    return match (true) {
+        $value === null => null,
+        \is_numeric($value) => filter_numeric($value) ?? $value,
+        \is_string($value) => match (\strtolower($value)) {
+            'true', 'yes', 'on' => true,
+            'false', 'no', 'off', 'none' => false,
+            'null', '' => null,
+            default => $value,
+        },
+        default => throw new \InvalidArgumentException('Invalid type for INI cast: ' . \get_debug_type($value)),
+    };
+}
+
+function filter_regexp(mixed $value, RegExp|string $regexp): string|null
+{
+    /** @var string|null $filtered */
+    $filtered = \filter_var($value, \FILTER_VALIDATE_REGEXP, ['options' => [
+        'flags' => \FILTER_NULL_ON_FAILURE,
+        'regexp' => (string)$regexp,
+    ]]);
+
+    \assert(\is_string($filtered) || $filtered === null);
+    return $filtered;
 }

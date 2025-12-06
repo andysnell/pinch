@@ -10,6 +10,8 @@ use PhoneBurner\Pinch\Component\Configuration\Environment;
 
 class MockEnvironment implements Environment
 {
+    public string $hostname = 'localhost';
+
     public function __construct(
         public readonly string $root,
         private array $server = [],
@@ -17,11 +19,6 @@ class MockEnvironment implements Environment
         public BuildStage $stage = BuildStage::Production,
         public Context $context = Context::Test,
     ) {
-    }
-
-    public function hostname(): string
-    {
-        return 'localhost';
     }
 
     public function has(string $id): bool

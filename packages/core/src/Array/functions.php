@@ -124,7 +124,7 @@ function array_get(string $key, array|\ArrayAccess $array): mixed
         if (! isset($array[$subkey])) {
             return null;
         }
-        $array = $array[$subkey];
+        $array = &$array[$subkey];
     }
 
     return $array;

@@ -29,7 +29,7 @@ class RedisTransportFactory implements TransportFactory
         \assert($config->class === RedisTransport::class);
 
         $options = $config->options;
-        $options['consumer'] ??= $this->environment->hostname();
+        $options['consumer'] ??= $this->environment->hostname;
         return ghost(fn(RedisTransport $ghost): null => $ghost->__construct(
             new RedisTransportConnection($options, $this->redis_manager->connect($config->connection)),
         ));
