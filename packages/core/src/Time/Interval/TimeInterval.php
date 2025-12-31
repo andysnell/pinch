@@ -9,7 +9,7 @@ use PhoneBurner\Pinch\Time\Domain\TimeUnit;
 use PhoneBurner\Pinch\Time\Interval\Duration;
 
 use function PhoneBurner\Pinch\Array\array_map_with_key;
-use function PhoneBurner\Pinch\Math\int_clamp;
+use function PhoneBurner\Pinch\Math\int_clamp_non_negative;
 
 use const PhoneBurner\Pinch\Time\DAYS_IN_WEEK;
 use const PhoneBurner\Pinch\Time\MICROSECONDS_IN_DAY;
@@ -20,9 +20,9 @@ use const PhoneBurner\Pinch\Time\MICROSECONDS_IN_SECOND;
 
 /**
  * An extension of the builtin \DateInterval class for representing well-defined periods
- * of time. Since \DateInterval has variable-length year and month component,
+ * of time. Since \DateInterval has variable-length year and month components,
  * the actual amount of time (in terms of clock seconds) is undefined. In contrast,
- * a TimeInterval is an immutable, positive and finite number of microseconds.
+ * a TimeInterval is an immutable, finite, and non-negative number of microseconds.
  *
  * @implements Arrayable<string, int>
  */
@@ -104,6 +104,9 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
      * to avoid having to generate a new duration string just to have the parent
      * parse it back into the component values. Additionally, \DateInterval cannot
      * handle duration strings with fractional seconds.
+     *
+     * @noinspection MagicMethodsValidityInspection
+     * @noinspection PhpMissingParentConstructorInspection
      */
     public function __construct(
         int|float $days = 0,
@@ -139,25 +142,35 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
         };
     }
 
+    /**
+     * Note: we can't just use \DateTimeInterface::diff() because it would return
+     * date intervals with month and year components when the number of days exceeds
+     * the relative month length. We can get the accurate interval using the
+     * absolute difference of the to date objects microsecond unix timestamps
+     */
     public static function until(
         \DateTimeInterface $datetime,
-        \DateTimeImmutable $now = new \DateTimeImmutable(),
+        \DateTimeInterface $now = new \DateTimeImmutable(),
     ): self {
-        return self::instance($now->diff($datetime, true));
+        $datetime_microseconds = $datetime->getTimestamp() * MICROSECONDS_IN_SECOND + $datetime->getMicrosecond();
+        $now_microseconds = $now->getTimestamp() * MICROSECONDS_IN_SECOND + $now->getMicrosecond();
+        return new self(microseconds: \abs($datetime_microseconds - $now_microseconds));
     }
 
     public static function instance(parent $interval): self
     {
-        self::validateDateInterval($interval);
         return match (true) {
             $interval instanceof self => $interval,
-            $interval instanceof parent => new self(
+            $interval->y === 0 && $interval->m === 0 => new self(
                 $interval->d,
                 $interval->h,
                 $interval->i,
                 $interval->s,
                 (int)($interval->f * MICROSECONDS_IN_SECOND),
             ),
+            default => throw new \UnexpectedValueException(
+                'Cannot Create a TimeInterval from DateInterval with Non-Zero Year or Month Values',
+            )
         };
     }
 
@@ -192,7 +205,7 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
         return $zero;
     }
 
-    public function create(
+    public static function create(
         int|float $days = 0,
         int|float $hours = 0,
         int|float $minutes = 0,
@@ -209,8 +222,9 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
         int|float $seconds = 0,
         int $microseconds = 0,
     ): self {
-        $microseconds = self::reduce($days, $hours, $minutes, $seconds, $microseconds);
-        return new self(microseconds: $this->microseconds + $microseconds);
+        return new self(
+            microseconds: $this->microseconds + self::reduce($days, $hours, $minutes, $seconds, $microseconds),
+        );
     }
 
     public function minus(
@@ -220,8 +234,9 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
         int|float $seconds = 0,
         int $microseconds = 0,
     ): self {
-        $microseconds = self::reduce($days, $hours, $minutes, $seconds, $microseconds);
-        return new self(microseconds: \max(0, $this->microseconds - $microseconds));
+        return new self(
+            microseconds: \max(0, $this->microseconds - self::reduce($days, $hours, $minutes, $seconds, $microseconds)),
+        );
     }
 
     private static function createFromDuration(Duration|\Stringable|string $duration): self
@@ -290,6 +305,9 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
         $this->__construct(microseconds: $data[0]);
     }
 
+    /**
+     * @return non-negative-int
+     */
     private static function reduce(
         int|float $days = 0,
         int|float $hours = 0,
@@ -313,15 +331,6 @@ final class TimeInterval extends \DateInterval implements \Stringable, Arrayable
             $microseconds += $seconds * MICROSECONDS_IN_SECOND;
         }
 
-        return int_clamp($microseconds, 0, \PHP_INT_MAX);
-    }
-
-    private static function validateDateInterval(parent $interval): void
-    {
-        if ($interval->y !== 0 || $interval->m !== 0) {
-            throw new \UnexpectedValueException(
-                'Cannot Create a TimeInterval from DateInterval with Non-Zero Year or Month Values',
-            );
-        }
+        return int_clamp_non_negative($microseconds);
     }
 }

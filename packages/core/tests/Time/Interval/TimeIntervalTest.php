@@ -7,9 +7,12 @@ namespace PhoneBurner\Pinch\Tests\Time\Interval;
 use PhoneBurner\Pinch\Time\Domain\TimeUnit;
 use PhoneBurner\Pinch\Time\Interval\Duration;
 use PhoneBurner\Pinch\Time\Interval\TimeInterval;
+use PhoneBurner\Pinch\Time\Standards\Rfc3339;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+
+use const PhoneBurner\Pinch\Time\MICROSECONDS_IN_SECOND;
 
 final class TimeIntervalTest extends TestCase
 {
@@ -305,7 +308,7 @@ final class TimeIntervalTest extends TestCase
         yield 'seconds from microseconds' => [0, 0, 0, 0, 2000000, 2];
         yield 'seconds from mixed' => [0, 0, 0, 1, 500000, 1];
         yield 'seconds from minutes' => [0, 0, 2, 0, 0, 120];
-        yield 'max seconds' => [0, 0, 0, \PHP_INT_MAX / 1000000, 0, (int)(\PHP_INT_MAX / 1000000)];
+        yield 'max seconds' => [0, 0, 0, \PHP_INT_MAX / MICROSECONDS_IN_SECOND, 0, (int)(\PHP_INT_MAX / MICROSECONDS_IN_SECOND)];
     }
 
     #[Test]
@@ -350,6 +353,66 @@ final class TimeIntervalTest extends TestCase
         self::assertSame(1, $interval->h);
         self::assertSame(30, $interval->i);
         self::assertSame(45, $interval->s);
+    }
+
+    #[Test]
+    public function untilMethodWorksWithLongDates(): void
+    {
+        $now = new \DateTimeImmutable('2024-01-01 12:00:00');
+        $future = new \DateTimeImmutable('2025-03-01 13:30:45');
+
+        // The native date interval would throw an exception if we used it to
+        // build the time interval because the year and month would be greater than 1.
+        $native_date_interval = $future->diff($now);
+        self::assertSame(1, $native_date_interval->y);
+        self::assertSame(2, $native_date_interval->m);
+
+        // since we use the absolute difference, the order of the dates doesn't matter,
+        // the returned time interval must be the same.
+        $a = TimeInterval::until($future, $now);
+        $b = TimeInterval::until($now, $future);
+        self::assertEquals($a, $b);
+        foreach ([$a, $b] as $interval) {
+            self::assertSame(36725445000000, $interval->microseconds);
+            self::assertSame(425, $interval->days);
+            self::assertSame(0, $interval->y);
+            self::assertSame(0, $interval->m);
+            self::assertSame(425, $interval->d);
+            self::assertSame(1, $interval->h);
+            self::assertSame(30, $interval->i);
+            self::assertSame(45, $interval->s);
+        }
+    }
+
+    #[Test]
+    public function untilMethodWorksWithLongMicrosecondDates(): void
+    {
+        $now = \DateTimeImmutable::createFromTimestamp(1704110400.123456);
+        self::assertSame('2024-01-01T12:00:00.123456+00:00', $now->format(Rfc3339::DATETIME_MICROSECOND));
+        $future = \DateTimeImmutable::createFromTimestamp(1740835845.654321);
+        self::assertSame('2025-03-01T13:30:45.654321+00:00', $future->format(Rfc3339::DATETIME_MICROSECOND));
+
+        // The native date interval would throw an exception if we used it to
+        // build the time interval because the year and month would be greater than 1.
+        $native_date_interval = $future->diff($now);
+        self::assertSame(1, $native_date_interval->y);
+        self::assertSame(2, $native_date_interval->m);
+
+        // since we use the absolute difference, the order of the dates does not matter
+        $a = TimeInterval::until($future, $now);
+        $b = TimeInterval::until($now, $future);
+        self::assertEquals($a, $b);
+        foreach ([$a, $b] as $interval) {
+            self::assertSame(36725445530865, $interval->microseconds);
+            self::assertSame(425, $interval->days);
+            self::assertSame(0, $interval->y);
+            self::assertSame(0, $interval->m);
+            self::assertSame(425, $interval->d);
+            self::assertSame(1, $interval->h);
+            self::assertSame(30, $interval->i);
+            self::assertSame(45, $interval->s);
+            self::assertSame(0.530865, $interval->f);
+        }
     }
 
     #[Test]
@@ -450,7 +513,7 @@ final class TimeIntervalTest extends TestCase
     public function createMethod(): void
     {
         $interval = new TimeInterval(hours: 1);
-        $new_interval = $interval->create(days: 1, hours: 2);
+        $new_interval = $interval::create(days: 1, hours: 2);
 
         self::assertNotSame($interval, $new_interval);
         self::assertSame(93600000000, $new_interval->microseconds);

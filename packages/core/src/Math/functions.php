@@ -37,9 +37,10 @@ function clamp(int|float $value, int|float $min, int|float $max): int|float
 }
 
 /**
- * Clamps a value to the integer value within the specified range.
+ * Clamps a value to the integer value within the specified range, and always within
+ * the valid range of PHP_INT_MIN and PHP_INT_MAX (preventing overflows weirdness).
  */
-function int_clamp(int|float $value, int $min, int $max): int
+function int_clamp(int|float $value, int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX): int
 {
     return match (true) {
         $max < $min => throw new \UnexpectedValueException('max must be greater than or equal to min'),
@@ -47,6 +48,32 @@ function int_clamp(int|float $value, int $min, int $max): int
         $value >= $max => $max,
         default => (int)$value,
     };
+}
+
+/**
+ * Note that the assert() test is required to ensure that casting the value from
+ * a float to an int does not overflow and flip the sign.
+ *
+ * @phpstan-return non-negative-int
+ */
+function int_clamp_non_negative(int|float $value): int
+{
+    $value = int_clamp($value, 0, \PHP_INT_MAX);
+    \assert($value >= 0 && $value <= \PHP_INT_MAX);
+    return $value;
+}
+
+/**
+ * Note that the assert() test is required to ensure that casting the value from
+ * a float to an int does not overflow and flip the sign.
+ *
+ * @phpstan-return positive-int
+ */
+function int_clamp_positive(int|float $value): int
+{
+    $value = int_clamp($value, 1, \PHP_INT_MAX);
+    \assert($value >= 1 && $value <= \PHP_INT_MAX);
+    return $value;
 }
 
 function is_between(
