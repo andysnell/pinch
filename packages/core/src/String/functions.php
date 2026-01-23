@@ -178,6 +178,16 @@ function str_enquote(string $string, string $char = '"'): string
     return $char . $string . $char;
 }
 
+function str_enquote_single(string $string): string
+{
+    return \sprintf("'%s'", $string);
+}
+
+function str_enquote_double(string $string): string
+{
+    return \sprintf('"%s"', $string);
+}
+
 function str_rpad(
     \Stringable|string|int|float|null $string,
     int $length,

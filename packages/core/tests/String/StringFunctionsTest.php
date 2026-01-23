@@ -18,6 +18,8 @@ use function PhoneBurner\Pinch\String\str_camel;
 use function PhoneBurner\Pinch\String\str_cast;
 use function PhoneBurner\Pinch\String\str_dot;
 use function PhoneBurner\Pinch\String\str_enquote;
+use function PhoneBurner\Pinch\String\str_enquote_double;
+use function PhoneBurner\Pinch\String\str_enquote_single;
 use function PhoneBurner\Pinch\String\str_kabob;
 use function PhoneBurner\Pinch\String\str_lpad;
 use function PhoneBurner\Pinch\String\str_ltrim;
@@ -181,6 +183,18 @@ final class StringFunctionsTest extends TestCase
     {
         self::assertSame('"hello"', str_enquote('hello'));
         self::assertSame("'hello'", str_enquote('hello', "'"));
+    }
+
+    #[Test]
+    public function strEnquoteSingleWrapsStringInSingleQuotes(): void
+    {
+        self::assertSame("'hello'", str_enquote_single('hello'));
+    }
+
+    #[Test]
+    public function strEnquoteDoubleWrapsStringInDoubleQuotes(): void
+    {
+        self::assertSame('"hello"', str_enquote_double('hello'));
     }
 
     #[Test]
