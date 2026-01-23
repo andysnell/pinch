@@ -12,8 +12,8 @@ use Random\IntervalBoundary;
 final readonly class NullableIntegerRange implements NullableNumericRange
 {
     public function __construct(
-        public int|null $min,
-        public int|null $max,
+        public int|null $min = null,
+        public int|null $max = null,
         public IntervalBoundary $boundary = IntervalBoundary::ClosedClosed,
     ) {
         if ($this->min !== null && $this->max !== null && $this->max < $this->min) {

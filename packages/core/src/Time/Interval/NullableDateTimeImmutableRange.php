@@ -19,8 +19,8 @@ final class NullableDateTimeImmutableRange implements NullableDateTimeRange
      * @param IntervalBoundary $boundary default includes both endpoints in interval
      */
     public function __construct(
-        \DateTimeInterface|null $start,
-        \DateTimeInterface|null $end,
+        \DateTimeInterface|null $start = null,
+        \DateTimeInterface|null $end = null,
         public IntervalBoundary $boundary = IntervalBoundary::ClosedClosed,
     ) {
         $this->start = match (true) {
