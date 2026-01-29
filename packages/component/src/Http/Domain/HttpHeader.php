@@ -27,6 +27,7 @@ class HttpHeader
     public const string ALLOW = 'Allow';
     public const string ALT_SVC = 'Alt-Svc';
     public const string ALT_USED = 'Alt-Used';
+    public const string API_VERSION = 'Api-Version';
     public const string ATTRIBUTION_REPORTING_ELIGIBLE = 'Attribution-Reporting-Eligible';
     public const string ATTRIBUTION_REPORTING_REGISTER_SOURCE = 'Attribution-Reporting-Register-Source';
     public const string ATTRIBUTION_REPORTING_REGISTER_TRIGGER = 'Attribution-Reporting-Register-Trigger';
