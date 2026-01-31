@@ -137,14 +137,17 @@ class InteractivePinchShellCommand extends Command
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $shell = new Shell(new PsyConfiguration(\array_merge(self::DEFAULT_PSYSH_OPTIONS, $this->config->options)));
-        $shell->setScopeVariables(\array_map(
-            $this->container->get(...),
-            \array_unique(\array_merge(self::DEFAULT_SERVICES, $this->config->services)),
-        ));
+        $shell = new Shell(new PsyConfiguration($this->config->options));
 
-        foreach (\array_unique(\array_merge(self::DEFAULT_IMPORTS, $this->config->imports)) as $import) {
-            $shell->addCode(\sprintf('use %s;', $import), true);
+        $services = \array_unique($this->config->services);
+        if ($services !== []) {
+            $shell->setScopeVariables(\array_map($this->container->get(...), $services));
+        }
+
+        $imports = \array_unique($this->config->imports);
+        if ($imports !== []) {
+            $imports = \array_map(static fn(string $import): string => \sprintf('use %s;', $import), $imports);
+            $shell->addCode(\implode(\PHP_EOL, $imports), true);
         }
 
         return $shell->run();

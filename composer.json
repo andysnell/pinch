@@ -22,8 +22,8 @@
     "ext-exif": "*",
     "ext-gmp": "*",
     "ext-iconv": "*",
-    "ext-intl": "*",
     "ext-igbinary": "*",
+    "ext-intl": "*",
     "ext-json": "*",
     "ext-mbstring": "*",
     "ext-pdo": "*",
@@ -80,36 +80,36 @@
     "ramsey/uuid": "^4.9.1",
     "ramsey/uuid-doctrine": "^2.1",
     "spaze/phpstan-disallowed-calls": "^4.6.0",
-    "symfony/amazon-sqs-messenger": "^7.3.4",
-    "symfony/amqp-messenger": "^7.3.2",
-    "symfony/cache": "^7.3.4",
-    "symfony/console": "^7.3.4",
-    "symfony/doctrine-messenger": "^7.3.4",
-    "symfony/event-dispatcher": "^7.3.3",
-    "symfony/http-client": "^7.3.4",
-    "symfony/lock": "^7.3.4",
-    "symfony/mailer": "^7.3.4",
-    "symfony/messenger": "^7.3.3",
-    "symfony/mime": "^7.3.4",
-    "symfony/process": "^7.3.4",
-    "symfony/redis-messenger": "^7.3.4",
-    "symfony/scheduler": "^7.3.3",
-    "symfony/sendgrid-mailer": "^7.3.2",
+    "symfony/amazon-sqs-messenger": "^8.0",
+    "symfony/amqp-messenger": "^8.0",
+    "symfony/cache": "^8.0",
+    "symfony/console": "^7.4",
+    "symfony/doctrine-messenger": "^8.0",
+    "symfony/event-dispatcher": "^7.4",
+    "symfony/http-client": "^8.0",
+    "symfony/lock": "^8.0",
+    "symfony/mailer": "^8.0",
+    "symfony/messenger": "^8.0",
+    "symfony/mime": "^8.0",
+    "symfony/process": "^8.0",
+    "symfony/redis-messenger": "^8.0",
+    "symfony/scheduler": "^8.0",
+    "symfony/sendgrid-mailer": "^8.0",
     "symfony/service-contracts": "^3.6",
-    "symfony/var-exporter": "^7.3.4"
+    "symfony/var-exporter": "^8.0"
   },
   "require-dev": {
     "behat/behat": "^3.25.0",
     "brianium/paratest": "^7.14.1",
     "eventsauce/test-utilities": "dev-main",
     "league/openapi-psr7-validator": "^0.22.0",
-    "phoneburner/coding-standard": "^1.0.1",
+    "phoneburner/coding-standard": "^1.1",
     "php-parallel-lint/php-parallel-lint": "^1.4",
     "phpunit/phpunit": "^12.4.0",
     "rector/rector": "^2.2.1",
     "roave/security-advisories": "dev-latest",
-    "symfony/var-dumper": "^7.3.4",
-    "symplify/monorepo-builder": "^11.2.23"
+    "symfony/var-dumper": "^8.0",
+    "symplify/monorepo-builder": "^12.4"
   },
   "replace": {
     "phoneburner/pinch-component": "self.version",
@@ -168,7 +168,12 @@
     "platform": {
       "php": "8.4"
     },
-    "sort-packages": true
+    "sort-packages": true,
+    "audit": {
+      "ignore": {
+        "PKSA-cncr-q695-v65g": "Composer is flagging false positives in the no-op package replacing the actual dependency."
+      }
+    }
   },
   "extra": {
     "aws/aws-sdk-php": [

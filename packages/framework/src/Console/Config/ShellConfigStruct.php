@@ -21,8 +21,8 @@ final readonly class ShellConfigStruct implements ConfigStruct
      * @link https://github.com/bobthecow/psysh/wiki/Config-options
      */
     public function __construct(
-        public array $services = [],
-        public array $imports = [],
+        public array $services = InteractivePinchShellCommand::DEFAULT_SERVICES,
+        public array $imports = InteractivePinchShellCommand::DEFAULT_IMPORTS,
         public array $options = InteractivePinchShellCommand::DEFAULT_PSYSH_OPTIONS,
     ) {
     }
