@@ -19,6 +19,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub\Stub;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -26,7 +27,7 @@ use Psr\Http\Message\ResponseInterface;
 #[CoversClass(HttpMessageSignatureFactory::class)]
 final class HttpMessageSignatureFactoryTest extends TestCase
 {
-    private Clock&MockObject $clock;
+    private Clock&Stub $clock;
     private HttpMessageSignatureFactory $factory;
     private string $test_key_id;
 
@@ -42,7 +43,7 @@ final class HttpMessageSignatureFactoryTest extends TestCase
         $key_hash = \hash('sha256', $public_key->bytes(), binary: true);
         $this->test_key_id = \bin2hex($key_hash);
 
-        $this->clock = $this->createMock(Clock::class);
+        $this->clock = $this->createStub(Clock::class);
         $this->factory = new HttpMessageSignatureFactory(
             $natrium,
             $key_chain,
